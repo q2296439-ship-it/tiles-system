@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 25px;
+        }
+
+        .menu-title {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+
+        .sidebar a:hover {
+            color: white;
+        }
+
+        /* 🔥 ACTIVE LINK (future use) */
+        .sidebar a.active {
+            color: white;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            cursor: pointer;
+            text-align: left;
+            padding: 0;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .logout-btn:hover {
+            color: white;
+        }
+
+        .main {
+            flex: 1;
+        }
+
+        .topbar {
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f9fafb;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Admin Panel</h2>
+
+    <div class="menu-title">MAIN</div>
+    <a href="/admin/dashboard">📊 Dashboard</a>
+
+    <div class="menu-title">POS / SALES</div>
+    <a href="/admin/pos">💰 POS</a>
+    <a href="#">📊 Per Brand</a>
+
+    <!-- 🔥 FIXED PER BRANCH -->
+    <a href="/admin/sales/branch">🏬 Per Branch</a>
+
+    <a href="/admin/sales/daily">📅 Daily Sales</a>
+
+    <div class="menu-title">PRODUCT</div>
+    <a href="/admin/products">📦 Product Overview</a>
+
+    <div class="menu-title">INVENTORY</div>
+    <a href="/admin/inventory">📦 Overview Stock</a>
+
+    <div class="menu-title">USER</div>
+    <a href="/admin/users">👥 Manage Account</a>
+
+    <div class="menu-title">ACCOUNT</div>
+    <form method="POST" action="/logout">
+        @csrf
+        <button type="submit" class="logout-btn">🚪 Logout</button>
+    </form>
+</div>
+
+<div class="main">
+
+    <div class="topbar">
+        <strong>Admin Dashboard</strong>
+        <span>👤 Admin</span>
+    </div>
+
+    @yield('content')
+
+</div>
+
+</body>
+</html>
