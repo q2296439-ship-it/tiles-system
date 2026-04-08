@@ -12,11 +12,11 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 RUN MIGRATIONS (IMPORTANT)
+// 🔥 RUN MIGRATIONS (FIXED - FRESH)
 // =====================
 Route::get('/migrate', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Migrations completed';
+    Artisan::call('migrate:fresh', ['--force' => true]);
+    return 'Fresh migration completed';
 });
 
 
