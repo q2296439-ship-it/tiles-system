@@ -12,41 +12,32 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 FIXED MIGRATE (DELETE + RECREATE SQLITE)
+// 🔥 FIX: FORCE MIGRATE (POSTGRES READY)
 // =====================
 Route::get('/migrate', function () {
-
-    $dbPath = database_path('database.sqlite');
-
-    if (file_exists($dbPath)) {
-        unlink($dbPath);
-    }
-
-    touch($dbPath);
-
     Artisan::call('migrate', ['--force' => true]);
-
-    return 'Database recreated + migrated';
+    return 'Database migrated';
 });
 
 
 // =====================
-// 🔥 CLEAN ADMIN CREATE (FINAL FIX)
+// 🔥 CREATE ADMIN (RAILWAY SAFE)
 // =====================
 Route::get('/create-user', function () {
 
     // delete all users
     \App\Models\User::truncate();
 
-    // create fresh admin
+    // create admin
     \App\Models\User::create([
-        'name' => 'admin',
+        'name' => 'Admin',
+        'username' => 'admin', // 🔥 important (login mo gamit username)
         'email' => 'admin@gmail.com',
         'password' => bcrypt('12345678'),
         'role' => 'admin',
     ]);
 
-    return 'Admin created fresh';
+    return 'Admin created';
 });
 
 
@@ -56,7 +47,6 @@ Route::get('/create-user', function () {
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::post('/logout', [AuthController::class, 'logout']);
 
 
