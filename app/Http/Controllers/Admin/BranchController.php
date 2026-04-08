@@ -13,7 +13,7 @@ class BranchController extends Controller
     // =====================
     public function index()
     {
-        $branches = Branch::all();
+        $branches = Branch::latest()->get(); // 🔥 latest first
 
         return view('admin.branches', compact('branches'));
     }
@@ -24,13 +24,46 @@ class BranchController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|unique:branches,name'
         ]);
 
         Branch::create([
             'name' => $request->name
         ]);
 
-        return redirect('/admin/branches')->with('success', 'Branch added successfully!');
+        return redirect('/admin/branches')
+            ->with('success', 'Branch added successfully!');
+    }
+
+    // =====================
+    // UPDATE BRANCH
+    // =====================
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required'
+        ]);
+
+        $branch = Branch::findOrFail($id);
+
+        $branch->update([
+            'name' => $request->name
+        ]);
+
+        return redirect('/admin/branches')
+            ->with('success', 'Branch updated successfully!');
+    }
+
+    // =====================
+    // DELETE BRANCH
+    // =====================
+    public function delete($id)
+    {
+        $branch = Branch::findOrFail($id);
+
+        $branch->delete();
+
+        return redirect('/admin/branches')
+            ->with('success', 'Branch deleted successfully!');
     }
 }
