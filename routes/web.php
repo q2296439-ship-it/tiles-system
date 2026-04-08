@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
+
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -41,7 +43,7 @@ Route::get('/create-user', function () {
 
 
 // =====================
-// 🔥 CREATE BRANCHES (FIX FOR DROPDOWN)
+// 🔥 CREATE BRANCHES (INITIAL SEED)
 // =====================
 Route::get('/create-branches', function () {
 
@@ -75,13 +77,39 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // =====================
 Route::prefix('admin')->group(function () {
 
+    // DASHBOARD
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
+    // POS
     Route::get('/pos', function () {
         return view('admin.pos');
     });
 
+    // =====================
+    // 🔥 BRANCH MANAGEMENT (NEW)
+    // =====================
+    Route::get('/branches', function () {
+        $branches = \App\Models\Branch::latest()->get();
+        return view('admin.branches', compact('branches'));
+    });
+
+    Route::post('/branches/store', function (Request $request) {
+
+        $request->validate([
+            'name' => 'required'
+        ]);
+
+        \App\Models\Branch::create([
+            'name' => $request->name
+        ]);
+
+        return back()->with('success', 'Branch added successfully');
+    });
+
+    // =====================
+    // PRODUCTS
+    // =====================
     Route::prefix('products')->group(function () {
 
         Route::get('/', [ProductController::class, 'index']);
@@ -95,15 +123,24 @@ Route::prefix('admin')->group(function () {
         Route::get('/export', [ProductController::class, 'export']);
     });
 
+    // =====================
+    // INVENTORY
+    // =====================
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
 
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
+    // =====================
+    // USERS
+    // =====================
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
 
+    // =====================
+    // REPORTS
+    // =====================
     Route::get('/reports', function () {
         return view('admin.reports');
     });
