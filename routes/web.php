@@ -11,15 +11,18 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 TEMP CREATE USER (REMOVE AFTER USE)
+// 🔥 TEMP CREATE USER (USERNAME BASED - REMOVE AFTER USE)
 // =====================
 Route::get('/create-user', function () {
-    \App\Models\User::create([
-        'name' => 'Admin',
-        'email' => 'admin@gmail.com',
-        'password' => bcrypt('12345678'),
-    ]);
-    return 'User created successfully';
+    \App\Models\User::updateOrCreate(
+        ['username' => 'admin'],
+        [
+            'name' => 'Admin',
+            'username' => 'admin',
+            'password' => bcrypt('12345678'),
+        ]
+    );
+    return 'User created/reset';
 });
 
 
