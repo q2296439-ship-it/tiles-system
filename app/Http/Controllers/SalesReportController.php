@@ -37,7 +37,6 @@ class SalesReportController extends Controller
             }
         }
 
-        // 🔥 FIX: BRANCH FILTER
         $sales = Sale::with(['branch','user'])
             ->whereBetween('created_at', [$start, $end])
             ->when($request->branch_id, function($q) use ($request) {
@@ -50,9 +49,10 @@ class SalesReportController extends Controller
         $transactionCount = $sales->count();
         $average = $transactionCount > 0 ? $total / $transactionCount : 0;
 
+        // ✅ FIXED FOR POSTGRESQL
         if ($range == 'daily') {
             $trend = Sale::select(
-                    DB::raw('HOUR(created_at) as label'),
+                    DB::raw('EXTRACT(HOUR FROM created_at) as label'),
                     DB::raw('SUM(total_amount) as total')
                 )
                 ->whereBetween('created_at', [$start, $end])
@@ -61,7 +61,7 @@ class SalesReportController extends Controller
                 ->get();
         } else {
             $trend = Sale::select(
-                    DB::raw('DATE(created_at) as label'),
+                    DB::raw("DATE_TRUNC('day', created_at) as label"),
                     DB::raw('SUM(total_amount) as total')
                 )
                 ->whereBetween('created_at', [$start, $end])
@@ -81,7 +81,6 @@ class SalesReportController extends Controller
         if ($total < 1000) $alerts[] = "⚠ Low sales";
         if ($peak) $alerts[] = "🔥 Peak: {$peak->label}";
 
-        // 🔥 FIX: branch list
         $branchList = DB::table('branches')->get();
 
         return view('admin.reports.daily', compact(
@@ -113,7 +112,6 @@ class SalesReportController extends Controller
             }
         }
 
-        // 🔥 FIX: BRANCH FILTER
         $sales = Sale::with(['branch','user'])
             ->whereBetween('created_at', [$start, $end])
             ->when($request->branch_id, function($q) use ($request) {
@@ -214,7 +212,7 @@ class SalesReportController extends Controller
         $chartData = $branches->pluck('total_sales');
 
         $trend = Sale::select(
-                DB::raw('DATE(created_at) as date'),
+                DB::raw("DATE_TRUNC('day', created_at) as date"),
                 DB::raw('SUM(total_amount) as total')
             )
             ->whereBetween('created_at', [$start, $end])
