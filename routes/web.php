@@ -10,12 +10,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\BranchController; // 🔥 ADD THIS
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 CLEAR CACHE (ADD THIS - IMPORTANT)
+// 🔥 CLEAR CACHE
 // =====================
 Route::get('/clear', function () {
     Artisan::call('view:clear');
@@ -98,25 +99,10 @@ Route::prefix('admin')->group(function () {
     });
 
     // =====================
-    // 🔥 BRANCHES
+    // 🔥 BRANCHES (CONTROLLER VERSION)
     // =====================
-    Route::get('/branches', function () {
-        $branches = \App\Models\Branch::orderBy('id', 'desc')->get();
-        return view('admin.branches', compact('branches'));
-    });
-
-    Route::post('/branches/store', function (Request $request) {
-
-        $request->validate([
-            'name' => 'required'
-        ]);
-
-        \App\Models\Branch::create([
-            'name' => $request->name
-        ]);
-
-        return redirect('/admin/branches')->with('success', 'Branch added!');
-    });
+    Route::get('/branches', [BranchController::class, 'index']);
+    Route::post('/branches/store', [BranchController::class, 'store']);
 
     // =====================
     // PRODUCTS
