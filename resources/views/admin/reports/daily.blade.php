@@ -11,8 +11,9 @@
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2 style="margin:0;">📊 Sales Dashboard <span style="color:green;">● Live</span></h2>
 
+            <!-- ✅ FIXED -->
             <small id="lastUpdate" style="color:#64748b;">
-                Last updated: --
+                Last updated: {{ now()->format('h:i:s A') }}
             </small>
         </div>
 
@@ -47,7 +48,6 @@
                     onchange="this.form.submit()"
                     style="padding:6px;">
 
-                <!-- 🔥 NEW: BRANCH FILTER -->
                 <select name="branch_id"
                     onchange="this.form.submit()"
                     style="padding:6px;">
@@ -63,14 +63,12 @@
 
             </form>
 
-            <!-- 🔥 EXCEL -->
             <a href="/admin/sales/daily/excel?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}">
                 <button style="padding:6px 12px; background:green; color:white;">
                     📊 Export Excel
                 </button>
             </a>
 
-            <!-- 🔥 PDF -->
             <a href="/admin/sales/daily/pdf?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}" target="_blank">
                 <button style="padding:6px 12px;">
                     📄 Export PDF
@@ -81,7 +79,6 @@
 
     </div>
 
-    <!-- ALERTS -->
     @if(isset($alerts) && count($alerts) > 0)
     <div class="card" style="background:#fff3cd; margin-bottom:25px; padding:15px; border-radius:8px;">
         <strong>⚠ Alerts</strong>
@@ -145,15 +142,12 @@
                     <td style="padding:12px;">
                         {{ \Carbon\Carbon::parse($sale->created_at)->format('M d, Y h:i:s A') }}
                     </td>
-
                     <td style="padding:12px;">
                         {{ $sale->branch->name ?? 'N/A' }}
                     </td>
-
                     <td style="padding:12px;">
                         {{ $sale->user->name ?? 'N/A' }}
                     </td>
-
                     <td style="padding:12px; text-align:right; font-weight:600;">
                         ₱{{ number_format($sale->total_amount, 2) }}
                     </td>
@@ -173,7 +167,6 @@
 
 </div>
 
-<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -199,12 +192,12 @@ setInterval(() => {
     location.reload();
 }, 5000);
 
-// CLOCK
+// ✅ FIXED CLOCK (proper format)
 function updateTime() {
     const now = new Date();
-    document.getElementById('lastUpdate').innerText = now.toLocaleTimeString();
+    document.getElementById('lastUpdate').innerText =
+        "Last updated: " + now.toLocaleTimeString();
 }
-updateTime();
 setInterval(updateTime, 1000);
 </script>
 
