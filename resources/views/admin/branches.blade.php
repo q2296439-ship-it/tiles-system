@@ -1,4 +1,4 @@
-@extends('layouts.app') {{-- or kung ano layout mo --}}
+@extends('admin.dashboard')
 
 @section('content')
 
