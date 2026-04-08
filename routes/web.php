@@ -12,11 +12,24 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 RUN MIGRATIONS (FIXED - FRESH)
+// 🔥 FIXED MIGRATE (DELETE + RECREATE SQLITE)
 // =====================
 Route::get('/migrate', function () {
-    Artisan::call('migrate:fresh', ['--force' => true]);
-    return 'Fresh migration completed';
+
+    $dbPath = database_path('database.sqlite');
+
+    // delete old database
+    if (file_exists($dbPath)) {
+        unlink($dbPath);
+    }
+
+    // create new database
+    touch($dbPath);
+
+    // run migration
+    Artisan::call('migrate', ['--force' => true]);
+
+    return 'Database recreated + migrated';
 });
 
 
@@ -50,7 +63,6 @@ Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// LOGOUT
 Route::post('/logout', [AuthController::class, 'logout']);
 
 
