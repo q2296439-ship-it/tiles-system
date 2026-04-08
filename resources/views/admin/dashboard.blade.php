@@ -15,7 +15,6 @@
         .sidebar {
             width: 240px;
             min-height: 100vh;
-            height: 100%;
             background: #1e293b;
             color: white;
             padding: 20px;
@@ -140,8 +139,6 @@
     <a href="/admin/pos">💰 POS</a>
     <a href="#">📊 Per Brand</a>
     <a href="#">🏬 Per Branch</a>
-
-    <!-- ✅ FIXED DAILY SALES -->
     <a href="/admin/sales/daily">📅 Daily Sales</a>
 
     <div class="menu-title">PRODUCT</div>
@@ -158,6 +155,9 @@
     <div class="menu-title">USER</div>
     <a href="/admin/users">➕ Add User</a>
     <a href="/admin/users">👥 Manage Account</a>
+
+    <!-- 🔥 NEW ADD BRANCH -->
+    <a href="/admin/branches">🏢 Add Branch</a>
 
     <div class="menu-title">ACCOUNT</div>
 
