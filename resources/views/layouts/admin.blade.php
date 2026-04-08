@@ -11,7 +11,6 @@
             background: #f1f5f9;
         }
 
-        /* 🔥 SIDEBAR FIXED */
         .sidebar {
             width: 240px;
             height: 100vh;
@@ -22,12 +21,12 @@
             left: 0;
             top: 0;
             overflow-y: auto;
-            box-sizing: border-box; /* ✅ FIX SA PUTOL */
+            box-sizing: border-box;
         }
 
         .sidebar h2 {
             margin-bottom: 25px;
-            white-space: nowrap; /* ✅ para di maputol text */
+            white-space: nowrap;
         }
 
         .menu-title {
@@ -69,10 +68,9 @@
             color: white;
         }
 
-        /* 🔥 MAIN FIXED */
         .main {
             margin-left: 240px;
-            width: calc(100% - 240px); /* ✅ FIX SA OVERLAY */
+            width: calc(100% - 240px);
         }
 
         .topbar {
@@ -88,7 +86,6 @@
             padding: 20px;
         }
 
-        /* 🔥 CARDS */
         .card {
             background: white;
             padding: 15px;
@@ -97,7 +94,6 @@
             margin-bottom: 20px;
         }
 
-        /* 🔥 DASHBOARD GRID */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -122,7 +118,6 @@
             font-weight: bold;
         }
 
-        /* 🔥 TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -149,7 +144,12 @@
 
     <div class="menu-title">POS / SALES</div>
     <a href="/admin/pos" class="{{ request()->is('admin/pos') ? 'active' : '' }}">💰 POS</a>
-    <a href="#">📊 Per Brand</a>
+
+    <!-- 🔥 FIXED PER BRAND -->
+    <a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">
+        📊 Per Brand
+    </a>
+
     <a href="/admin/sales/branch" class="{{ request()->is('admin/sales/branch') ? 'active' : '' }}">🏬 Per Branch</a>
     <a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
 
