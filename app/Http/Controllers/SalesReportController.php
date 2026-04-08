@@ -266,11 +266,11 @@ class SalesReportController extends Controller
             ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
             ->select(
-                'products.brand',
+                'products.name as brand',
                 DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
             )
             ->whereBetween('sales.created_at', [$start, $end])
-            ->groupBy('products.brand')
+            ->groupBy('products.name')
             ->orderByDesc('total')
             ->get();
 
