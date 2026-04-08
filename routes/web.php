@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -25,10 +26,8 @@ Route::get('/migrate', function () {
 // =====================
 Route::get('/create-user', function () {
 
-    // delete all users
     \App\Models\User::truncate();
 
-    // create admin
     \App\Models\User::create([
         'name' => 'Admin',
         'username' => 'admin',
@@ -38,6 +37,27 @@ Route::get('/create-user', function () {
     ]);
 
     return 'Admin created';
+});
+
+
+// =====================
+// 🔥 CREATE BRANCHES (FIX FOR DROPDOWN)
+// =====================
+Route::get('/create-branches', function () {
+
+    DB::table('branches')->truncate();
+
+    DB::table('branches')->insert([
+        ['name' => 'San Isidro'],
+        ['name' => 'Arayat'],
+        ['name' => 'Mexico'],
+        ['name' => 'Capas'],
+        ['name' => 'Magalang'],
+        ['name' => 'Mabalacat'],
+        ['name' => 'Angeles'],
+    ]);
+
+    return 'Branches inserted!';
 });
 
 
