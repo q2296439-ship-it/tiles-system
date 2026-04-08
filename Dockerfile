@@ -18,5 +18,5 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN chmod -R 777 storage bootstrap/cache
 
-# 🔥 FINAL DEBUG + FIX
-CMD php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && php artisan migrate --force || true && php artisan serve --host=0.0.0.0 --port=$PORT
+# 🔥 FINAL FIX (WITH SESSION TABLE)
+CMD php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && php artisan session:table && php artisan migrate --force || true && php artisan serve --host=0.0.0.0 --port=$PORT
