@@ -11,7 +11,7 @@
             background: #f1f5f9;
         }
 
-        /* 🔥 FIXED SIDEBAR */
+        /* 🔥 SIDEBAR */
         .sidebar {
             width: 240px;
             height: 100vh;
@@ -47,7 +47,6 @@
             color: white;
         }
 
-        /* 🔥 ACTIVE MENU */
         .sidebar a.active {
             color: white;
             font-weight: bold;
@@ -68,7 +67,7 @@
             color: white;
         }
 
-        /* 🔥 MAIN FIX */
+        /* 🔥 MAIN */
         .main {
             margin-left: 240px;
             flex: 1;
@@ -87,6 +86,7 @@
             padding: 20px;
         }
 
+        /* 🔥 CARDS */
         .card {
             background: white;
             padding: 15px;
@@ -95,6 +95,32 @@
             margin-bottom: 20px;
         }
 
+        /* 🔥 DASHBOARD GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .kpi { color: white; }
+
+        .blue { background: #3b82f6; }
+        .green { background: #22c55e; }
+        .yellow { background: #f59e0b; }
+        .red { background: #ef4444; }
+
+        .section-title {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .low {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* 🔥 TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -127,9 +153,14 @@
 
     <div class="menu-title">PRODUCT</div>
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
+    <a href="#">🏷 Per Model</a>
 
     <div class="menu-title">INVENTORY</div>
     <a href="/admin/inventory" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
+    <a href="#">➕ Add New Stock</a>
+    <a href="#">⬅ Transfer In</a>
+    <a href="#">➡ Transfer Out</a>
+    <a href="#">📄 Delivery Report</a>
 
     <div class="menu-title">USER</div>
     <a href="/admin/users">➕ Add User</a>
@@ -151,7 +182,6 @@
         <span>👤 {{ auth()->user()->name ?? 'Admin' }}</span>
     </div>
 
-    {{-- 🔥 CONTENT WILL LOAD HERE --}}
     <div class="content">
         @yield('content')
     </div>
