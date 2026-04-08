@@ -16,11 +16,11 @@ class User extends Authenticatable
     // =====================
     protected $fillable = [
         'name',
+        'username', // 🔥 REQUIRED (dahil sa DB mo)
         'email',
         'password',
         'role',
         'branch_id',
-        // 'username' // ❌ REMOVE muna para walang DB error
     ];
 
     // =====================
@@ -36,7 +36,6 @@ class User extends Authenticatable
     // =====================
     protected $casts = [
         'email_verified_at' => 'datetime',
-        // ❌ REMOVE 'password' => 'hashed' (baka double hash issue)
     ];
 
     // =====================
