@@ -16,18 +16,34 @@ class AuthController extends Controller
     }
 
     // =====================
-    // LOGIN FUNCTION (EMAIL BASED FIX)
+    // LOGIN FUNCTION (EMAIL BASED FIX - FINAL)
     // =====================
     public function login(Request $request)
     {
+        // 🔥 VALIDATION
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+
+        // 🔥 EMAIL LOGIN (username field = email)
         $credentials = [
-            'email' => $request->username, // 🔥 gumagamit ng email kahit username field
+            'email' => $request->username,
             'password' => $request->password
         ];
 
-        if (Auth::attempt($credentials)) {
+        // 🔥 REMEMBER ME SUPPORT
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+
+            $request->session()->regenerate();
 
             $user = Auth::user();
+
+            // =====================
+            // ROLE BASED REDIRECT
+            // =====================
 
             // ADMIN
             if ($user->role === 'admin') {
@@ -36,13 +52,16 @@ class AuthController extends Controller
 
             // CASHIER
             if ($user->role === 'cashier') {
-                return redirect('/cashier?branch_id=' . $user->branch_id);
+                return redirect('/cashier');
             }
 
             // INVENTORY
             if ($user->role === 'inventory') {
-                return redirect('/inventory?branch_id=' . $user->branch_id);
+                return redirect('/inventory-dashboard');
             }
+
+            // DEFAULT FALLBACK
+            return redirect('/');
         }
 
         return back()->with('error', 'Invalid login credentials');
