@@ -5,16 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Branch; // 🔥 ADD THIS
+use App\Models\Branch;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    // 🔥 IMPORTANT FIELDS
     protected $fillable = [
         'name',
-        'username',
+        'username', // ✔ KEEP THIS
         'email',
         'password',
         'role',
@@ -31,7 +30,6 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // 🔥 FIX: RELATIONSHIP
     public function branch()
     {
         return $this->belongsTo(Branch::class);

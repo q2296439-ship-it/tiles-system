@@ -11,19 +11,21 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 TEMP CREATE / RESET USER (FINAL FIX)
+// 🔥 TEMP CREATE / RESET USER (FINAL FIX - SAFE)
 // =====================
 Route::get('/create-user', function () {
     $user = \App\Models\User::where('email', 'admin@gmail.com')->first();
 
     if ($user) {
-        $user->password = bcrypt('12345678'); // 🔥 reset password
+        $user->password = bcrypt('12345678');
+        $user->role = 'admin'; // 🔥 important para sa redirect
         $user->save();
     } else {
         \App\Models\User::create([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
+            'role' => 'admin', // 🔥 important
         ]);
     }
 
