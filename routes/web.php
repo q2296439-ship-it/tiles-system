@@ -18,15 +18,12 @@ Route::get('/migrate', function () {
 
     $dbPath = database_path('database.sqlite');
 
-    // delete old database
     if (file_exists($dbPath)) {
         unlink($dbPath);
     }
 
-    // create new database
     touch($dbPath);
 
-    // run migration
     Artisan::call('migrate', ['--force' => true]);
 
     return 'Database recreated + migrated';
@@ -34,7 +31,7 @@ Route::get('/migrate', function () {
 
 
 // =====================
-// 🔥 TEMP CREATE / RESET USER
+// 🔥 TEMP CREATE / RESET USER (FIXED USERNAME)
 // =====================
 Route::get('/create-user', function () {
     $user = \App\Models\User::where('email', 'admin@gmail.com')->first();
@@ -42,10 +39,12 @@ Route::get('/create-user', function () {
     if ($user) {
         $user->password = bcrypt('12345678');
         $user->role = 'admin';
+        $user->username = 'admin'; // 🔥 FIX
         $user->save();
     } else {
         \App\Models\User::create([
             'name' => 'Admin',
+            'username' => 'admin', // 🔥 FIX
             'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
             'role' => 'admin',
