@@ -129,3 +129,11 @@ Route::post('/cashier/checkout', [CashierController::class, 'checkout']);
 Route::get('/inventory-dashboard', function () {
     return view('inventory.dashboard');
 });
+
+
+// =====================
+// 🔥 DEBUG: CHECK USER (ADD THIS)
+// =====================
+Route::get('/check-user', function () {
+    return \App\Models\User::all();
+});
