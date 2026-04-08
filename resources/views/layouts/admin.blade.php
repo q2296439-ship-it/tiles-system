@@ -9,15 +9,19 @@
             font-family: Arial, sans-serif;
             display: flex;
             background: #f1f5f9;
-            min-height: 100vh;
         }
 
+        /* 🔥 FIXED SIDEBAR */
         .sidebar {
             width: 240px;
-            min-height: 100vh;
+            height: 100vh;
             background: #1e293b;
             color: white;
             padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
         }
 
         .sidebar h2 {
@@ -43,6 +47,7 @@
             color: white;
         }
 
+        /* 🔥 ACTIVE MENU */
         .sidebar a.active {
             color: white;
             font-weight: bold;
@@ -63,7 +68,9 @@
             color: white;
         }
 
+        /* 🔥 MAIN FIX */
         .main {
+            margin-left: 240px;
             flex: 1;
         }
 
@@ -110,26 +117,25 @@
     <h2>Admin Panel</h2>
 
     <div class="menu-title">MAIN</div>
-    <a href="/admin/dashboard">📊 Dashboard</a>
+    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
 
     <div class="menu-title">POS / SALES</div>
-    <a href="/admin/pos">💰 POS</a>
+    <a href="/admin/pos" class="{{ request()->is('admin/pos') ? 'active' : '' }}">💰 POS</a>
     <a href="#">📊 Per Brand</a>
-    <a href="/admin/sales/branch">🏬 Per Branch</a>
-    <a href="/admin/sales/daily">📅 Daily Sales</a>
+    <a href="/admin/sales/branch" class="{{ request()->is('admin/sales/branch') ? 'active' : '' }}">🏬 Per Branch</a>
+    <a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
 
     <div class="menu-title">PRODUCT</div>
-    <a href="/admin/products">📦 Product Overview</a>
+    <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
 
     <div class="menu-title">INVENTORY</div>
-    <a href="/admin/inventory">📦 Overview Stock</a>
+    <a href="/admin/inventory" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
 
     <div class="menu-title">USER</div>
     <a href="/admin/users">➕ Add User</a>
     <a href="/admin/users">👥 Manage Account</a>
 
-    <!-- 🔥 NEW ADD BRANCH -->
-    <a href="/admin/branches">🏬 Add Branch</a>
+    <a href="/admin/branches" class="{{ request()->is('admin/branches') ? 'active' : '' }}">🏬 Add Branch</a>
 
     <div class="menu-title">ACCOUNT</div>
     <form method="POST" action="/logout">
@@ -146,7 +152,9 @@
     </div>
 
     {{-- 🔥 CONTENT WILL LOAD HERE --}}
-    @yield('content')
+    <div class="content">
+        @yield('content')
+    </div>
 
 </div>
 
