@@ -11,25 +11,37 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    // =====================
+    // FILLABLE
+    // =====================
     protected $fillable = [
         'name',
-        'username', // ✔ KEEP THIS
         'email',
         'password',
         'role',
         'branch_id',
+        // 'username' // ❌ REMOVE muna para walang DB error
     ];
 
+    // =====================
+    // HIDDEN
+    // =====================
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    // =====================
+    // CASTS
+    // =====================
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        // ❌ REMOVE 'password' => 'hashed' (baka double hash issue)
     ];
 
+    // =====================
+    // RELATIONSHIP
+    // =====================
     public function branch()
     {
         return $this->belongsTo(Branch::class);
