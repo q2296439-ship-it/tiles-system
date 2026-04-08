@@ -11,11 +11,11 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 TEMP CREATE USER (USERNAME BASED - REMOVE AFTER USE)
+// 🔥 TEMP CREATE USER (FIXED - NO DUPLICATE ERROR)
 // =====================
 Route::get('/create-user', function () {
     \App\Models\User::updateOrCreate(
-        ['username' => 'admin'],
+        ['email' => 'admin@gmail.com'], // 🔥 use email para i-update existing
         [
             'name' => 'Admin',
             'username' => 'admin',
