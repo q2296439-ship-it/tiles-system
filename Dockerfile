@@ -1,15 +1,34 @@
 FROM php:8.2-cli
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git unzip libpng-dev libjpeg-dev libfreetype6-dev \
+    git \
+    unzip \
+    curl \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    zip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd
+    && docker-php-ext-install gd pdo pdo_mysql
 
-WORKDIR /app
+# Install Composer (mas clean way)
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Set working directory
+WORKDIR /var/www
+
+# Copy project files
 COPY . .
 
-RUN curl -sS https://getcomposer.org/installer | php \
-    && php composer.phar install --no-dev --optimize-autoloader
+# Install Laravel dependencies
+RUN composer install --no-dev --optimize-autoloader
 
+# Laravel permissions (important sa Railway)
+RUN chmod -R 777 storage bootstrap/cache
+
+# Expose port
+EXPOSE 8000
+
+# Run Laravel
 CMD php artisan serve --host=0.0.0.0 --port=$PORT
