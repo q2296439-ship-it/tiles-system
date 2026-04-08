@@ -43,7 +43,6 @@
             color: white;
         }
 
-        /* 🔥 ACTIVE LINK (future use) */
         .sidebar a.active {
             color: white;
             font-weight: bold;
@@ -116,10 +115,7 @@
     <div class="menu-title">POS / SALES</div>
     <a href="/admin/pos">💰 POS</a>
     <a href="#">📊 Per Brand</a>
-
-    <!-- 🔥 FIXED PER BRANCH -->
     <a href="/admin/sales/branch">🏬 Per Branch</a>
-
     <a href="/admin/sales/daily">📅 Daily Sales</a>
 
     <div class="menu-title">PRODUCT</div>
@@ -129,7 +125,11 @@
     <a href="/admin/inventory">📦 Overview Stock</a>
 
     <div class="menu-title">USER</div>
+    <a href="/admin/users">➕ Add User</a>
     <a href="/admin/users">👥 Manage Account</a>
+
+    <!-- 🔥 NEW ADD BRANCH -->
+    <a href="/admin/branches">🏬 Add Branch</a>
 
     <div class="menu-title">ACCOUNT</div>
     <form method="POST" action="/logout">
@@ -141,10 +141,11 @@
 <div class="main">
 
     <div class="topbar">
-        <strong>Admin Dashboard</strong>
-        <span>👤 Admin</span>
+        <strong>Admin Panel</strong>
+        <span>👤 {{ auth()->user()->name ?? 'Admin' }}</span>
     </div>
 
+    {{-- 🔥 CONTENT WILL LOAD HERE --}}
     @yield('content')
 
 </div>
