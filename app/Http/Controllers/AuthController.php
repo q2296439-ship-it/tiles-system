@@ -16,12 +16,12 @@ class AuthController extends Controller
     }
 
     // =====================
-    // LOGIN FUNCTION (WITH BRANCH SUPPORT)
+    // LOGIN FUNCTION (EMAIL BASED FIX)
     // =====================
     public function login(Request $request)
     {
         $credentials = [
-            'username' => $request->username,
+            'email' => $request->username, // 🔥 gumagamit ng email kahit username field
             'password' => $request->password
         ];
 
