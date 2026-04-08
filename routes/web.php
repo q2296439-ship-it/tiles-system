@@ -11,18 +11,23 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 TEMP CREATE USER (FIXED - NO DUPLICATE ERROR)
+// 🔥 TEMP CREATE / RESET USER (FINAL FIX)
 // =====================
 Route::get('/create-user', function () {
-    \App\Models\User::updateOrCreate(
-        ['email' => 'admin@gmail.com'], // 🔥 use email para i-update existing
-        [
+    $user = \App\Models\User::where('email', 'admin@gmail.com')->first();
+
+    if ($user) {
+        $user->password = bcrypt('12345678'); // 🔥 reset password
+        $user->save();
+    } else {
+        \App\Models\User::create([
             'name' => 'Admin',
-            'username' => 'admin',
+            'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
-        ]
-    );
-    return 'User created/reset';
+        ]);
+    }
+
+    return 'Password reset / User created';
 });
 
 
