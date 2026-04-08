@@ -11,6 +11,19 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
+// 🔥 TEMP CREATE USER (REMOVE AFTER USE)
+// =====================
+Route::get('/create-user', function () {
+    \App\Models\User::create([
+        'name' => 'Admin',
+        'email' => 'admin@gmail.com',
+        'password' => bcrypt('12345678'),
+    ]);
+    return 'User created successfully';
+});
+
+
+// =====================
 // AUTH
 // =====================
 Route::get('/', [AuthController::class, 'showLogin']);
@@ -83,7 +96,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/sales/daily', [SalesReportController::class, 'daily']);
     Route::get('/sales/branch', [SalesReportController::class, 'perBranch']);
 
-    // 🔥 AUTO UPDATE API (IMPORTANT)
+    // 🔥 AUTO UPDATE API
     Route::get('/sales/branch/data', [SalesReportController::class, 'branchData']);
 
     // =====================
@@ -96,8 +109,6 @@ Route::prefix('admin')->group(function () {
     // EXCEL EXPORT 🔥
     // =====================
     Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel']);
-
-    // 🔥 FIX: BRANCH EXCEL (ETO YUNG KULANG MO)
     Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
 });
 
