@@ -31,27 +31,22 @@ Route::get('/migrate', function () {
 
 
 // =====================
-// 🔥 TEMP CREATE / RESET USER (FIXED USERNAME)
+// 🔥 CLEAN ADMIN CREATE (FINAL FIX)
 // =====================
 Route::get('/create-user', function () {
-    $user = \App\Models\User::where('email', 'admin@gmail.com')->first();
 
-    if ($user) {
-        $user->password = bcrypt('12345678');
-        $user->role = 'admin';
-        $user->username = 'admin'; // 🔥 FIX
-        $user->save();
-    } else {
-        \App\Models\User::create([
-            'name' => 'Admin',
-            'username' => 'admin', // 🔥 FIX
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('12345678'),
-            'role' => 'admin',
-        ]);
-    }
+    // delete all users
+    \App\Models\User::truncate();
 
-    return 'User created / reset';
+    // create fresh admin
+    \App\Models\User::create([
+        'name' => 'admin',
+        'email' => 'admin@gmail.com',
+        'password' => bcrypt('12345678'),
+        'role' => 'admin',
+    ]);
+
+    return 'Admin created fresh';
 });
 
 
@@ -128,12 +123,4 @@ Route::post('/cashier/checkout', [CashierController::class, 'checkout']);
 // =====================
 Route::get('/inventory-dashboard', function () {
     return view('inventory.dashboard');
-});
-
-
-// =====================
-// 🔥 DEBUG: CHECK USER (ADD THIS)
-// =====================
-Route::get('/check-user', function () {
-    return \App\Models\User::all();
 });
