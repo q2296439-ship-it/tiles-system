@@ -10,7 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\BranchController; // 🔥 ADD THIS
+use App\Http\Controllers\Admin\BranchController; // ✅
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\SalesReportController;
 
@@ -99,10 +99,12 @@ Route::prefix('admin')->group(function () {
     });
 
     // =====================
-    // 🔥 BRANCHES (CONTROLLER VERSION)
+    // 🔥 BRANCHES (FULL CRUD FIX)
     // =====================
     Route::get('/branches', [BranchController::class, 'index']);
     Route::post('/branches/store', [BranchController::class, 'store']);
+    Route::post('/branches/update/{id}', [BranchController::class, 'update']); // ✅ FIX
+    Route::post('/branches/delete/{id}', [BranchController::class, 'delete']); // ✅ FIX
 
     // =====================
     // PRODUCTS
