@@ -15,7 +15,18 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 FIX: FRESH MIGRATE (NO DUPLICATE ERROR)
+// 🔥 CLEAR CACHE (ADD THIS - IMPORTANT)
+// =====================
+Route::get('/clear', function () {
+    Artisan::call('view:clear');
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    return 'Cache cleared!';
+});
+
+
+// =====================
+// 🔥 FRESH MIGRATE
 // =====================
 Route::get('/migrate', function () {
     Artisan::call('migrate:fresh', ['--force' => true]);
@@ -24,7 +35,7 @@ Route::get('/migrate', function () {
 
 
 // =====================
-// 🔥 CREATE ADMIN (RAILWAY SAFE)
+// 🔥 CREATE ADMIN
 // =====================
 Route::get('/create-user', function () {
 
@@ -43,7 +54,7 @@ Route::get('/create-user', function () {
 
 
 // =====================
-// 🔥 CREATE BRANCHES (INITIAL SEED)
+// 🔥 CREATE BRANCHES
 // =====================
 Route::get('/create-branches', function () {
 
@@ -87,10 +98,10 @@ Route::prefix('admin')->group(function () {
     });
 
     // =====================
-    // 🔥 BRANCH MANAGEMENT (NEW)
+    // 🔥 BRANCHES
     // =====================
     Route::get('/branches', function () {
-        $branches = \App\Models\Branch::latest()->get();
+        $branches = \App\Models\Branch::orderBy('id', 'desc')->get();
         return view('admin.branches', compact('branches'));
     });
 
@@ -104,7 +115,7 @@ Route::prefix('admin')->group(function () {
             'name' => $request->name
         ]);
 
-        return back()->with('success', 'Branch added successfully');
+        return redirect('/admin/branches')->with('success', 'Branch added!');
     });
 
     // =====================
@@ -123,36 +134,26 @@ Route::prefix('admin')->group(function () {
         Route::get('/export', [ProductController::class, 'export']);
     });
 
-    // =====================
     // INVENTORY
-    // =====================
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
-
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
-    // =====================
     // USERS
-    // =====================
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
 
-    // =====================
     // REPORTS
-    // =====================
     Route::get('/reports', function () {
         return view('admin.reports');
     });
 
     Route::get('/sales/daily', [SalesReportController::class, 'daily']);
     Route::get('/sales/branch', [SalesReportController::class, 'perBranch']);
-
     Route::get('/sales/branch/data', [SalesReportController::class, 'branchData']);
-
     Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf']);
     Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf']);
-
     Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel']);
     Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
 });
@@ -166,7 +167,7 @@ Route::post('/cashier/checkout', [CashierController::class, 'checkout']);
 
 
 // =====================
-// OTHER DASHBOARDS
+// OTHER
 // =====================
 Route::get('/inventory-dashboard', function () {
     return view('inventory.dashboard');
