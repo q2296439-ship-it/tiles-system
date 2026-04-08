@@ -12,11 +12,11 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 FIX: FORCE MIGRATE (POSTGRES READY)
+// 🔥 FIX: FRESH MIGRATE (NO DUPLICATE ERROR)
 // =====================
 Route::get('/migrate', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Database migrated';
+    Artisan::call('migrate:fresh', ['--force' => true]);
+    return 'Database refreshed + migrated';
 });
 
 
@@ -31,7 +31,7 @@ Route::get('/create-user', function () {
     // create admin
     \App\Models\User::create([
         'name' => 'Admin',
-        'username' => 'admin', // 🔥 important (login mo gamit username)
+        'username' => 'admin',
         'email' => 'admin@gmail.com',
         'password' => bcrypt('12345678'),
         'role' => 'admin',
