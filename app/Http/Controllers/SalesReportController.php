@@ -182,7 +182,7 @@ class SalesReportController extends Controller
     }
 
     // =====================
-    // PER BRANCH 🔥
+    // 🔥 PER BRANCH
     // =====================
     public function perBranch(Request $request)
     {
@@ -247,6 +247,37 @@ class SalesReportController extends Controller
             'trendLabels','trendData',
             'range','alerts','branchList'
         ));
+    }
+
+    // =====================
+    // 🔥 PER BRAND (NEW)
+    // =====================
+    public function perBrand(Request $request)
+    {
+        $start = $request->start_date 
+            ? $request->start_date . ' 00:00:00' 
+            : now()->startOfDay();
+
+        $end = $request->end_date 
+            ? $request->end_date . ' 23:59:59' 
+            : now()->endOfDay();
+
+        $data = DB::table('sales')
+            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->select(
+                'products.brand',
+                DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
+            )
+            ->whereBetween('sales.created_at', [$start, $end])
+            ->groupBy('products.brand')
+            ->orderByDesc('total')
+            ->get();
+
+        $labels = $data->pluck('brand');
+        $totals = $data->pluck('total');
+
+        return view('admin.reports.brand', compact('data','labels','totals'));
     }
 
     public function branchData(Request $request)

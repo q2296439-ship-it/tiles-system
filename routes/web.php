@@ -10,7 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\BranchController; // ✅
+use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\SalesReportController;
 
@@ -99,12 +99,12 @@ Route::prefix('admin')->group(function () {
     });
 
     // =====================
-    // 🔥 BRANCHES (FULL CRUD FIX)
+    // 🔥 BRANCHES
     // =====================
     Route::get('/branches', [BranchController::class, 'index']);
     Route::post('/branches/store', [BranchController::class, 'store']);
-    Route::post('/branches/update/{id}', [BranchController::class, 'update']); // ✅ FIX
-    Route::post('/branches/delete/{id}', [BranchController::class, 'delete']); // ✅ FIX
+    Route::post('/branches/update/{id}', [BranchController::class, 'update']);
+    Route::post('/branches/delete/{id}', [BranchController::class, 'delete']);
 
     // =====================
     // PRODUCTS
@@ -122,30 +122,42 @@ Route::prefix('admin')->group(function () {
         Route::get('/export', [ProductController::class, 'export']);
     });
 
+    // =====================
     // INVENTORY
+    // =====================
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
+    // =====================
     // USERS
+    // =====================
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
 
+    // =====================
     // REPORTS
+    // =====================
     Route::get('/reports', function () {
         return view('admin.reports');
     });
 
+    // 🔥 DAILY
     Route::get('/sales/daily', [SalesReportController::class, 'daily']);
+    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf']);
+    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel']);
+
+    // 🔥 BRANCH
     Route::get('/sales/branch', [SalesReportController::class, 'perBranch']);
     Route::get('/sales/branch/data', [SalesReportController::class, 'branchData']);
-    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf']);
     Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf']);
-    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel']);
     Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
-});
 
+    // 🔥 BRAND (NEW 🔥)
+    Route::get('/sales/brand', [SalesReportController::class, 'perBrand']);
+});
+    
 
 // =====================
 // CASHIER
