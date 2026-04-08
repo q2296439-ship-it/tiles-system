@@ -11,7 +11,7 @@
             background: #f1f5f9;
         }
 
-        /* 🔥 SIDEBAR */
+        /* 🔥 SIDEBAR FIXED */
         .sidebar {
             width: 240px;
             height: 100vh;
@@ -22,10 +22,12 @@
             left: 0;
             top: 0;
             overflow-y: auto;
+            box-sizing: border-box; /* ✅ FIX SA PUTOL */
         }
 
         .sidebar h2 {
             margin-bottom: 25px;
+            white-space: nowrap; /* ✅ para di maputol text */
         }
 
         .menu-title {
@@ -67,10 +69,10 @@
             color: white;
         }
 
-        /* 🔥 MAIN */
+        /* 🔥 MAIN FIXED */
         .main {
             margin-left: 240px;
-            flex: 1;
+            width: calc(100% - 240px); /* ✅ FIX SA OVERLAY */
         }
 
         .topbar {
