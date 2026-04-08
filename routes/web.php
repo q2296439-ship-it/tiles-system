@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -11,25 +12,34 @@ use App\Http\Controllers\SalesReportController;
 
 
 // =====================
-// 🔥 TEMP CREATE / RESET USER (FINAL FIX - SAFE)
+// 🔥 RUN MIGRATIONS (IMPORTANT)
+// =====================
+Route::get('/migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migrations completed';
+});
+
+
+// =====================
+// 🔥 TEMP CREATE / RESET USER
 // =====================
 Route::get('/create-user', function () {
     $user = \App\Models\User::where('email', 'admin@gmail.com')->first();
 
     if ($user) {
         $user->password = bcrypt('12345678');
-        $user->role = 'admin'; // 🔥 important para sa redirect
+        $user->role = 'admin';
         $user->save();
     } else {
         \App\Models\User::create([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
-            'role' => 'admin', // 🔥 important
+            'role' => 'admin',
         ]);
     }
 
-    return 'Password reset / User created';
+    return 'User created / reset';
 });
 
 
@@ -40,31 +50,22 @@ Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// 🔥 LOGOUT
+// LOGOUT
 Route::post('/logout', [AuthController::class, 'logout']);
 
 
 // =====================
-// ADMIN GROUP 🔥
+// ADMIN GROUP
 // =====================
 Route::prefix('admin')->group(function () {
 
-    // =====================
-    // DASHBOARD
-    // =====================
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // =====================
-    // POS
-    // =====================
     Route::get('/pos', function () {
         return view('admin.pos');
     });
 
-    // =====================
-    // PRODUCTS
-    // =====================
     Route::prefix('products')->group(function () {
 
         Route::get('/', [ProductController::class, 'index']);
@@ -78,53 +79,34 @@ Route::prefix('admin')->group(function () {
         Route::get('/export', [ProductController::class, 'export']);
     });
 
-    // =====================
-    // INVENTORY 🔥
-    // =====================
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
 
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
-    // =====================
-    // USERS 🔥
-    // =====================
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
 
-    // =====================
-    // REPORTS
-    // =====================
     Route::get('/reports', function () {
         return view('admin.reports');
     });
 
-    // =====================
-    // SALES REPORTS 🔥
-    // =====================
     Route::get('/sales/daily', [SalesReportController::class, 'daily']);
     Route::get('/sales/branch', [SalesReportController::class, 'perBranch']);
 
-    // 🔥 AUTO UPDATE API
     Route::get('/sales/branch/data', [SalesReportController::class, 'branchData']);
 
-    // =====================
-    // PDF EXPORT 🔥
-    // =====================
     Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf']);
     Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf']);
 
-    // =====================
-    // EXCEL EXPORT 🔥
-    // =====================
     Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel']);
     Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
 });
 
 
 // =====================
-// CASHIER 🔥
+// CASHIER
 // =====================
 Route::get('/cashier', [CashierController::class, 'index']);
 Route::post('/cashier/checkout', [CashierController::class, 'checkout']);
