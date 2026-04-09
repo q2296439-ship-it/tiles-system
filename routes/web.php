@@ -144,27 +144,36 @@ Route::prefix('admin')->group(function () {
     });
 
     // 🔥 DAILY
-    Route::get('/sales/daily', [SalesReportController::class, 'daily']);
-    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf']);
-    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel']);
+    Route::get('/sales/daily', [SalesReportController::class, 'daily'])
+        ->name('report.daily');
+
+    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf'])
+        ->name('report.daily.pdf');
+
+    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel'])
+        ->name('report.daily.excel');
 
     // 🔥 BRANCH
-    Route::get('/sales/branch', [SalesReportController::class, 'perBranch']);
+    Route::get('/sales/branch', [SalesReportController::class, 'perBranch'])
+        ->name('report.branch');
+
     Route::get('/sales/branch/data', [SalesReportController::class, 'branchData']);
-    Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf']);
-    Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
+
+    Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf'])
+        ->name('report.branch.pdf');
+
+    Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel'])
+        ->name('report.branch.excel');
 
     // 🔥 BRAND
-    Route::get('/sales/brand', [SalesReportController::class, 'perBrand']);
+    Route::get('/sales/brand', [SalesReportController::class, 'perBrand'])
+        ->name('report.brand');
 
-    // ✅ BRAND PDF
     Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])
         ->name('report.brand.pdf');
 
-    // ✅ BRAND EXCEL (NEW 🔥)
     Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])
         ->name('report.brand.excel');
-
 });
 
 
