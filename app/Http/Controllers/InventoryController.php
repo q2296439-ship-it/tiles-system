@@ -26,7 +26,6 @@ class InventoryController extends Controller
     // =====================
     public function store(Request $request)
     {
-        // 🔥 NEW PRODUCT
         if ($request->new_name) {
 
             $request->validate([
@@ -54,7 +53,6 @@ class InventoryController extends Controller
 
         } else {
 
-            // 🔥 EXISTING PRODUCT
             $request->validate([
                 'product_id' => 'required|exists:products,id',
                 'quantity' => 'required|integer|min:1',
@@ -79,7 +77,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 NEW: TRANSFER IN FORM
+    // 🔥 TRANSFER IN FORM
     // =====================
     public function transferInForm()
     {
@@ -90,7 +88,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 NEW: TRANSFER REQUEST (PENDING)
+    // 🔥 TRANSFER REQUEST (PENDING)
     // =====================
     public function transferInStore(Request $request)
     {
@@ -104,13 +102,54 @@ class InventoryController extends Controller
         StockMovement::create([
             'product_id' => $request->product_id,
             'branch_id' => $request->to_branch,
-            'type' => 'IN', // ✅ FIX LANG
+            'type' => 'IN',
             'quantity' => $request->quantity,
             'reason' => 'Transfer Request',
-            'status' => 'pending', // 🔥 approval system
+            'status' => 'pending',
         ]);
 
         return back()->with('success', 'Transfer request submitted for approval');
+    }
+
+    // =====================
+    // 🔥 NEW: MANAGER APPROVAL PAGE
+    // =====================
+    public function approvals()
+    {
+        $requests = StockMovement::with(['product', 'branch'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        return view('manager.approvals', compact('requests'));
+    }
+
+    // =====================
+    // 🔥 APPROVE
+    // =====================
+    public function approve($id)
+    {
+        $movement = StockMovement::findOrFail($id);
+
+        $movement->status = 'approved';
+        $movement->save();
+
+        // OPTIONAL: dagdag stock logic dito kung gusto mo
+
+        return back()->with('success', 'Request approved!');
+    }
+
+    // =====================
+    // 🔥 REJECT
+    // =====================
+    public function reject($id)
+    {
+        $movement = StockMovement::findOrFail($id);
+
+        $movement->status = 'rejected';
+        $movement->save();
+
+        return back()->with('success', 'Request rejected!');
     }
 
     // =====================
