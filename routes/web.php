@@ -22,6 +22,8 @@ Route::get('/clear', function () {
     Artisan::call('view:clear');
     Artisan::call('config:clear');
     Artisan::call('cache:clear');
+    Artisan::call('route:clear'); // 🔥 ADD
+    Artisan::call('optimize:clear'); // 🔥 ADD
     return 'Cache cleared!';
 });
 
@@ -134,9 +136,16 @@ Route::prefix('admin')->group(function () {
     Route::get('/inventory/add-stock', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
 
-    // 🔥 NEW: TRANSFER IN (APPROVAL FLOW)
+    // 🔥 TRANSFER IN (APPROVAL FLOW)
     Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInForm'])->name('inventory.transfer.in');
     Route::post('/inventory/transfer-in', [InventoryController::class, 'transferInStore'])->name('inventory.transfer.store');
+
+    // =====================
+    // 🔥 NEW: MANAGER APPROVAL
+    // =====================
+    Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->name('manager.approvals');
+    Route::post('/manager/approve/{id}', [InventoryController::class, 'approve']);
+    Route::post('/manager/reject/{id}', [InventoryController::class, 'reject']);
 
 
     // =====================

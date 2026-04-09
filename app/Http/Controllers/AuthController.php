@@ -60,6 +60,11 @@ class AuthController extends Controller
                 return redirect('/inventory-dashboard');
             }
 
+            // 🔥 NEW: BRANCH MANAGER
+            if ($user->role === 'manager') {
+                return redirect('/admin/manager/approvals');
+            }
+
             // DEFAULT FALLBACK
             return redirect('/');
         }
