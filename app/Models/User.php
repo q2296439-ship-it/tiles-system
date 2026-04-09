@@ -24,6 +24,19 @@ class User extends Authenticatable
     ];
 
     // =====================
+    // 🔥 AUTO HASH PASSWORD (FIX)
+    // =====================
+    public function setPasswordAttribute($value)
+    {
+        // kung hindi pa hashed, i-hash natin
+        if (!\Illuminate\Support\Facades\Hash::needsRehash($value)) {
+            $this->attributes['password'] = $value;
+        } else {
+            $this->attributes['password'] = bcrypt($value);
+        }
+    }
+
+    // =====================
     // HIDDEN
     // =====================
     protected $hidden = [
