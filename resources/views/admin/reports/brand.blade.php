@@ -5,49 +5,69 @@
 <div class="content">
 
     <!-- 🔥 HEADER -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h2 style="font-weight:600;">
-            📊 Sales per Brand <span style="color:green;">● Live</span>
-        </h2>
+    <div style="margin-bottom:25px;">
 
-        <small style="color:#64748b;">
-            Last updated: <span id="liveTime"></span>
-        </small>
-    </div>
+        <!-- TITLE + LAST UPDATED -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0;">📊 Sales per Brand <span style="color:green;">● Live</span></h2>
+            <small id="lastUpdated" style="color:#64748b;">
+                Last updated: --
+            </small>
+        </div>
 
-    <!-- 🔥 FILTER + EXPORT -->
-    <div style="margin-bottom:15px;">
-        <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <!-- 🔥 DATE + FILTER + ACTIONS -->
+        <div style="margin-top:15px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
 
-            <input type="date" name="start_date" value="{{ request('start_date') }}">
-            <span>To</span>
-            <input type="date" name="end_date" value="{{ request('end_date') }}">
+            <!-- FILTER FORM -->
+            <form method="GET" style="display:flex; gap:10px; align-items:center;">
 
-            <select name="branch_id">
-                <option value="">All Branch</option>
-                @foreach($branches as $branch)
-                    <option value="{{ $branch->id }}" 
-                        {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
-                        {{ $branch->name }}
-                    </option>
-                @endforeach
-            </select>
+                <input type="date" name="start_date"
+                    value="{{ request('start_date') }}"
+                    onchange="this.form.submit()"
+                    style="padding:6px;">
 
-            <button class="btn primary">Filter</button>
+                <span>To:</span>
 
-            <a href="{{ route('report.brand.excel', request()->all()) }}" class="btn excel">
-                📊 Export Excel
+                <input type="date" name="end_date"
+                    value="{{ request('end_date') }}"
+                    onchange="this.form.submit()"
+                    style="padding:6px;">
+
+                <select name="branch_id"
+                    onchange="this.form.submit()"
+                    style="padding:6px;">
+                    <option value="">All Branch</option>
+
+                    @foreach($branches as $b)
+                        <option value="{{ $b->id }}"
+                            {{ request('branch_id') == $b->id ? 'selected' : '' }}>
+                            {{ $b->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+            </form>
+
+            <!-- 🔥 EXCEL -->
+            <a href="{{ route('report.brand.excel', request()->all()) }}">
+                <button style="padding:6px 12px; background:green; color:white;">
+                    📊 Export Excel
+                </button>
             </a>
 
-            <a href="{{ route('report.brand.pdf', request()->all()) }}" class="btn pdf">
-                📄 Export PDF
+            <!-- 🔥 PDF -->
+            <a href="{{ route('report.brand.pdf', request()->all()) }}" target="_blank">
+                <button style="padding:6px 12px;">
+                    📄 Export PDF
+                </button>
             </a>
 
-        </form>
+        </div>
+
     </div>
 
-    <!-- 🔥 KPI CARDS -->
-    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:20px;">
+    <!-- 🔥 KPI -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:30px;">
 
         <div class="card">
             <p>Total Sales</p>
@@ -74,107 +94,45 @@
     </div>
 
     <!-- 🔥 CHART -->
-    <div class="card" style="margin-bottom:20px;">
-        <div style="font-weight:bold; margin-bottom:10px;">
-            📈 Sales by Brand
-        </div>
-
-        <canvas id="brandChart" height="100"></canvas>
+    <div class="card" style="padding:20px; margin-bottom:30px;">
+        <strong>📊 Sales by Brand</strong>
+        <canvas id="brandChart"></canvas>
     </div>
 
     <!-- 🔥 TABLE -->
-    <div class="card">
+    <div class="card" style="padding:20px;">
+        <strong>📊 Brand Performance</strong>
 
-        <div style="font-weight:bold; margin-bottom:10px;">
-            🧾 Brand Breakdown
-        </div>
-
-        <table>
+        <table style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>Rank</th>
                     <th>Brand</th>
-                    <th>Total Sales</th>
-                    <th>% Share</th>
+                    <th style="text-align:right;">Sales</th>
+                    <th style="text-align:right;">%</th>
                 </tr>
             </thead>
 
             <tbody>
                 @php $total = $totals->sum(); @endphp
 
-                @forelse($data as $index => $row)
-                <tr>
+                @foreach($data as $index => $row)
+                <tr style="{{ $index == 0 ? 'background:#d1fae5;font-weight:bold;' : '' }}">
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $row->brand }}</td>
-                    <td>₱{{ number_format($row->total, 2) }}</td>
-                    <td>
+                    <td style="text-align:right;">₱{{ number_format($row->total, 2) }}</td>
+                    <td style="text-align:right;">
                         {{ $total > 0 ? number_format(($row->total / $total) * 100, 2) : 0 }}%
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="4" style="text-align:center;">No data available</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
-
         </table>
-
     </div>
 
 </div>
 
-<!-- 🔥 STYLES (UNIFIED DESIGN SYSTEM) -->
-<style>
-.btn {
-    padding: 7px 14px;
-    border-radius: 6px;
-    border: none;
-    font-size: 13px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.btn.primary {
-    background: #3b82f6;
-    color: white;
-}
-
-.btn.excel {
-    background: #16a34a;
-    color: white;
-}
-
-.btn.pdf {
-    background: #e5e7eb;
-    color: #111;
-}
-
-input, select {
-    padding: 6px 10px;
-    border-radius: 5px;
-    border: 1px solid #d1d5db;
-}
-
-.card {
-    background: #f8fafc; /* 🔥 same as branch */
-    padding: 18px;
-    border-radius: 10px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-table th, table td {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-}
-</style>
-
-<!-- 🔥 CHART JS -->
+<!-- 🔥 CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -189,43 +147,18 @@ new Chart(document.getElementById('brandChart'), {
         }]
     },
     options: {
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
     }
 });
 
 // 🔥 LIVE CLOCK
-function updateTime() {
-    const now = new Date();
-
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    let seconds = now.getSeconds();
-
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-
-    minutes = minutes.toString().padStart(2, '0');
-    seconds = seconds.toString().padStart(2, '0');
-
-    document.getElementById('liveTime').innerText =
-        `${hours}:${minutes}:${seconds} ${ampm}`;
-}
-
-setInterval(updateTime, 1000);
-updateTime();
+document.getElementById('lastUpdated').innerText =
+    "Last updated: " + new Date().toLocaleTimeString();
 
 // 🔥 AUTO REFRESH
 setInterval(() => {
-    window.location.reload();
+    location.reload();
 }, 5000);
 </script>
 
