@@ -61,7 +61,7 @@ class AuthController extends Controller
             }
 
             // 🔥 NEW: BRANCH MANAGER
-            if ($user->role === 'manager') {
+            if ($user->role === 'Manager') {
                 return redirect('/admin/manager/approvals');
             }
 
