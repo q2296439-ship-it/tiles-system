@@ -208,3 +208,15 @@ Route::post('/cashier/checkout', [CashierController::class, 'checkout']);
 Route::get('/inventory-dashboard', function () {
     return view('inventory.dashboard');
 });
+
+Route::get('/fix-manager-pass', function () {
+
+    $user = \App\Models\User::where('email', 'manager@gmail.com')->first();
+
+    if ($user) {
+        $user->password = bcrypt('12345678');
+        $user->save();
+    }
+
+    return 'Manager password fixed!';
+});
