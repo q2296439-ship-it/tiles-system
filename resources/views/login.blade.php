@@ -9,6 +9,39 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
             height: 100vh;
             display: flex;
+            overflow: hidden;
+        }
+
+        /* FLOATING LIGHT */
+        .light {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 1;
+        }
+
+        .light.blue {
+            width: 300px;
+            height: 300px;
+            background: #3b82f6;
+            top: 10%;
+            left: 60%;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .light.purple {
+            width: 250px;
+            height: 250px;
+            background: #6366f1;
+            bottom: 10%;
+            right: 10%;
+            animation: float 14s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
         }
 
         /* LEFT SIDE */
@@ -20,6 +53,7 @@
             flex-direction: column;
             justify-content: center;
             padding: 60px;
+            z-index: 2;
         }
 
         .left h1 {
@@ -34,13 +68,22 @@
             color: rgba(255,255,255,0.85);
         }
 
-        /* RIGHT SIDE */
+        /* RIGHT SIDE (ANIMATED) */
         .right {
             width: 50%;
-            background: radial-gradient(circle at top right, #1e293b, #0b1220);
+            background: linear-gradient(270deg, #0b1220, #1e293b, #0b1220);
+            background-size: 400% 400%;
+            animation: gradientMove 12s ease infinite;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* CARD */
@@ -53,6 +96,8 @@
             box-shadow: 
                 0 20px 60px rgba(0,0,0,0.7),
                 0 0 40px rgba(59,130,246,0.15);
+            position: relative;
+            z-index: 2;
         }
 
         .logo {
@@ -152,7 +197,6 @@
             cursor: pointer;
             transition: 0.25s;
             font-weight: 600;
-            letter-spacing: 0.3px;
         }
 
         .btn:hover {
@@ -179,10 +223,15 @@
             .left { display: none; }
             .right { width: 100%; }
         }
+
     </style>
 </head>
 
 <body>
+
+<!-- LIGHT EFFECT -->
+<div class="light blue"></div>
+<div class="light purple"></div>
 
 <!-- LEFT -->
 <div class="left">
