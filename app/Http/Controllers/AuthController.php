@@ -26,9 +26,9 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        // 🔥 EMAIL LOGIN (username field = email)
+        // 🔥 EMAIL LOGIN (FIXED: trim + lowercase)
         $credentials = [
-            'email' => $request->username,
+            'email' => strtolower(trim($request->username)),
             'password' => $request->password
         ];
 
@@ -46,22 +46,22 @@ class AuthController extends Controller
             // =====================
 
             // ADMIN
-            if ($user->role === 'admin') {
+            if (strtolower(trim($user->role)) === 'admin') {
                 return redirect('/admin');
             }
 
             // CASHIER
-            if ($user->role === 'cashier') {
+            if (strtolower(trim($user->role)) === 'cashier') {
                 return redirect('/cashier');
             }
 
             // INVENTORY
-            if ($user->role === 'inventory') {
+            if (strtolower(trim($user->role)) === 'inventory') {
                 return redirect('/inventory-dashboard');
             }
 
-            // 🔥 NEW: BRANCH MANAGER
-            if ($user->role === 'Manager') {
+            // 🔥 BRANCH MANAGER (FIXED)
+            if (strtolower(trim($user->role)) === 'manager') {
                 return redirect('/admin/manager/approvals');
             }
 
