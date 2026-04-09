@@ -10,37 +10,48 @@
             font-size: 12px;
         }
 
-        h2 {
-            margin-bottom: 5px;
-        }
-
         .header {
             margin-bottom: 20px;
+        }
+
+        h2 {
+            margin: 0;
         }
 
         .info {
             font-size: 11px;
             color: #555;
+            margin-top: 5px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         table th, table td {
             border: 1px solid #ccc;
             padding: 6px;
-            text-align: left;
         }
 
         table th {
             background: #f3f4f6;
+            text-align: left;
         }
 
         .text-right {
             text-align: right;
+        }
+
+        .top-row {
+            background: #d1fae5;
+            font-weight: bold;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background: #f9fafb;
         }
     </style>
 </head>
@@ -48,10 +59,21 @@
 <body>
 
 <div class="header">
-    <h2>📊 Sales per Brand Report</h2>
+    <h2>📊 SALES PER BRAND REPORT</h2>
 
     <div class="info">
-        Date: {{ request('start_date') }} - {{ request('end_date') }} <br>
+        Date:
+        {{ request('start_date') ?? 'All' }}
+        -
+        {{ request('end_date') ?? 'All' }}
+        <br>
+
+        @if(request('branch_id'))
+            Branch: {{ $data->first()->branch ?? 'Selected Branch' }} <br>
+        @else
+            Branch: All Branches <br>
+        @endif
+
         Generated: {{ now()->format('Y-m-d h:i A') }}
     </div>
 </div>
@@ -61,8 +83,8 @@
         <tr>
             <th>#</th>
             <th>Brand</th>
-            <th>Total Sales</th>
-            <th>% Share</th>
+            <th class="text-right">Total Sales (₱)</th>
+            <th class="text-right">% Share</th>
         </tr>
     </thead>
 
@@ -70,7 +92,7 @@
         @php $total = $totals->sum(); @endphp
 
         @foreach($data as $index => $row)
-        <tr>
+        <tr class="{{ $index == 0 ? 'top-row' : '' }}">
             <td>{{ $index + 1 }}</td>
             <td>{{ $row->brand }}</td>
             <td class="text-right">₱{{ number_format($row->total, 2) }}</td>
@@ -79,6 +101,13 @@
             </td>
         </tr>
         @endforeach
+
+        <!-- 🔥 TOTAL ROW -->
+        <tr class="total-row">
+            <td colspan="2">TOTAL</td>
+            <td class="text-right">₱{{ number_format($total, 2) }}</td>
+            <td class="text-right">100%</td>
+        </tr>
     </tbody>
 </table>
 
