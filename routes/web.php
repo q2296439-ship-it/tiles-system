@@ -89,7 +89,7 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // =====================
 // 🔥 MANAGER DASHBOARD (NEW)
 // =====================
-Route::get('/manager', [InventoryController::class, 'approvals']);
+Route::get('/manager', [InventoryController::class, 'approvals'])->middleware('auth');
 
 
 // =====================
