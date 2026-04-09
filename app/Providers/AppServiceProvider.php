@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL; // ✅ ADD THIS
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // 🔥 FORCE HTTPS (FIX MIXED CONTENT)
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
