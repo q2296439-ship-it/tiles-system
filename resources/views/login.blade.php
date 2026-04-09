@@ -7,84 +7,72 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
+            height: 100vh;
+            display: flex;
+        }
+
+        /* LEFT SIDE */
+        .left {
+            width: 50%;
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .left h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .left p {
+            font-size: 14px;
+            opacity: 0.9;
+            max-width: 400px;
+        }
+
+        /* RIGHT SIDE */
+        .right {
+            width: 50%;
+            background: #0f172a;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .light {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-        }
-
-        .light.blue {
-            width: 300px;
-            height: 300px;
-            background: #2563eb;
-            top: 15%;
-            left: 20%;
-            animation: float 12s ease-in-out infinite;
-        }
-
-        .light.purple {
-            width: 250px;
-            height: 250px;
-            background: #7c3aed;
-            bottom: 15%;
-            right: 20%;
-            animation: float 15s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%,100% { transform: translateY(0px); }
-            50% { transform: translateY(-25px); }
         }
 
         .card {
-            position: relative;
-            width: 320px;
-            background: rgba(255,255,255,0.08);
+            width: 350px;
+            background: rgba(255,255,255,0.05);
             backdrop-filter: blur(20px);
-            padding: 30px 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-            z-index: 2;
-            animation: fadeIn 0.8s ease;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
         .logo {
             text-align: center;
-            margin-bottom: 15px;
             color: #e2e8f0;
-            font-size: 16px;
+            margin-bottom: 5px;
+            font-size: 18px;
             font-weight: 600;
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 20px;
             color: white;
-            font-size: 18px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin-bottom: 25px;
         }
 
         input {
-            width: 85%;
-            padding: 8px 10px;
-            margin-bottom: 12px;
-            border-radius: 5px;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
             border: none;
-            font-size: 12px;
+            background: rgba(255,255,255,0.1);
+            color: white;
         }
 
         input:focus {
@@ -93,47 +81,24 @@
         }
 
         .remember {
-            width: 85%;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 12px;
-            color: #cbd5e1;
             font-size: 12px;
-        }
-
-        .remember input {
-            width: auto;
-            margin-right: 5px;
+            color: #cbd5e1;
+            margin-bottom: 15px;
         }
 
         .btn {
-            width: 85%;
-            padding: 9px;
-            border-radius: 5px;
-            font-size: 13px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
             background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
             border: none;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
         }
 
         .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(37,99,235,0.4);
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 10px;
-            color: #cbd5e1;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+            opacity: 0.9;
         }
 
         .error {
@@ -142,45 +107,64 @@
             font-size: 12px;
             margin-bottom: 10px;
         }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 15px;
+        }
+
+        /* Responsive */
+        @media(max-width: 768px){
+            .left { display: none; }
+            .right { width: 100%; }
+        }
+
     </style>
 </head>
 
 <body>
 
-<div class="light blue"></div>
-<div class="light purple"></div>
+<!-- LEFT SIDE -->
+<div class="left">
+    <h1>Nicole Tile Center</h1>
+    <p>
+        Manage your inventory, sales, and reports efficiently with our smart ERP system.
+    </p>
+</div>
 
-<div class="card">
+<!-- RIGHT SIDE -->
+<div class="right">
 
-    <div class="logo">Nicole Tile Center</div>
+    <div class="card">
 
-    <h2>Login</h2>
+        <div class="logo">Tile Inventory System</div>
+        <h2>Login</h2>
 
-    @if(session('error'))
-        <div class="error">{{ session('error') }}</div>
-    @endif
+        @if(session('error'))
+            <div class="error">{{ session('error') }}</div>
+        @endif
 
-    <form method="POST" action="/login">
-        @csrf
-
-        <div class="form-group">
+        <form method="POST" action="/login">
+            @csrf
 
             <input type="text" name="username" placeholder="Username" required>
 
             <input type="password" name="password" placeholder="Password" required>
 
             <div class="remember">
-                <input type="checkbox" id="remember">
-                <label for="remember">Remember me</label>
+                <input type="checkbox"> Remember me
             </div>
 
             <button class="btn">Login</button>
 
-        </div>
-    </form>
+        </form>
 
-    <div class="footer">
-        © 2026 Tiles Inventory System
+        <div class="footer">
+            © 2026 Tiles Inventory System
+        </div>
+
     </div>
 
 </div>
