@@ -22,7 +22,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // STORE STOCK 🔥 (UPDATED 🔥)
+    // STORE STOCK 🔥 (FIXED 🔥)
     // =====================
     public function store(Request $request)
     {
@@ -42,6 +42,7 @@ class InventoryController extends Controller
                 'size' => $request->new_size,
                 'price' => $request->new_price,
                 'stock' => $request->quantity,
+                'color' => 'N/A', // ✅ FIX HERE
             ]);
 
             // 👉 LOG
