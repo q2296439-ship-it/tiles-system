@@ -10,7 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 // 🔥 EXCEL
 use App\Exports\SalesExport;
 use App\Exports\BranchSalesExport;
-use App\Exports\BrandSalesExport; // ✅ NEW
+use App\Exports\BrandSalesExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class SalesReportController extends Controller
@@ -89,9 +89,6 @@ class SalesReportController extends Controller
         ));
     }
 
-    // =====================
-    // 🔥 DAILY PDF EXPORT
-    // =====================
     public function exportDailyPdf(Request $request)
     {
         $range = $request->range ?? 'daily';
@@ -131,9 +128,6 @@ class SalesReportController extends Controller
         return $pdf->stream('daily_report.pdf');
     }
 
-    // =====================
-    // 🔥 EXCEL EXPORT
-    // =====================
     public function exportExcel(Request $request)
     {
         $range = $request->range ?? 'daily';
@@ -160,9 +154,6 @@ class SalesReportController extends Controller
         );
     }
 
-    // =====================
-    // 🔥 BRANCH EXCEL
-    // =====================
     public function exportBranchExcel(Request $request)
     {
         $start = $request->start_date 
@@ -181,30 +172,24 @@ class SalesReportController extends Controller
         );
     }
 
-    // =====================
-    // 🔥 BRAND EXCEL (NEW)
-    // =====================
     public function brandExcel(Request $request)
-{
-    $start = $request->start_date 
-        ? $request->start_date . ' 00:00:00' 
-        : null;
+    {
+        $start = $request->start_date 
+            ? $request->start_date . ' 00:00:00' 
+            : null;
 
-    $end = $request->end_date 
-        ? $request->end_date . ' 23:59:59' 
-        : null;
+        $end = $request->end_date 
+            ? $request->end_date . ' 23:59:59' 
+            : null;
 
-    $branchId = $request->branch_id;
+        $branchId = $request->branch_id;
 
-    return Excel::download(
-        new BrandSalesExport($start, $end, $branchId),
-        'brand_sales.xlsx'
-    );
-}
+        return Excel::download(
+            new BrandSalesExport($start, $end, $branchId),
+            'brand_sales.xlsx'
+        );
+    }
 
-    // =====================
-    // 🔥 PER BRANCH
-    // =====================
     public function perBranch(Request $request)
     {
         $range = $request->range ?? 'today';
@@ -270,9 +255,6 @@ class SalesReportController extends Controller
         ));
     }
 
-    // =====================
-    // 🔥 PER BRAND
-    // =====================
     public function perBrand(Request $request)
     {
         $start = $request->start_date 
@@ -306,32 +288,29 @@ class SalesReportController extends Controller
         return view('admin.reports.brand', compact('data','labels','totals','branches'));
     }
 
-    // =====================
-    // 🔥 BRAND PDF
-    // =====================
     public function brandPdf(Request $request)
     {
         $start = $request->start_date 
             ? $request->start_date . ' 00:00:00' 
-            : now()->startOfDay();
+            : null;
 
         $end = $request->end_date 
             ? $request->end_date . ' 23:59:59' 
-            : now()->endOfDay();
+            : null;
 
         $branchId = $request->branch_id;
 
         $query = DB::table('sales')
-    ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
-    ->join('products', 'sale_items.product_id', '=', 'products.id')
-    ->select(
-        'products.name as brand',
-        DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
-    );
+            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->select(
+                'products.name as brand',
+                DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
+            );
 
-if ($start && $end) {
-    $query->whereBetween('sales.created_at', [$start, $end]);
-}
+        if ($start && $end) {
+            $query->whereBetween('sales.created_at', [$start, $end]);
+        }
 
         if ($branchId) {
             $query->where('sales.branch_id', $branchId);
@@ -345,9 +324,6 @@ if ($start && $end) {
         return $pdf->stream('sales_per_brand.pdf');
     }
 
-    // =====================
-    // OTHER METHODS
-    // =====================
     public function branchData(Request $request)
     {
         $range = $request->range ?? 'today';
@@ -410,15 +386,13 @@ if ($start && $end) {
 
     public function exportPdf(Request $request)
     {
-        if ($request->start_date && $request->end_date) {
-           $start = $request->start_date 
-    ? $request->start_date . ' 00:00:00' 
-    : null;
+        $start = $request->start_date 
+            ? $request->start_date . ' 00:00:00' 
+            : null;
 
-$end = $request->end_date 
-    ? $request->end_date . ' 23:59:59' 
-    : null;
-        }
+        $end = $request->end_date 
+            ? $request->end_date . ' 23:59:59' 
+            : null;
 
         $branchId = $request->branch_id;
 
