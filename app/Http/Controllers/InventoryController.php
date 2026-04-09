@@ -104,7 +104,7 @@ class InventoryController extends Controller
         StockMovement::create([
             'product_id' => $request->product_id,
             'branch_id' => $request->to_branch,
-            'type' => 'TRANSFER_IN',
+            'type' => 'IN', // ✅ FIX LANG
             'quantity' => $request->quantity,
             'reason' => 'Transfer Request',
             'status' => 'pending', // 🔥 approval system
