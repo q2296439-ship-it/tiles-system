@@ -121,7 +121,7 @@ class InventoryController extends Controller
             ->latest()
             ->get();
 
-        return view('manager.approvals', compact('requests'));
+        return view('manager.dashboard', compact('requests'));
     }
 
     // =====================
