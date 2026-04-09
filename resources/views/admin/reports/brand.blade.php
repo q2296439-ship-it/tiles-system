@@ -9,7 +9,7 @@
         <h2>📊 Sales per Brand <span style="color:green;">● Live</span></h2>
 
         <small style="color:#64748b;">
-            Last updated: {{ now()->format('h:i:s A') }}
+            Last updated: <span id="liveTime"></span>
         </small>
     </div>
 
@@ -21,7 +21,6 @@
             <span>To</span>
             <input type="date" name="end_date" value="{{ request('end_date') }}">
 
-            <!-- 🔥 NEW: BRANCH FILTER -->
             <select name="branch_id">
                 <option value="">All Branch</option>
                 @foreach($branches as $branch)
@@ -32,9 +31,8 @@
                 @endforeach
             </select>
 
-            <button class="btn">Filter</button>
+            <button class="btn filter">Filter</button>
 
-            <!-- 🔥 EXPORT BUTTONS -->
             <a href="{{ route('report.brand.excel', request()->all()) }}" class="btn excel">
                 📊 Export Excel
             </a>
@@ -127,29 +125,40 @@
 <!-- 🔥 STYLES -->
 <style>
 .btn {
-    padding: 6px 12px;
-    border-radius: 4px;
+    padding: 7px 14px;
+    border-radius: 6px;
     border: none;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn.filter {
     background: #3b82f6;
     color: white;
-    cursor: pointer;
-    font-size: 13px;
 }
 
 .btn.excel {
     background: #16a34a;
+    color: white;
 }
 
 .btn.pdf {
     background: #e5e7eb;
-    color: black;
+    color: #111;
+}
+
+input, select {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
 
 .card {
     background: white;
     padding: 15px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
 table {
@@ -188,6 +197,34 @@ new Chart(document.getElementById('brandChart'), {
         }
     }
 });
+
+// 🔥 LIVE CLOCK
+function updateTime() {
+    const now = new Date();
+
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let seconds = now.getSeconds();
+
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    minutes = minutes.toString().padStart(2, '0');
+    seconds = seconds.toString().padStart(2, '0');
+
+    document.getElementById('liveTime').innerText =
+        `${hours}:${minutes}:${seconds} ${ampm}`;
+}
+
+setInterval(updateTime, 1000);
+updateTime();
+
+// 🔥 AUTO REFRESH EVERY 5 SECONDS
+setInterval(() => {
+    window.location.reload();
+}, 5000);
 </script>
 
 @endsection
