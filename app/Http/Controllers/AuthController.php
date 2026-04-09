@@ -69,7 +69,7 @@ class AuthController extends Controller
             }
 
             // 🔥 MANAGER
-            if (strtolower(trim($user->role)) === 'manager') {
+            if (strtolower(trim($user->role)) === 'branch_manager') {
                 return redirect('/manager');
             }
 
