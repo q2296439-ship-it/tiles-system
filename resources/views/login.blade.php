@@ -14,7 +14,7 @@
         /* LEFT SIDE */
         .left {
             width: 50%;
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            background: linear-gradient(135deg, #1e40af, #3b82f6, #2563eb);
             color: white;
             display: flex;
             flex-direction: column;
@@ -29,32 +29,35 @@
 
         .left p {
             font-size: 14px;
-            opacity: 0.9;
             max-width: 420px;
             line-height: 1.6;
+            color: rgba(255,255,255,0.85);
         }
 
         /* RIGHT SIDE */
         .right {
             width: 50%;
-            background: #0f172a;
+            background: radial-gradient(circle at top right, #1e293b, #0b1220);
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
+        /* CARD */
         .card {
             width: 360px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(25px);
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(30px);
             padding: 35px;
             border-radius: 18px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.6);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.7),
+                0 0 40px rgba(59,130,246,0.15);
         }
 
         .logo {
             text-align: center;
-            color: #e2e8f0;
+            color: #cbd5f5;
             margin-bottom: 5px;
             font-size: 18px;
             font-weight: 600;
@@ -62,11 +65,11 @@
 
         h2 {
             text-align: center;
-            color: white;
+            color: #f1f5f9;
             margin-bottom: 25px;
         }
 
-        /* INPUT GROUP */
+        /* INPUT */
         .input-group {
             width: 100%;
             position: relative;
@@ -78,7 +81,7 @@
             margin-bottom: 15px;
             border-radius: 8px;
             border: none;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.06);
             color: white;
             font-size: 13px;
         }
@@ -89,8 +92,8 @@
 
         .input-group input:focus {
             outline: none;
-            box-shadow: 0 0 0 2px #2563eb;
-            background: rgba(255,255,255,0.12);
+            box-shadow: 0 0 0 2px #3b82f6;
+            background: rgba(255,255,255,0.1);
         }
 
         /* SHOW PASSWORD */
@@ -122,7 +125,7 @@
         }
 
         .remember input {
-            accent-color: #2563eb;
+            accent-color: #3b82f6;
             transform: scale(1.05);
         }
 
@@ -143,7 +146,7 @@
             padding: 11px;
             border-radius: 10px;
             font-size: 14px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
             border: none;
             cursor: pointer;
@@ -154,7 +157,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(37,99,235,0.5);
+            box-shadow: 0 10px 25px rgba(59,130,246,0.4);
         }
 
         .error {
@@ -167,7 +170,7 @@
         .footer {
             text-align: center;
             font-size: 11px;
-            color: #94a3b8;
+            color: #64748b;
             margin-top: 15px;
         }
 
@@ -176,7 +179,6 @@
             .left { display: none; }
             .right { width: 100%; }
         }
-
     </style>
 </head>
 
