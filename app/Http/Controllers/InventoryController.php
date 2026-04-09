@@ -11,6 +11,42 @@ use Illuminate\Support\Facades\Auth;
 class InventoryController extends Controller
 {
     // =====================
+    // ADD STOCK PAGE 🔥
+    // =====================
+    public function create()
+    {
+        $products = Product::all();
+        return view('inventory.add_stock', compact('products'));
+    }
+
+    // =====================
+    // STORE STOCK 🔥
+    // =====================
+    public function store(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        $product = Product::findOrFail($request->product_id);
+
+        // dagdag stock
+        $product->stock += $request->quantity;
+        $product->save();
+
+        // log
+        StockMovement::create([
+            'product_id' => $product->id,
+            'type' => 'IN',
+            'quantity' => $request->quantity,
+            'reason' => 'Manual Add',
+        ]);
+
+        return back()->with('success', 'Stock added successfully!');
+    }
+
+    // =====================
     // GET PRODUCTS
     // =====================
     private function getProducts()
@@ -29,7 +65,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // GET MOVEMENTS (WITH FILTER 🔥)
+    // GET MOVEMENTS
     // =====================
     private function getMovements(Request $request)
     {
@@ -39,17 +75,14 @@ class InventoryController extends Controller
 
         $query = StockMovement::with(['product', 'branch']);
 
-        // 🔥 role filter
         if ($user->role !== 'admin') {
             $query->where('branch_id', $user->branch_id);
         }
 
-        // 🔥 TYPE FILTER (IN / OUT / ADJUST)
         if ($request->type) {
             $query->where('type', $request->type);
         }
 
-        // 🔥 BRANCH FILTER
         if ($request->branch_id) {
             $query->where('branch_id', $request->branch_id);
         }
@@ -58,7 +91,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // SHOW INVENTORY
+    // INVENTORY PAGE
     // =====================
     public function index(Request $request)
     {
@@ -74,7 +107,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // EXPORT INVENTORY CSV
+    // EXPORT INVENTORY
     // =====================
     public function export()
     {
@@ -122,7 +155,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // EXPORT MOVEMENTS 🔥
+    // EXPORT MOVEMENTS
     // =====================
     public function exportMovements()
     {
@@ -158,7 +191,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // STOCK TRANSFER 🔥
+    // TRANSFER
     // =====================
     public function transfer(Request $request)
     {
@@ -171,13 +204,9 @@ class InventoryController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        // bawas sa source
         $product->decrement('stock', $request->qty);
-
-        // dagdag sa destination (basic version)
         $product->increment('stock', $request->qty);
 
-        // 🔥 LOG OUT
         StockMovement::create([
             'product_id' => $product->id,
             'branch_id' => $request->from_branch,
@@ -186,7 +215,6 @@ class InventoryController extends Controller
             'reason' => 'Transfer OUT',
         ]);
 
-        // 🔥 LOG IN
         StockMovement::create([
             'product_id' => $product->id,
             'branch_id' => $request->to_branch,
