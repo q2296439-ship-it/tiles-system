@@ -48,18 +48,17 @@
 
             </form>
 
-            <!-- 🔥 EXCEL -->
-            <a href="{{ route('report.brand.excel', request()->all()) }}">
-                <button style="padding:6px 12px; background:green; color:white;">
-                    📊 Export Excel
-                </button>
+            <!-- 🔥 EXCEL (FIXED) -->
+            <a href="{{ route('report.brand.excel', request()->all()) }}"
+               style="padding:6px 12px; background:green; color:white; text-decoration:none; display:inline-block;">
+                📊 Export Excel
             </a>
 
-            <!-- 🔥 PDF -->
-            <a href="{{ route('report.brand.pdf', request()->all()) }}" target="_blank">
-                <button style="padding:6px 12px;">
-                    📄 Export PDF
-                </button>
+            <!-- 🔥 PDF (FIXED) -->
+            <a href="{{ route('report.brand.pdf', request()->all()) }}"
+               target="_blank"
+               style="padding:6px 12px; background:#e5e7eb; color:black; text-decoration:none; display:inline-block;">
+                📄 Export PDF
             </a>
 
         </div>
