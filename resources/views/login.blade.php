@@ -213,8 +213,9 @@
         <div class="logo">Tile Inventory System</div>
         <h2>Welcome Back</h2>
 
-        @if(session('error'))
-            <div class="error">{{ session('error') }}</div>
+        {{-- 🔥 FIXED ERROR DISPLAY --}}
+        @if($errors->any())
+            <div class="error">{{ $errors->first() }}</div>
         @endif
 
         <form method="POST" action="/login">

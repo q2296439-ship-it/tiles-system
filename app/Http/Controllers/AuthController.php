@@ -35,11 +35,11 @@ class AuthController extends Controller
         // 🔥 REMEMBER ME SUPPORT
         $remember = $request->has('remember');
 
-        // 🔥 DEBUG USER CHECK
+        // 🔥 CHECK USER EXISTS
         $userCheck = \App\Models\User::where('email', $credentials['email'])->first();
 
         if (!$userCheck) {
-            return back()->with('error', 'User not found (email mismatch)');
+            return back()->withErrors(['login' => 'User not found (email mismatch)']);
         }
 
         // 🔥 TRY LOGIN
@@ -78,7 +78,7 @@ class AuthController extends Controller
         }
 
         // 🔥 PASSWORD FAIL
-        return back()->with('error', 'Wrong password');
+        return back()->withErrors(['login' => 'Wrong password']);
     }
 
     // =====================
