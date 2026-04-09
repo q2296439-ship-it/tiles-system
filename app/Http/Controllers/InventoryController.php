@@ -22,11 +22,11 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // STORE STOCK 🔥 (FIXED 🔥)
+    // STORE STOCK 🔥
     // =====================
     public function store(Request $request)
     {
-        // 🔥 CHECK MODE (NEW PRODUCT)
+        // 🔥 NEW PRODUCT
         if ($request->new_name) {
 
             $request->validate([
@@ -36,16 +36,14 @@ class InventoryController extends Controller
                 'branch_id' => 'required|exists:branches,id'
             ]);
 
-            // 👉 CREATE NEW PRODUCT
             $product = Product::create([
                 'name' => $request->new_name,
                 'size' => $request->new_size,
                 'price' => $request->new_price,
                 'stock' => $request->quantity,
-                'color' => 'N/A', // ✅ FIX HERE
+                'color' => 'N/A',
             ]);
 
-            // 👉 LOG
             StockMovement::create([
                 'product_id' => $product->id,
                 'branch_id' => $request->branch_id,
@@ -78,6 +76,41 @@ class InventoryController extends Controller
         }
 
         return back()->with('success', 'Saved successfully!');
+    }
+
+    // =====================
+    // 🔥 NEW: TRANSFER IN FORM
+    // =====================
+    public function transferInForm()
+    {
+        $products = Product::all();
+        $branches = Branch::all();
+
+        return view('inventory.transfer_in', compact('products', 'branches'));
+    }
+
+    // =====================
+    // 🔥 NEW: TRANSFER REQUEST (PENDING)
+    // =====================
+    public function transferInStore(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'from_branch' => 'required|exists:branches,id',
+            'to_branch' => 'required|different:from_branch|exists:branches,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        StockMovement::create([
+            'product_id' => $request->product_id,
+            'branch_id' => $request->to_branch,
+            'type' => 'TRANSFER_IN',
+            'quantity' => $request->quantity,
+            'reason' => 'Transfer Request',
+            'status' => 'pending', // 🔥 approval system
+        ]);
+
+        return back()->with('success', 'Transfer request submitted for approval');
     }
 
     // =====================
@@ -225,7 +258,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // TRANSFER
+    // TRANSFER (OLD)
     // =====================
     public function transfer(Request $request)
     {
