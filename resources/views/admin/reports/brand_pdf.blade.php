@@ -10,24 +10,35 @@
             font-size: 12px;
         }
 
-        .header {
+        .top-line {
+            width: 100%;
+            height: 5px;
+            background: #111;
             margin-bottom: 20px;
         }
 
-        h2 {
+        .header h2 {
             margin: 0;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        .sub-title {
+            font-size: 12px;
+            margin-top: 2px;
+            color: #333;
         }
 
         .info {
+            margin-top: 10px;
             font-size: 11px;
             color: #555;
-            margin-top: 5px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         table th, table td {
@@ -37,44 +48,42 @@
 
         table th {
             background: #f3f4f6;
-            text-align: left;
         }
 
         .text-right {
             text-align: right;
         }
 
-        .top-row {
-            background: #d1fae5;
-            font-weight: bold;
-        }
-
         .total-row {
             font-weight: bold;
-            background: #f9fafb;
+            background: #f1f5f9;
         }
     </style>
 </head>
 
 <body>
 
+<div class="top-line"></div>
+
 <div class="header">
-    <h2>📊 SALES PER BRAND REPORT</h2>
+    <h2>NICOLE TILES CENTER</h2>
+    <div class="sub-title">Brand Sales Performance Report</div>
 
     <div class="info">
+        Generated: {{ now()->format('F d, Y h:i A') }} <br>
+
+        Branch:
+        @if(request('branch_id'))
+            {{ $data->first()->branch ?? 'Selected Branch' }}
+        @else
+            All Branches
+        @endif
+        <br>
+
         Date:
         {{ request('start_date') ?? 'All' }}
         -
         {{ request('end_date') ?? 'All' }}
-        <br>
-
-        @if(request('branch_id'))
-            Branch: {{ $data->first()->branch ?? 'Selected Branch' }} <br>
-        @else
-            Branch: All Branches <br>
-        @endif
-
-        Generated: {{ now()->format('Y-m-d h:i A') }}
     </div>
 </div>
 
@@ -92,7 +101,7 @@
         @php $total = $totals->sum(); @endphp
 
         @foreach($data as $index => $row)
-        <tr class="{{ $index == 0 ? 'top-row' : '' }}">
+        <tr>
             <td>{{ $index + 1 }}</td>
             <td>{{ $row->brand }}</td>
             <td class="text-right">₱{{ number_format($row->total, 2) }}</td>
@@ -102,7 +111,7 @@
         </tr>
         @endforeach
 
-        <!-- 🔥 TOTAL ROW -->
+        <!-- TOTAL -->
         <tr class="total-row">
             <td colspan="2">TOTAL</td>
             <td class="text-right">₱{{ number_format($total, 2) }}</td>
