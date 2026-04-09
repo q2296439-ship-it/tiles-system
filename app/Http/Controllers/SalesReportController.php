@@ -49,7 +49,6 @@ class SalesReportController extends Controller
         $transactionCount = $sales->count();
         $average = $transactionCount > 0 ? $total / $transactionCount : 0;
 
-        // ✅ FIXED FOR POSTGRESQL
         if ($range == 'daily') {
             $trend = Sale::select(
                     DB::raw('EXTRACT(HOUR FROM created_at) as label'),
@@ -250,7 +249,7 @@ class SalesReportController extends Controller
     }
 
     // =====================
-    // 🔥 PER BRAND (NEW)
+    // 🔥 PER BRAND (UPDATED)
     // =====================
     public function perBrand(Request $request)
     {
@@ -270,6 +269,9 @@ class SalesReportController extends Controller
                 DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
             )
             ->whereBetween('sales.created_at', [$start, $end])
+            ->when($request->branch_id, function($q) use ($request){
+                $q->where('sales.branch_id', $request->branch_id);
+            })
             ->groupBy('products.name')
             ->orderByDesc('total')
             ->get();
@@ -277,9 +279,54 @@ class SalesReportController extends Controller
         $labels = $data->pluck('brand');
         $totals = $data->pluck('total');
 
-        return view('admin.reports.brand', compact('data','labels','totals'));
+        $branches = DB::table('branches')->get();
+
+        return view('admin.reports.brand', compact('data','labels','totals','branches'));
     }
 
+    // =====================
+    // 🔥 BRAND PDF EXPORT (NEW)
+    // =====================
+    public function brandPdf(Request $request)
+    {
+        $start = $request->start_date 
+            ? $request->start_date . ' 00:00:00' 
+            : now()->startOfDay();
+
+        $end = $request->end_date 
+            ? $request->end_date . ' 23:59:59' 
+            : now()->endOfDay();
+
+        $branchId = $request->branch_id;
+
+        $query = DB::table('sales')
+            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->select(
+                'products.name as brand',
+                DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
+            )
+            ->whereBetween('sales.created_at', [$start, $end]);
+
+        if ($branchId) {
+            $query->where('sales.branch_id', $branchId);
+        }
+
+        $data = $query
+            ->groupBy('products.name')
+            ->orderByDesc('total')
+            ->get();
+
+        $totals = $data->pluck('total');
+
+        $pdf = Pdf::loadView('admin.reports.brand_pdf', compact('data','totals','request'));
+
+        return $pdf->download('sales_per_brand.pdf');
+    }
+
+    // =====================
+    // OTHER METHODS
+    // =====================
     public function branchData(Request $request)
     {
         $range = $request->range ?? 'today';

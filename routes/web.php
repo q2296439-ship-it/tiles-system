@@ -154,10 +154,15 @@ Route::prefix('admin')->group(function () {
     Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf']);
     Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
 
-    // 🔥 BRAND (NEW 🔥)
+    // 🔥 BRAND (UPDATED 🔥)
     Route::get('/sales/brand', [SalesReportController::class, 'perBrand']);
+
+    // ✅ NEW: BRAND PDF EXPORT
+    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])
+        ->name('report.brand.pdf');
+
 });
-    
+
 
 // =====================
 // CASHIER

@@ -13,12 +13,36 @@
         </small>
     </div>
 
-    <!-- 🔥 FILTER -->
+    <!-- 🔥 FILTER + EXPORT -->
     <div style="margin-bottom:20px;">
-        <form method="GET" style="display:flex; gap:10px;">
+        <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+
             <input type="date" name="start_date" value="{{ request('start_date') }}">
+            <span>To</span>
             <input type="date" name="end_date" value="{{ request('end_date') }}">
+
+            <!-- 🔥 NEW: BRANCH FILTER -->
+            <select name="branch_id">
+                <option value="">All Branch</option>
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}" 
+                        {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
+                        {{ $branch->name }}
+                    </option>
+                @endforeach
+            </select>
+
             <button class="btn">Filter</button>
+
+            <!-- 🔥 EXPORT BUTTONS -->
+            <a href="{{ route('report.brand.excel', request()->all()) }}" class="btn excel">
+                📊 Export Excel
+            </a>
+
+            <a href="{{ route('report.brand.pdf', request()->all()) }}" class="btn pdf">
+                📄 Export PDF
+            </a>
+
         </form>
     </div>
 
@@ -99,6 +123,45 @@
     </div>
 
 </div>
+
+<!-- 🔥 STYLES -->
+<style>
+.btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn.excel {
+    background: #16a34a;
+}
+
+.btn.pdf {
+    background: #e5e7eb;
+    color: black;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+</style>
 
 <!-- 🔥 CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
