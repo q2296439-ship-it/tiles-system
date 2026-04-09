@@ -164,8 +164,8 @@
         ➕ Add New Stock
     </a>
 
-    <!-- 🔥 FIXED TRANSFER IN -->
-    <a href="{{ route('inventory.transfer.in') }}"
+    <!-- ✅ FIXED (DIRECT URL) -->
+    <a href="/admin/inventory/transfer-in"
        class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
         ⬅ Transfer In
     </a>
