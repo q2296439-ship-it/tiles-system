@@ -22,8 +22,8 @@ Route::get('/clear', function () {
     Artisan::call('view:clear');
     Artisan::call('config:clear');
     Artisan::call('cache:clear');
-    Artisan::call('route:clear'); // 🔥 ADD
-    Artisan::call('optimize:clear'); // 🔥 ADD
+    Artisan::call('route:clear');
+    Artisan::call('optimize:clear');
     return 'Cache cleared!';
 });
 
@@ -87,6 +87,12 @@ Route::post('/logout', [AuthController::class, 'logout']);
 
 
 // =====================
+// 🔥 MANAGER DASHBOARD (NEW)
+// =====================
+Route::get('/manager', [InventoryController::class, 'approvals']);
+
+
+// =====================
 // ADMIN GROUP
 // =====================
 Route::prefix('admin')->group(function () {
@@ -101,7 +107,7 @@ Route::prefix('admin')->group(function () {
     });
 
     // =====================
-    // 🔥 BRANCHES
+    // BRANCHES
     // =====================
     Route::get('/branches', [BranchController::class, 'index']);
     Route::post('/branches/store', [BranchController::class, 'store']);
@@ -125,28 +131,24 @@ Route::prefix('admin')->group(function () {
     });
 
     // =====================
-    // 📦 INVENTORY
+    // INVENTORY
     // =====================
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
-    // 👉 ADD NEW STOCK
     Route::get('/inventory/add-stock', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
 
-    // 🔥 TRANSFER IN (APPROVAL FLOW)
     Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInForm'])->name('inventory.transfer.in');
     Route::post('/inventory/transfer-in', [InventoryController::class, 'transferInStore'])->name('inventory.transfer.store');
 
     // =====================
-    // 🔥 NEW: MANAGER APPROVAL
+    // MANAGER APPROVAL ACTIONS
     // =====================
-    Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->name('manager.approvals');
     Route::post('/manager/approve/{id}', [InventoryController::class, 'approve']);
     Route::post('/manager/reject/{id}', [InventoryController::class, 'reject']);
-
 
     // =====================
     // USERS
@@ -161,37 +163,18 @@ Route::prefix('admin')->group(function () {
         return view('admin.reports');
     });
 
-    // 🔥 DAILY
-    Route::get('/sales/daily', [SalesReportController::class, 'daily'])
-        ->name('report.daily');
+    Route::get('/sales/daily', [SalesReportController::class, 'daily'])->name('report.daily');
+    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf'])->name('report.daily.pdf');
+    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel'])->name('report.daily.excel');
 
-    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf'])
-        ->name('report.daily.pdf');
-
-    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel'])
-        ->name('report.daily.excel');
-
-    // 🔥 BRANCH
-    Route::get('/sales/branch', [SalesReportController::class, 'perBranch'])
-        ->name('report.branch');
-
+    Route::get('/sales/branch', [SalesReportController::class, 'perBranch'])->name('report.branch');
     Route::get('/sales/branch/data', [SalesReportController::class, 'branchData']);
+    Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf'])->name('report.branch.pdf');
+    Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel'])->name('report.branch.excel');
 
-    Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf'])
-        ->name('report.branch.pdf');
-
-    Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel'])
-        ->name('report.branch.excel');
-
-    // 🔥 BRAND
-    Route::get('/sales/brand', [SalesReportController::class, 'perBrand'])
-        ->name('report.brand');
-
-    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])
-        ->name('report.brand.pdf');
-
-    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])
-        ->name('report.brand.excel');
+    Route::get('/sales/brand', [SalesReportController::class, 'perBrand'])->name('report.brand');
+    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])->name('report.brand.pdf');
+    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])->name('report.brand.excel');
 });
 
 
@@ -209,6 +192,10 @@ Route::get('/inventory-dashboard', function () {
     return view('inventory.dashboard');
 });
 
+
+// =====================
+// 🔥 FIX MANAGER PASSWORD
+// =====================
 Route::get('/fix-manager-pass', function () {
 
     $user = \App\Models\User::where('email', 'manager@gmail.com')->first();

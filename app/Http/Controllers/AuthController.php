@@ -60,9 +60,9 @@ class AuthController extends Controller
                 return redirect('/inventory-dashboard');
             }
 
-            // 🔥 BRANCH MANAGER (FIXED)
+            // 🔥 MANAGER (UPDATED DASHBOARD)
             if (strtolower(trim($user->role)) === 'manager') {
-                return redirect('/admin/manager/approvals');
+                return redirect('/manager');
             }
 
             // DEFAULT FALLBACK
