@@ -12,7 +12,6 @@
             overflow: hidden;
         }
 
-        /* FLOATING LIGHT */
         .light {
             position: absolute;
             border-radius: 50%;
@@ -44,7 +43,6 @@
             50% { transform: translateY(-30px); }
         }
 
-        /* LEFT SIDE */
         .left {
             width: 50%;
             background: linear-gradient(135deg, #1e40af, #3b82f6, #2563eb);
@@ -68,7 +66,6 @@
             color: rgba(255,255,255,0.85);
         }
 
-        /* RIGHT SIDE (ANIMATED) */
         .right {
             width: 50%;
             background: linear-gradient(270deg, #0b1220, #1e293b, #0b1220);
@@ -86,7 +83,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* CARD */
         .card {
             width: 360px;
             background: rgba(255,255,255,0.04);
@@ -114,7 +110,6 @@
             margin-bottom: 25px;
         }
 
-        /* INPUT */
         .input-group {
             width: 100%;
             position: relative;
@@ -141,7 +136,6 @@
             background: rgba(255,255,255,0.1);
         }
 
-        /* SHOW PASSWORD */
         .toggle-pass {
             position: absolute;
             right: 12px;
@@ -151,7 +145,6 @@
             color: #94a3b8;
         }
 
-        /* OPTIONS */
         .form-options {
             width: 100%;
             display: flex;
@@ -169,23 +162,12 @@
             cursor: pointer;
         }
 
-        .remember input {
-            accent-color: #3b82f6;
-            transform: scale(1.05);
-        }
-
         .forgot {
             font-size: 12px;
             color: #93c5fd;
             text-decoration: none;
-            transition: 0.2s;
         }
 
-        .forgot:hover {
-            color: white;
-        }
-
-        /* BUTTON */
         .btn {
             width: 100%;
             padding: 11px;
@@ -195,13 +177,7 @@
             color: white;
             border: none;
             cursor: pointer;
-            transition: 0.25s;
             font-weight: 600;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(59,130,246,0.4);
         }
 
         .error {
@@ -217,31 +193,19 @@
             color: #64748b;
             margin-top: 15px;
         }
-
-        /* RESPONSIVE */
-        @media(max-width: 768px){
-            .left { display: none; }
-            .right { width: 100%; }
-        }
-
     </style>
 </head>
 
 <body>
 
-<!-- LIGHT EFFECT -->
 <div class="light blue"></div>
 <div class="light purple"></div>
 
-<!-- LEFT -->
 <div class="left">
     <h1>Nicole Tile Center</h1>
-    <p>
-        Manage your inventory, sales, and reports efficiently with our smart ERP system.
-    </p>
+    <p>Manage your inventory, sales, and reports efficiently with our smart ERP system.</p>
 </div>
 
-<!-- RIGHT -->
 <div class="right">
 
     <div class="card">
@@ -257,7 +221,7 @@
             @csrf
 
             <div class="input-group">
-                <input type="text" name="username" placeholder="Username" required>
+                <input type="text" name="username" placeholder="Email" required>
             </div>
 
             <div class="input-group">
@@ -267,14 +231,14 @@
 
             <div class="form-options">
                 <label class="remember">
-                    <input type="checkbox">
+                    <input type="checkbox" name="remember">
                     <span>Remember me</span>
                 </label>
 
                 <a href="#" class="forgot">Forgot?</a>
             </div>
 
-            <button class="btn">Login</button>
+            <button type="submit" class="btn">Login</button>
 
         </form>
 
