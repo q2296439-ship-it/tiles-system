@@ -57,18 +57,21 @@
 
         @foreach($requests as $req)
         <tr>
-            <td>{{ $req->product->name }}</td>
-            <td>{{ $req->branch->name }}</td>
+            {{-- 🔥 FIXED NULL SAFE --}}
+            <td>{{ optional($req->product)->name ?? 'N/A' }}</td>
+            <td>{{ optional($req->branch)->name ?? 'N/A' }}</td>
+
             <td>{{ $req->quantity }}</td>
+
             <td>
                 <form method="POST" action="/admin/manager/approve/{{ $req->id }}" style="display:inline;">
                     @csrf
-                    <button class="approve">Approve</button>
+                    <button type="submit" class="approve">Approve</button>
                 </form>
 
                 <form method="POST" action="/admin/manager/reject/{{ $req->id }}" style="display:inline;">
                     @csrf
-                    <button class="reject">Reject</button>
+                    <button type="submit" class="reject">Reject</button>
                 </form>
             </td>
         </tr>
