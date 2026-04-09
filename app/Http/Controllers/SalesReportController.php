@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 // 🔥 EXCEL
 use App\Exports\SalesExport;
 use App\Exports\BranchSalesExport;
+use App\Exports\BrandSalesExport; // ✅ NEW
 use Maatwebsite\Excel\Facades\Excel;
 
 class SalesReportController extends Controller
@@ -181,6 +182,27 @@ class SalesReportController extends Controller
     }
 
     // =====================
+    // 🔥 BRAND EXCEL (NEW)
+    // =====================
+    public function brandExcel(Request $request)
+    {
+        $start = $request->start_date 
+            ? $request->start_date . ' 00:00:00' 
+            : now()->startOfDay();
+
+        $end = $request->end_date 
+            ? $request->end_date . ' 23:59:59' 
+            : now()->endOfDay();
+
+        $branchId = $request->branch_id;
+
+        return Excel::download(
+            new BrandSalesExport($start, $end, $branchId),
+            'brand_sales.xlsx'
+        );
+    }
+
+    // =====================
     // 🔥 PER BRANCH
     // =====================
     public function perBranch(Request $request)
@@ -249,7 +271,7 @@ class SalesReportController extends Controller
     }
 
     // =====================
-    // 🔥 PER BRAND (UPDATED)
+    // 🔥 PER BRAND
     // =====================
     public function perBrand(Request $request)
     {
@@ -285,7 +307,7 @@ class SalesReportController extends Controller
     }
 
     // =====================
-    // 🔥 BRAND PDF EXPORT (NEW)
+    // 🔥 BRAND PDF
     // =====================
     public function brandPdf(Request $request)
     {
@@ -312,11 +334,7 @@ class SalesReportController extends Controller
             $query->where('sales.branch_id', $branchId);
         }
 
-        $data = $query
-            ->groupBy('products.name')
-            ->orderByDesc('total')
-            ->get();
-
+        $data = $query->groupBy('products.name')->orderByDesc('total')->get();
         $totals = $data->pluck('total');
 
         $pdf = Pdf::loadView('admin.reports.brand_pdf', compact('data','totals','request'));

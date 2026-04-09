@@ -5,8 +5,10 @@
 <div class="content">
 
     <!-- 🔥 HEADER -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2>📊 Sales per Brand <span style="color:green;">● Live</span></h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h2 style="font-weight:600;">
+            📊 Sales per Brand <span style="color:green;">● Live</span>
+        </h2>
 
         <small style="color:#64748b;">
             Last updated: <span id="liveTime"></span>
@@ -14,7 +16,7 @@
     </div>
 
     <!-- 🔥 FILTER + EXPORT -->
-    <div style="margin-bottom:20px;">
+    <div style="margin-bottom:15px;">
         <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
 
             <input type="date" name="start_date" value="{{ request('start_date') }}">
@@ -31,7 +33,7 @@
                 @endforeach
             </select>
 
-            <button class="btn filter">Filter</button>
+            <button class="btn primary">Filter</button>
 
             <a href="{{ route('report.brand.excel', request()->all()) }}" class="btn excel">
                 📊 Export Excel
@@ -122,7 +124,7 @@
 
 </div>
 
-<!-- 🔥 STYLES -->
+<!-- 🔥 STYLES (UNIFIED DESIGN SYSTEM) -->
 <style>
 .btn {
     padding: 7px 14px;
@@ -133,7 +135,7 @@
     font-weight: 500;
 }
 
-.btn.filter {
+.btn.primary {
     background: #3b82f6;
     color: white;
 }
@@ -150,15 +152,15 @@
 
 input, select {
     padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    border-radius: 5px;
+    border: 1px solid #d1d5db;
 }
 
 .card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    background: #f8fafc; /* 🔥 same as branch */
+    padding: 18px;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
 }
 
 table {
@@ -221,7 +223,7 @@ function updateTime() {
 setInterval(updateTime, 1000);
 updateTime();
 
-// 🔥 AUTO REFRESH EVERY 5 SECONDS
+// 🔥 AUTO REFRESH
 setInterval(() => {
     window.location.reload();
 }, 5000);
