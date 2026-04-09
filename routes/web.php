@@ -130,9 +130,13 @@ Route::prefix('admin')->group(function () {
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
-    // 👉 ADD NEW STOCK (NEW)
+    // 👉 ADD NEW STOCK
     Route::get('/inventory/add-stock', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
+
+    // 🔥 NEW: TRANSFER IN (APPROVAL FLOW)
+    Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInForm'])->name('inventory.transfer.in');
+    Route::post('/inventory/transfer-in', [InventoryController::class, 'transferInStore'])->name('inventory.transfer.store');
 
 
     // =====================
