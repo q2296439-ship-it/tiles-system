@@ -16,7 +16,9 @@ class InventoryController extends Controller
     public function create()
     {
         $products = Product::all();
-        return view('inventory.add_stock', compact('products'));
+        $branches = Branch::all(); // ✅ ADD THIS
+
+        return view('inventory.add_stock', compact('products', 'branches'));
     }
 
     // =====================
