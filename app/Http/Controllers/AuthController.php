@@ -35,6 +35,14 @@ class AuthController extends Controller
         // 🔥 REMEMBER ME SUPPORT
         $remember = $request->has('remember');
 
+        // 🔥 DEBUG USER CHECK
+        $userCheck = \App\Models\User::where('email', $credentials['email'])->first();
+
+        if (!$userCheck) {
+            return back()->with('error', 'User not found (email mismatch)');
+        }
+
+        // 🔥 TRY LOGIN
         if (Auth::attempt($credentials, $remember)) {
 
             $request->session()->regenerate();
@@ -60,7 +68,7 @@ class AuthController extends Controller
                 return redirect('/inventory-dashboard');
             }
 
-            // 🔥 MANAGER (UPDATED DASHBOARD)
+            // 🔥 MANAGER
             if (strtolower(trim($user->role)) === 'manager') {
                 return redirect('/manager');
             }
@@ -69,7 +77,8 @@ class AuthController extends Controller
             return redirect('/');
         }
 
-        return back()->with('error', 'Invalid login credentials');
+        // 🔥 PASSWORD FAIL
+        return back()->with('error', 'Wrong password');
     }
 
     // =====================
