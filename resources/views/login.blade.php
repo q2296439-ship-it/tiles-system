@@ -23,14 +23,15 @@
         }
 
         .left h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+            font-size: 34px;
+            margin-bottom: 12px;
         }
 
         .left p {
             font-size: 14px;
             opacity: 0.9;
-            max-width: 400px;
+            max-width: 420px;
+            line-height: 1.6;
         }
 
         /* RIGHT SIDE */
@@ -43,12 +44,12 @@
         }
 
         .card {
-            width: 350px;
+            width: 360px;
             background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
             padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border-radius: 18px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.6);
         }
 
         .logo {
@@ -65,47 +66,102 @@
             margin-bottom: 25px;
         }
 
-        input {
+        /* INPUT GROUP */
+        .input-group {
             width: 100%;
-            padding: 10px;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 11px 12px;
             margin-bottom: 15px;
             border-radius: 8px;
             border: none;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
             color: white;
+            font-size: 13px;
         }
 
-        input:focus {
+        .input-group input::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-group input:focus {
             outline: none;
             box-shadow: 0 0 0 2px #2563eb;
+            background: rgba(255,255,255,0.12);
+        }
+
+        /* SHOW PASSWORD */
+        .toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 11px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* OPTIONS */
+        .form-options {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
         }
 
         .remember {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-size: 12px;
             color: #cbd5e1;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border: none;
-            color: white;
-            font-weight: bold;
             cursor: pointer;
         }
 
+        .remember input {
+            accent-color: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .forgot {
+            font-size: 12px;
+            color: #93c5fd;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .forgot:hover {
+            color: white;
+        }
+
+        /* BUTTON */
+        .btn {
+            width: 100%;
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.25s;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37,99,235,0.5);
         }
 
         .error {
             color: #f87171;
             text-align: center;
             font-size: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .footer {
@@ -115,7 +171,7 @@
             margin-top: 15px;
         }
 
-        /* Responsive */
+        /* RESPONSIVE */
         @media(max-width: 768px){
             .left { display: none; }
             .right { width: 100%; }
@@ -126,7 +182,7 @@
 
 <body>
 
-<!-- LEFT SIDE -->
+<!-- LEFT -->
 <div class="left">
     <h1>Nicole Tile Center</h1>
     <p>
@@ -134,13 +190,13 @@
     </p>
 </div>
 
-<!-- RIGHT SIDE -->
+<!-- RIGHT -->
 <div class="right">
 
     <div class="card">
 
         <div class="logo">Tile Inventory System</div>
-        <h2>Login</h2>
+        <h2>Welcome Back</h2>
 
         @if(session('error'))
             <div class="error">{{ session('error') }}</div>
@@ -149,12 +205,22 @@
         <form method="POST" action="/login">
             @csrf
 
-            <input type="text" name="username" placeholder="Username" required>
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
 
-            <input type="password" name="password" placeholder="Password" required>
+            <div class="input-group">
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <span class="toggle-pass" onclick="togglePassword()">👁</span>
+            </div>
 
-            <div class="remember">
-                <input type="checkbox"> Remember me
+            <div class="form-options">
+                <label class="remember">
+                    <input type="checkbox">
+                    <span>Remember me</span>
+                </label>
+
+                <a href="#" class="forgot">Forgot?</a>
             </div>
 
             <button class="btn">Login</button>
@@ -168,6 +234,13 @@
     </div>
 
 </div>
+
+<script>
+function togglePassword() {
+    const pass = document.getElementById("password");
+    pass.type = pass.type === "password" ? "text" : "password";
+}
+</script>
 
 </body>
 </html>
