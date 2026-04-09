@@ -145,7 +145,6 @@
     <div class="menu-title">POS / SALES</div>
     <a href="/admin/pos" class="{{ request()->is('admin/pos') ? 'active' : '' }}">💰 POS</a>
 
-    <!-- 🔥 FIXED PER BRAND -->
     <a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">
         📊 Per Brand
     </a>
@@ -159,7 +158,13 @@
 
     <div class="menu-title">INVENTORY</div>
     <a href="/admin/inventory" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
-    <a href="#">➕ Add New Stock</a>
+
+    <!-- ✅ FIXED ADD NEW STOCK -->
+    <a href="{{ route('inventory.create') }}" 
+       class="{{ request()->is('admin/inventory/add-stock') ? 'active' : '' }}">
+        ➕ Add New Stock
+    </a>
+
     <a href="#">⬅ Transfer In</a>
     <a href="#">➡ Transfer Out</a>
     <a href="#">📄 Delivery Report</a>

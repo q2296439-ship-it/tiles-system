@@ -123,12 +123,17 @@ Route::prefix('admin')->group(function () {
     });
 
     // =====================
-    // INVENTORY
+    // 📦 INVENTORY
     // =====================
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
+
+    // 👉 ADD NEW STOCK (NEW)
+    Route::get('/inventory/add-stock', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
+
 
     // =====================
     // USERS
