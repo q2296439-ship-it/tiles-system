@@ -94,7 +94,14 @@
     <form method="POST" action="{{ route('inventory.store') }}">
         @csrf
 
-        {{-- ✅ NEW: BRANCH --}}
+        {{-- 🔥 MODE SELECT --}}
+        <label>Mode</label>
+        <select id="modeSelect">
+            <option value="existing">Select Existing Product</option>
+            <option value="new">Add New Product</option>
+        </select>
+
+        {{-- BRANCH --}}
         <label>Select Branch</label>
         <select name="branch_id" required>
             <option value="">-- Select Branch --</option>
@@ -105,38 +112,69 @@
             @endforeach
         </select>
 
-        {{-- PRODUCT --}}
-        <label>Product</label>
-        <select name="product_id" id="productSelect" required>
-            <option value="">-- Select Product --</option>
-            @foreach($products as $product)
-                <option value="{{ $product->id }}"
-                        data-stock="{{ $product->stock }}">
-                    {{ $product->name }} (Stock: {{ $product->stock }})
-                </option>
-            @endforeach
-        </select>
+        {{-- EXISTING PRODUCT --}}
+        <div id="existingProduct">
 
-        {{-- CURRENT STOCK --}}
-        <label>Current Stock</label>
-        <input type="text" id="currentStock" readonly>
+            <label>Product</label>
+            <select name="product_id" id="productSelect">
+                <option value="">-- Select Product --</option>
+                @foreach($products as $product)
+                    <option value="{{ $product->id }}"
+                            data-stock="{{ $product->stock }}">
+                        {{ $product->name }} (Stock: {{ $product->stock }})
+                    </option>
+                @endforeach
+            </select>
+
+            <label>Current Stock</label>
+            <input type="text" id="currentStock" readonly>
+
+        </div>
+
+        {{-- NEW PRODUCT --}}
+        <div id="newProduct" style="display:none;">
+
+            <label>Product Name</label>
+            <input type="text" name="new_name">
+
+            <label>Size</label>
+            <input type="text" name="new_size">
+
+            <label>Price</label>
+            <input type="number" step="0.01" name="new_price">
+
+        </div>
 
         {{-- QUANTITY --}}
-        <label>Quantity to Add</label>
+        <label>Quantity</label>
         <input type="number" name="quantity" required>
 
-        <button type="submit" class="btn">Add Stock</button>
+        <button type="submit" class="btn">Save</button>
     </form>
 
 </div>
 
 <script>
+    const modeSelect = document.getElementById('modeSelect');
+    const existingDiv = document.getElementById('existingProduct');
+    const newDiv = document.getElementById('newProduct');
+
+    modeSelect.addEventListener('change', function () {
+        if (this.value === 'new') {
+            existingDiv.style.display = 'none';
+            newDiv.style.display = 'block';
+        } else {
+            existingDiv.style.display = 'block';
+            newDiv.style.display = 'none';
+        }
+    });
+
+    // stock preview
     const productSelect = document.getElementById('productSelect');
     const currentStock = document.getElementById('currentStock');
 
     productSelect.addEventListener('change', function () {
-        const selected = this.options[this.selectedIndex];
-        const stock = selected.getAttribute('data-stock');
+        const stock = this.options[this.selectedIndex].getAttribute('data-stock');
         currentStock.value = stock ?? '';
     });
 </script>
