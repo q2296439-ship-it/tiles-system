@@ -26,8 +26,12 @@ class BrandSalesExport implements FromCollection, WithHeadings, WithMapping
             ->select(
                 'products.name as brand',
                 DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
-            )
-            ->whereBetween('sales.created_at', [$this->start, $this->end]);
+            );
+
+        // ✅ FIX: apply date filter ONLY if both exist
+        if ($this->start && $this->end) {
+            $query->whereBetween('sales.created_at', [$this->start, $this->end]);
+        }
 
         if ($this->branchId) {
             $query->where('sales.branch_id', $this->branchId);

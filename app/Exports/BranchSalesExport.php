@@ -33,8 +33,8 @@ class BranchSalesExport implements FromCollection, WithHeadings, WithStyles, Sho
         return Sale::join('branches', 'sales.branch_id', '=', 'branches.id')
             ->select(
                 'branches.name as Branch',
-                DB::raw('SUM(sales.total_amount) as Total_Sales'),
-                DB::raw('COUNT(*) as Transactions')
+                DB::raw('SUM(sales.total_amount) as total_sales'), // ✅ FIX
+                DB::raw('COUNT(*) as transactions') // ✅ FIX
             )
 
             // 🔥 DATE FILTER
@@ -42,13 +42,13 @@ class BranchSalesExport implements FromCollection, WithHeadings, WithStyles, Sho
                 $query->whereBetween('sales.created_at', [$this->start, $this->end]);
             })
 
-            // 🔥 BRANCH FILTER (ETO KULANG MO)
+            // 🔥 BRANCH FILTER
             ->when($this->branchId, function ($query) {
                 $query->where('sales.branch_id', $this->branchId);
             })
 
-            ->groupBy('branches.name')
-            ->orderByDesc('Total_Sales')
+            ->groupBy('branches.id', 'branches.name') // ✅ FIX
+            ->orderByDesc('total_sales') // ✅ FIX
             ->get();
     }
 
@@ -64,7 +64,7 @@ class BranchSalesExport implements FromCollection, WithHeadings, WithStyles, Sho
     public function styles(Worksheet $sheet)
     {
         return [
-            4 => ['font' => ['bold' => true]], // 🔥 FIX (header row moved down)
+            4 => ['font' => ['bold' => true]],
         ];
     }
 
