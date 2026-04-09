@@ -159,13 +159,17 @@
     <div class="menu-title">INVENTORY</div>
     <a href="/admin/inventory" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
 
-    <!-- ✅ FIXED ADD NEW STOCK -->
     <a href="{{ route('inventory.create') }}" 
        class="{{ request()->is('admin/inventory/add-stock') ? 'active' : '' }}">
         ➕ Add New Stock
     </a>
 
-    <a href="#">⬅ Transfer In</a>
+    <!-- 🔥 FIXED TRANSFER IN -->
+    <a href="{{ route('inventory.transfer.in') }}"
+       class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
+        ⬅ Transfer In
+    </a>
+
     <a href="#">➡ Transfer Out</a>
     <a href="#">📄 Delivery Report</a>
 
