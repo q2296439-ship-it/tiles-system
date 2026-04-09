@@ -69,8 +69,6 @@
 
 <div class="card">
 
-    <a href="/admin/inventory" class="back">← Back to Inventory</a>
-
     <h2>➕ Add New Stock</h2>
 
     {{-- SUCCESS --}}
