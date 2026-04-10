@@ -174,7 +174,7 @@
         font-weight: bold;
     }
 
-    /* 🔥 PRO MODAL */
+    /* MODAL */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -192,32 +192,22 @@
         border-radius: 18px;
         width: 340px;
         text-align: center;
-        animation: pop 0.25s ease;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    @keyframes pop {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-
-    .icon {
-        width: 60px;
-        height: 60px;
-        margin: auto;
-        background: #22c55e;
-        color: white;
-        font-size: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
     }
 
     .actions {
         margin-top: 20px;
         display: flex;
         gap: 10px;
+    }
+
+    .btn-print {
+        background: #22c55e;
+        color: white;
+    }
+
+    .btn-close {
+        background: #64748b;
+        color: white;
     }
 
     .actions button {
@@ -229,14 +219,21 @@
         cursor: pointer;
     }
 
-    .btn-print {
-        background: #22c55e;
-        color: white;
-    }
+    /* PRINT ONLY RECEIPT */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
 
-    .btn-close {
-        background: #64748b;
-        color: white;
+        #receipt, #receipt * {
+            visibility: visible;
+        }
+
+        #receipt {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
     }
 </style>
 
@@ -256,23 +253,30 @@
     💳 PAY
 </button>
 
-<!-- 🔥 PRO MODAL -->
+<!-- MODAL -->
 <div id="successModal" class="modal-overlay">
-
     <div class="modal-box">
-
-        <div class="icon">✔</div>
-
         <h2>Payment Successful</h2>
-        <p>Transaction completed successfully</p>
 
         <div class="actions">
             <button class="btn-print" onclick="printReceipt()">🖨 Print</button>
             <button class="btn-close" onclick="closeModal()">Close</button>
         </div>
-
     </div>
+</div>
 
+<!-- 🔥 RECEIPT -->
+<div id="receipt" style="display:none; font-family: monospace; width:300px; padding:10px;">
+    <h3 style="text-align:center;">Nicole Tiles Center</h3>
+    <p style="text-align:center;">------------------</p>
+
+    <div id="receiptItems"></div>
+
+    <p>------------------</p>
+    <p>Total: ₱<span id="rTotal"></span></p>
+    <p>Cash: ₱<span id="rCash"></span></p>
+    <p>Change: ₱<span id="rChange"></span></p>
+    <p id="rDate"></p>
 </div>
 
 @endsection
@@ -374,17 +378,38 @@ function checkout(){
     .then(data => {
         if(data.success){
             showSuccessModal();
+            buildReceipt();
             cart = [];
             renderCart();
-            updateProducts(data.products);
         } else {
             alert(data.message);
         }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Checkout failed");
     });
+}
+
+function buildReceipt(){
+    let html = '';
+    let total = 0;
+
+    cart.forEach(item=>{
+        total += item.price * item.qty;
+
+        html += `<p>${item.name} (${item.qty}) - ₱${item.price}</p>`;
+    });
+
+    document.getElementById('receiptItems').innerHTML = html;
+    document.getElementById('rTotal').innerText = total.toFixed(2);
+
+    let cash = document.getElementById('cash').value;
+    let change = cash - total;
+
+    document.getElementById('rCash').innerText = cash;
+    document.getElementById('rChange').innerText = change.toFixed(2);
+    document.getElementById('rDate').innerText = new Date().toLocaleString();
+}
+
+function printReceipt(){
+    window.print();
 }
 
 function showSuccessModal(){
@@ -393,31 +418,6 @@ function showSuccessModal(){
 
 function closeModal(){
     document.getElementById('successModal').style.display = 'none';
-}
-
-function printReceipt(){
-    window.print();
-}
-
-function updateProducts(products){
-    let grid = document.querySelector('.grid');
-    let html = '';
-
-    products.forEach(product => {
-        html += `
-            <div class="product ${product.stock <= 0 ? 'out' : ''}"
-                onclick='addToCart(${product.id}, "${product.name}", ${product.price})'>
-                <h4>${product.name}</h4>
-                <div class="size">${product.size ?? ''}</div>
-                <div class="price">₱${parseFloat(product.price).toFixed(2)}</div>
-                <div class="stock" style="color:${product.stock <= 5 ? 'red' : '#64748b'}">
-                    Stock: ${product.stock}
-                </div>
-            </div>
-        `;
-    });
-
-    grid.innerHTML = html;
 }
 </script>
 
