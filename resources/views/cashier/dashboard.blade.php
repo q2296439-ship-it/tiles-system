@@ -12,69 +12,71 @@
 
     .topbar h2 {
         margin: 0;
+        font-size: 20px;
     }
 
+    /* SEARCH */
     .search input {
         width: 100%;
         padding: 12px;
         border-radius: 12px;
         border: 1px solid #ddd;
         font-size: 14px;
+        background: #fff;
     }
 
-    .section {
-        display: none;
+    /* CONTAINER FIX (para mawala green issue) */
+    .pos-wrapper {
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 16px;
+        min-height: 300px;
     }
 
-    .section.active {
-        display: block;
-    }
-
-    /* 🔥 FIXED GRID */
+    /* GRID FIX */
     .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
         gap: 15px;
         margin-top: 15px;
     }
 
-    /* 🔥 PRODUCT CARD (PRO STYLE) */
+    /* PRODUCT CARD */
     .product {
-        background: white;
+        background: #f9fafb;
         padding: 15px;
-        border-radius: 16px;
+        border-radius: 14px;
         cursor: pointer;
         text-align: center;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.08);
         transition: 0.2s;
         border: 2px solid transparent;
     }
 
     .product:hover {
-        transform: translateY(-5px);
         border-color: #22c55e;
+        transform: translateY(-3px);
     }
 
     .product h4 {
-        margin: 5px 0;
-        font-size: 15px;
+        margin: 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #111827;
     }
 
-    .product p {
+    .product .price {
+        font-size: 16px;
         font-weight: bold;
         color: #22c55e;
-        margin: 5px 0;
     }
 
-    .product small {
-        display: block;
-        margin-top: 5px;
+    .product .stock {
         font-size: 12px;
+        margin-top: 5px;
     }
 
-    /* 🔥 OUT OF STOCK */
     .out {
-        opacity: 0.5;
+        opacity: 0.4;
         pointer-events: none;
     }
 
@@ -94,27 +96,31 @@
 <!-- POS -->
 <div id="pos" class="section active">
 
-    <div class="search">
-        <input type="text" placeholder="🔍 Search product...">
-    </div>
+    <div class="pos-wrapper">
 
-    <div class="grid">
-        @forelse($products as $product)
-        <div class="product {{ $product->stock <= 0 ? 'out' : '' }}"
-            onclick='addToCart({{ $product->id }}, @json($product->name), {{ $product->price }})'>
-
-            <h4>{{ $product->name }}</h4>
-
-            <p>₱{{ number_format($product->price,2) }}</p>
-
-            <small style="color: {{ $product->stock <= 5 ? 'red' : '#6b7280' }}">
-                Stock: {{ $product->stock }}
-            </small>
-
+        <div class="search">
+            <input type="text" placeholder="🔍 Search product...">
         </div>
-        @empty
-        <p>No products found</p>
-        @endforelse
+
+        <div class="grid">
+            @forelse($products as $product)
+            <div class="product {{ $product->stock <= 0 ? 'out' : '' }}"
+                onclick='addToCart({{ $product->id }}, @json($product->name), {{ $product->price }})'>
+
+                <h4>{{ $product->name }}</h4>
+
+                <div class="price">₱{{ number_format($product->price,2) }}</div>
+
+                <div class="stock" style="color: {{ $product->stock <= 5 ? 'red' : '#6b7280' }}">
+                    Stock: {{ $product->stock }}
+                </div>
+
+            </div>
+            @empty
+            <p>No products available</p>
+            @endforelse
+        </div>
+
     </div>
 
 </div>
@@ -163,6 +169,7 @@
     .cart-items {
         flex: 1;
         overflow-y: auto;
+        margin-bottom: 10px;
     }
 
     .item {
@@ -172,17 +179,23 @@
         margin-bottom: 10px;
     }
 
+    .summary {
+        border-top: 1px solid #475569;
+        padding-top: 10px;
+    }
+
     .total {
         font-size: 22px;
-        margin: 10px 0;
         font-weight: bold;
+        margin-bottom: 10px;
     }
 
     #cash {
+        width: 100%;
         padding: 12px;
         border-radius: 10px;
         border: none;
-        width: 100%;
+        margin-bottom: 10px;
     }
 
     .pay {
@@ -192,6 +205,7 @@
         font-size: 16px;
         background: #22c55e;
         color: white;
+        font-weight: bold;
     }
 
     .pay:disabled {
@@ -203,17 +217,23 @@
 
 <div class="cart-items" id="cart"></div>
 
-<div class="total">
-    ₱<span id="total">0.00</span>
+<div class="summary">
+
+    <div class="total">
+        Total: ₱<span id="total">0.00</span>
+    </div>
+
+    <input type="number" id="cash" placeholder="Enter cash">
+
+    <div style="margin-bottom:10px;">
+        Change: ₱<span id="change">0.00</span>
+    </div>
+
+    <button class="pay" id="payBtn" onclick="checkout()" disabled>
+        💳 PAY NOW
+    </button>
+
 </div>
-
-<input type="number" id="cash" placeholder="Enter cash">
-
-<div>Change: ₱<span id="change">0.00</span></div>
-
-<button class="pay" id="payBtn" onclick="checkout()" disabled>
-    💳 PAY
-</button>
 
 @endsection
 
@@ -226,11 +246,13 @@ function showSection(id){
     document.getElementById(id).classList.add('active');
 }
 
-// DCCR compute
 function compute(){
-    let actual = parseFloat(document.getElementById('actual').value) || 0;
-    let sales = parseFloat(document.getElementById('sales').innerText) || 0;
-    document.getElementById('diff').innerText = (actual - sales).toFixed(2);
+    let actual = parseFloat(document.getElementById('actual')?.value) || 0;
+    let sales = parseFloat(document.getElementById('sales')?.innerText) || 0;
+    let diff = actual - sales;
+
+    let diffEl = document.getElementById('diff');
+    if(diffEl) diffEl.innerText = diff.toFixed(2);
 }
 </script>
 
