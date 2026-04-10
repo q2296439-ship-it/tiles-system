@@ -54,7 +54,7 @@
     .badge {
         background: #fee2e2;
         color: #b91c1c;
-        padding: 3px 10px;
+        padding: 4px 10px;
         border-radius: 999px;
         font-size: 11px;
     }
@@ -68,27 +68,49 @@
         background: #f9fafb;
         font-size: 13px;
         color: #6b7280;
+        text-align: left;
     }
 
     table th, table td {
-        padding: 12px;
+        padding: 14px;
         border-bottom: 1px solid #e5e7eb;
+        vertical-align: middle;
+    }
+
+    /* ALIGNMENT FIX */
+    th:nth-child(3),
+    td:nth-child(3) {
+        text-align: center;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+        text-align: center;
+    }
+
+    /* BUTTON ALIGN FIX */
+    td:last-child {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
     }
 
     .approve {
         background: #22c55e;
         color: white;
-        padding: 5px 10px;
+        padding: 6px 12px;
         border-radius: 6px;
         border: none;
+        cursor: pointer;
     }
 
     .reject {
         background: #ef4444;
         color: white;
-        padding: 5px 10px;
+        padding: 6px 12px;
         border-radius: 6px;
         border: none;
+        cursor: pointer;
     }
 
     .danger {
@@ -138,12 +160,12 @@
     <table>
         <tr>
             <th>Product</th>
-            <th>Stock</th>
+            <th style="text-align:center;">Stock</th>
         </tr>
 
         <tr>
             <td>Sample Product</td>
-            <td class="danger">5</td>
+            <td class="danger" style="text-align:center;">5</td>
         </tr>
     </table>
 </div>
@@ -187,6 +209,9 @@ new Chart(document.getElementById('salesChart'), {
             borderWidth: 2,
             fill: true
         }]
+    },
+    options: {
+        responsive: true
     }
 });
 </script>
