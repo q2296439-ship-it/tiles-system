@@ -7,15 +7,18 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            display: flex;
-            min-height: 100vh;
         }
 
         .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 230px;
+            height: 100vh;
             background: #1e293b;
             color: white;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .sidebar h2 {
@@ -50,9 +53,10 @@
         }
 
         .content {
-            flex: 1;
+            margin-left: 230px;
             padding: 25px;
             background: #f1f5f9;
+            min-height: 100vh;
         }
     </style>
 </head>
