@@ -108,8 +108,8 @@
     <h2>💰 POS</h2>
 
     <a href="/cashier" class="active">🧾 New Sale</a>
-    <a href="#">💰 DCCR</a>
-    <a href="#">🏦 Deposit</a>
+    <a href="/cashier/dccr">💰 DCCR</a>
+    <a href="/cashier/deposit">🏦 Deposit</a>
 
     <div class="logout">
         <form method="POST" action="/logout">
@@ -128,6 +128,9 @@
 <div class="cart">
     @yield('cart')
 </div>
+
+<!-- 🔥 IMPORTANT FIX (ITO ANG KULANG MO) -->
+@yield('scripts')
 
 </body>
 </html>
