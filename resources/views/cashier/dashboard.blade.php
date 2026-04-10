@@ -172,6 +172,7 @@
         background: #22c55e;
         color: white;
         font-weight: bold;
+        transition: 0.2s;
     }
 </style>
 
@@ -238,7 +239,7 @@ function renderCart(){
     document.getElementById('cart').innerHTML = html;
     document.getElementById('total').innerText = total.toFixed(2);
 
-    document.getElementById('payBtn').disabled = cart.length === 0;
+    calculateChange(); // 🔥 auto validate
 }
 
 function increaseQty(index){
@@ -273,6 +274,16 @@ function calculateChange(){
 
     let change = cash - total;
     document.getElementById('change').innerText = change.toFixed(2);
+
+    let payBtn = document.getElementById('payBtn');
+
+    if(cash < total || total === 0){
+        payBtn.disabled = true;
+        payBtn.style.opacity = 0.5;
+    } else {
+        payBtn.disabled = false;
+        payBtn.style.opacity = 1;
+    }
 }
 
 function checkout(){
@@ -285,7 +296,7 @@ function checkout(){
         return;
     }
 
-    if(cash < total){
+    if(cash <= 0 || cash < total){
         alert("Insufficient cash");
         return;
     }
