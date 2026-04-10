@@ -192,6 +192,29 @@
     💳 PAY
 </button>
 
+<!-- 🔥 NEW SUCCESS MODAL -->
+<div id="successModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+
+    <div style="background:white; padding:30px; border-radius:12px; width:320px; text-align:center;">
+
+        <h3>✅ Payment Successful</h3>
+
+        <p style="font-size:14px; color:gray;">Transaction completed</p>
+
+        <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+            <button onclick="printReceipt()" style="padding:10px 15px; background:#22c55e; color:white; border:none; border-radius:6px;">
+                🖨 Print
+            </button>
+
+            <button onclick="closeModal()" style="padding:10px 15px; background:#64748b; color:white; border:none; border-radius:6px;">
+                Close
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
 @endsection
 
 
@@ -277,7 +300,6 @@ function calculateChange(){
 
     let payBtn = document.getElementById('payBtn');
 
-    // 🔥 STRICT: EXACT PAYMENT ONLY
     if(cash !== total || total === 0){
         payBtn.disabled = true;
         payBtn.style.opacity = 0.5;
@@ -297,7 +319,6 @@ function checkout(){
         return;
     }
 
-    // 🔥 STRICT VALIDATION
     if(cash !== total){
         alert("Cash must be exact amount!");
         return;
@@ -318,7 +339,8 @@ function checkout(){
     .then(data => {
 
         if(data.success){
-            alert("Payment Successful!");
+
+            showSuccessModal();
 
             cart = [];
             renderCart();
@@ -333,6 +355,19 @@ function checkout(){
         console.error(err);
         alert("Checkout failed");
     });
+}
+
+// 🔥 NEW FUNCTIONS
+function showSuccessModal(){
+    document.getElementById('successModal').style.display = 'flex';
+}
+
+function closeModal(){
+    document.getElementById('successModal').style.display = 'none';
+}
+
+function printReceipt(){
+    window.print();
 }
 
 function updateProducts(products){
