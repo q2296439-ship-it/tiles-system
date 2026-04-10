@@ -184,7 +184,7 @@
     Total: ₱<span id="total">0.00</span>
 </div>
 
-<input type="number" id="cash" placeholder="Enter cash" oninput="calculateChange()">
+<input type="number" id="cash" placeholder="Enter exact cash" oninput="calculateChange()">
 
 <div>Change: ₱<span id="change">0.00</span></div>
 
@@ -239,7 +239,7 @@ function renderCart(){
     document.getElementById('cart').innerHTML = html;
     document.getElementById('total').innerText = total.toFixed(2);
 
-    calculateChange(); // 🔥 auto validate
+    calculateChange();
 }
 
 function increaseQty(index){
@@ -277,7 +277,8 @@ function calculateChange(){
 
     let payBtn = document.getElementById('payBtn');
 
-    if(cash < total || total === 0){
+    // 🔥 STRICT: EXACT PAYMENT ONLY
+    if(cash !== total || total === 0){
         payBtn.disabled = true;
         payBtn.style.opacity = 0.5;
     } else {
@@ -296,8 +297,9 @@ function checkout(){
         return;
     }
 
-    if(cash <= 0 || cash < total){
-        alert("Insufficient cash");
+    // 🔥 STRICT VALIDATION
+    if(cash !== total){
+        alert("Cash must be exact amount!");
         return;
     }
 
