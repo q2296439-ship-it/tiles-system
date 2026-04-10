@@ -3,16 +3,12 @@
 @section('content')
 
 <style>
-    body {
-        background: #f3f4f6;
-    }
-
     .header {
         margin-bottom: 20px;
     }
 
     .header h2 {
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
     }
 
@@ -20,36 +16,29 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 20px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
     .card {
         background: white;
         padding: 20px;
         border-radius: 12px;
-        margin-bottom: 20px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        transition: 0.2s;
-    }
-
-    .card:hover {
-        transform: translateY(-3px);
     }
 
     .stat {
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
     }
 
     .label {
         font-size: 13px;
-        color: #6b7280;
+        color: gray;
     }
 
     .section-title {
         font-weight: bold;
         margin-bottom: 10px;
-        font-size: 16px;
     }
 
     table {
@@ -64,38 +53,29 @@
     }
 
     table th, table td {
-        border-bottom: 1px solid #e5e7eb;
         padding: 10px;
-        text-align: left;
-    }
-
-    button {
-        padding: 5px 10px;
-        border: none;
-        cursor: pointer;
-        border-radius: 6px;
-        font-size: 12px;
+        border-bottom: 1px solid #e5e7eb;
     }
 
     .approve {
         background: #22c55e;
         color: white;
+        border-radius: 5px;
+        padding: 5px 10px;
+        border: none;
     }
 
     .reject {
         background: #ef4444;
         color: white;
+        border-radius: 5px;
+        padding: 5px 10px;
+        border: none;
     }
 
     .danger {
-        color: #ef4444;
+        color: red;
         font-weight: bold;
-    }
-
-    .flex {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
     }
 
     .badge {
@@ -105,70 +85,64 @@
         border-radius: 999px;
         font-size: 11px;
     }
+
+    .flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>
 
-{{-- HEADER --}}
 <div class="header">
     <h2>📊 Manager Dashboard</h2>
     <p>Welcome, {{ auth()->user()->name }}</p>
 </div>
 
-{{-- KPI CARDS --}}
+{{-- KPI --}}
 <div class="grid">
-
     <div class="card">
-        <div class="label">💰 Today's Sales</div>
+        <div class="label">Today's Sales</div>
         <div class="stat">₱{{ number_format($todaySales ?? 0, 2) }}</div>
     </div>
 
     <div class="card">
-        <div class="label">📈 Monthly Sales</div>
+        <div class="label">Monthly Sales</div>
         <div class="stat">₱{{ number_format($monthlySales ?? 0, 2) }}</div>
     </div>
 
     <div class="card">
-        <div class="label">🧾 Total Orders</div>
+        <div class="label">Total Orders</div>
         <div class="stat">{{ $totalOrders ?? 0 }}</div>
     </div>
 
     <div class="card">
-        <div class="label">⚠️ Low Stock Items</div>
+        <div class="label">Low Stock</div>
         <div class="stat danger">{{ $lowStockCount ?? 0 }}</div>
     </div>
-
 </div>
 
-{{-- MAIN GRID --}}
+{{-- CHART + TOP PRODUCTS --}}
 <div class="grid">
 
-    {{-- SALES OVERVIEW --}}
     <div class="card" style="grid-column: span 2;">
         <div class="flex">
             <div class="section-title">📈 Sales Overview</div>
-            <select>
-                <option>Today</option>
-                <option>This Week</option>
-                <option>This Month</option>
-            </select>
         </div>
 
-        <div style="height:180px; display:flex; align-items:center; justify-content:center; color:gray;">
-            (Chart coming soon)
-        </div>
+        <canvas id="salesChart" height="100"></canvas>
     </div>
 
-    {{-- TOP PRODUCTS --}}
     <div class="card">
         <div class="section-title">🔥 Top Products</div>
 
-        <ul style="padding-left: 15px; font-size:14px;">
+        <ul>
             @if(isset($topProducts))
                 @foreach($topProducts as $item)
-                    <li>{{ $item->product_name }} - {{ $item->total_qty }} sold</li>
+                    <li>{{ $item->product_name }} - {{ $item->total_qty }}</li>
                 @endforeach
             @else
-                <li>Sample Product A - 120 sold</li>
-                <li>Sample Product B - 95 sold</li>
+                <li>Sample Product A - 120</li>
+                <li>Sample Product B - 95</li>
             @endif
         </ul>
     </div>
@@ -186,16 +160,12 @@
         </tr>
 
         @if(isset($lowStocks))
-            @forelse($lowStocks as $product)
+            @foreach($lowStocks as $p)
             <tr>
-                <td>{{ $product->name }}</td>
-                <td class="danger">{{ $product->stock }}</td>
+                <td>{{ $p->name }}</td>
+                <td class="danger">{{ $p->stock }}</td>
             </tr>
-            @empty
-            <tr>
-                <td colspan="2">No low stock items</td>
-            </tr>
-            @endforelse
+            @endforeach
         @else
             <tr>
                 <td>Sample Product</td>
@@ -209,9 +179,7 @@
 <div class="card">
     <div class="flex">
         <div class="section-title">🧾 Pending Approvals</div>
-        <span class="badge">
-            {{ isset($requests) ? count($requests) : 1 }} Requests
-        </span>
+        <span class="badge">{{ isset($requests) ? count($requests) : 3 }} Requests</span>
     </div>
 
     <table>
@@ -223,33 +191,27 @@
         </tr>
 
         @if(isset($requests))
-            @forelse($requests as $req)
+            @foreach($requests as $req)
             <tr>
-                <td>{{ optional($req->product)->name ?? 'N/A' }}</td>
-                <td>{{ optional($req->branch)->name ?? 'N/A' }}</td>
+                <td>{{ optional($req->product)->name }}</td>
+                <td>{{ optional($req->branch)->name }}</td>
                 <td>{{ $req->quantity }}</td>
-
                 <td>
                     <form method="POST" action="/admin/manager/approve/{{ $req->id }}" style="display:inline;">
                         @csrf
-                        <button type="submit" class="approve">Approve</button>
+                        <button class="approve">Approve</button>
                     </form>
-
                     <form method="POST" action="/admin/manager/reject/{{ $req->id }}" style="display:inline;">
                         @csrf
-                        <button type="submit" class="reject">Reject</button>
+                        <button class="reject">Reject</button>
                     </form>
                 </td>
             </tr>
-            @empty
-            <tr>
-                <td colspan="4">No pending requests</td>
-            </tr>
-            @endforelse
+            @endforeach
         @else
             <tr>
-                <td>Sample Product</td>
-                <td>Main Branch</td>
+                <td>Sample</td>
+                <td>Main</td>
                 <td>10</td>
                 <td>
                     <button class="approve">Approve</button>
@@ -259,5 +221,27 @@
         @endif
     </table>
 </div>
+
+{{-- CHART SCRIPT --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Sales',
+                data: [1200, 1900, 1500, 2000, 1700, 2500, 2200],
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+        }
+    });
+</script>
 
 @endsection
