@@ -112,9 +112,21 @@
 
     .item {
         background: #334155;
-        padding: 10px;
-        border-radius: 8px;
+        padding: 12px;
+        border-radius: 10px;
         margin-bottom: 10px;
+    }
+
+    .qty-control {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    .qty-control input {
+        width: 50px;
+        text-align: center;
     }
 
     .total {
@@ -181,13 +193,22 @@ function renderCart(){
     let html = '';
     let total = 0;
 
-    cart.forEach(item=>{
+    cart.forEach((item, index)=>{
         total += item.price * item.qty;
 
         html += `
             <div class="item">
-                ${item.name} <br>
-                ₱${item.price} x ${item.qty}
+                <strong>${item.name}</strong><br>
+                ₱${item.price}
+
+                <div class="qty-control">
+                    <button onclick="decreaseQty(${index})">-</button>
+
+                    <input type="number" value="${item.qty}" min="1"
+                        onchange="updateQty(${index}, this.value)">
+
+                    <button onclick="increaseQty(${index})">+</button>
+                </div>
             </div>
         `;
     });
@@ -196,6 +217,32 @@ function renderCart(){
     document.getElementById('total').innerText = total.toFixed(2);
 
     document.getElementById('payBtn').disabled = cart.length === 0;
+}
+
+function increaseQty(index){
+    cart[index].qty++;
+    renderCart();
+}
+
+function decreaseQty(index){
+    if(cart[index].qty > 1){
+        cart[index].qty--;
+    } else {
+        cart.splice(index, 1);
+    }
+    renderCart();
+}
+
+function updateQty(index, value){
+    let qty = parseInt(value);
+
+    if(qty <= 0 || isNaN(qty)){
+        cart.splice(index, 1);
+    } else {
+        cart[index].qty = qty;
+    }
+
+    renderCart();
 }
 
 function calculateChange(){
