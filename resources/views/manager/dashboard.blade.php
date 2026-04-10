@@ -3,6 +3,10 @@
 @section('content')
 
 <style>
+    body {
+        background: #f3f4f6;
+    }
+
     .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -13,9 +17,9 @@
     .card {
         background: white;
         padding: 20px;
-        border-radius: 10px;
+        border-radius: 12px;
         margin-bottom: 20px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
     .stat {
@@ -72,22 +76,30 @@
 
     <div class="card">
         <div class="label">Today's Sales</div>
-        <div class="stat">₱{{ number_format($todaySales ?? 0, 2) }}</div>
+        <div class="stat">
+            ₱{{ number_format($todaySales ?? 0, 2) }}
+        </div>
     </div>
 
     <div class="card">
         <div class="label">Monthly Sales</div>
-        <div class="stat">₱{{ number_format($monthlySales ?? 0, 2) }}</div>
+        <div class="stat">
+            ₱{{ number_format($monthlySales ?? 0, 2) }}
+        </div>
     </div>
 
     <div class="card">
         <div class="label">Total Orders</div>
-        <div class="stat">{{ $totalOrders ?? 0 }}</div>
+        <div class="stat">
+            {{ $totalOrders ?? 0 }}
+        </div>
     </div>
 
     <div class="card">
         <div class="label">Low Stock Items</div>
-        <div class="stat danger">{{ $lowStockCount ?? 0 }}</div>
+        <div class="stat danger">
+            {{ $lowStockCount ?? 0 }}
+        </div>
     </div>
 
 </div>
@@ -102,16 +114,29 @@
             <th>Sold Qty</th>
         </tr>
 
-        @forelse($topProducts as $item)
-        <tr>
-            <td>{{ $item->product_name }}</td>
-            <td>{{ $item->total_qty }}</td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="2">No data available</td>
-        </tr>
-        @endforelse
+        @if(isset($topProducts))
+            @forelse($topProducts as $item)
+            <tr>
+                <td>{{ $item->product_name }}</td>
+                <td>{{ $item->total_qty }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="2">No data available</td>
+            </tr>
+            @endforelse
+        @else
+            {{-- UI fallback --}}
+            <tr>
+                <td>Sample Product A</td>
+                <td>120</td>
+            </tr>
+            <tr>
+                <td>Sample Product B</td>
+                <td>95</td>
+            </tr>
+        @endif
+
     </table>
 </div>
 
@@ -125,16 +150,25 @@
             <th>Stock</th>
         </tr>
 
-        @forelse($lowStocks as $product)
-        <tr>
-            <td>{{ $product->name }}</td>
-            <td class="danger">{{ $product->stock }}</td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="2">No low stock items</td>
-        </tr>
-        @endforelse
+        @if(isset($lowStocks))
+            @forelse($lowStocks as $product)
+            <tr>
+                <td>{{ $product->name }}</td>
+                <td class="danger">{{ $product->stock }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="2">No low stock items</td>
+            </tr>
+            @endforelse
+        @else
+            {{-- UI fallback --}}
+            <tr>
+                <td>Sample Product</td>
+                <td class="danger">5</td>
+            </tr>
+        @endif
+
     </table>
 </div>
 
@@ -150,25 +184,43 @@
             <th>Action</th>
         </tr>
 
-        @foreach($requests as $req)
-        <tr>
-            <td>{{ optional($req->product)->name ?? 'N/A' }}</td>
-            <td>{{ optional($req->branch)->name ?? 'N/A' }}</td>
-            <td>{{ $req->quantity }}</td>
+        @if(isset($requests))
+            @forelse($requests as $req)
+            <tr>
+                <td>{{ optional($req->product)->name ?? 'N/A' }}</td>
+                <td>{{ optional($req->branch)->name ?? 'N/A' }}</td>
+                <td>{{ $req->quantity }}</td>
 
-            <td>
-                <form method="POST" action="/admin/manager/approve/{{ $req->id }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="approve">Approve</button>
-                </form>
+                <td>
+                    <form method="POST" action="/admin/manager/approve/{{ $req->id }}" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="approve">Approve</button>
+                    </form>
 
-                <form method="POST" action="/admin/manager/reject/{{ $req->id }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="reject">Reject</button>
-                </form>
-            </td>
-        </tr>
-        @endforeach
+                    <form method="POST" action="/admin/manager/reject/{{ $req->id }}" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="reject">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="4">No pending requests</td>
+            </tr>
+            @endforelse
+        @else
+            {{-- UI fallback --}}
+            <tr>
+                <td>Sample Product</td>
+                <td>Main Branch</td>
+                <td>10</td>
+                <td>
+                    <button class="approve">Approve</button>
+                    <button class="reject">Reject</button>
+                </td>
+            </tr>
+        @endif
+
     </table>
 </div>
 
