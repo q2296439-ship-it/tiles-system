@@ -276,9 +276,75 @@ function calculateChange(){
 }
 
 function checkout(){
-    alert("Payment Successful!");
-    cart = [];
-    renderCart();
+
+    let cash = parseFloat(document.getElementById('cash').value) || 0;
+    let total = parseFloat(document.getElementById('total').innerText) || 0;
+
+    if(cart.length === 0){
+        alert("No items in cart");
+        return;
+    }
+
+    if(cash < total){
+        alert("Insufficient cash");
+        return;
+    }
+
+    fetch('/cashier/checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            items: cart,
+            total: total
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.success){
+            alert("Payment Successful!");
+
+            cart = [];
+            renderCart();
+
+            updateProducts(data.products);
+        } else {
+            alert(data.message);
+        }
+
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Checkout failed");
+    });
+}
+
+function updateProducts(products){
+    let grid = document.querySelector('.grid');
+    let html = '';
+
+    products.forEach(product => {
+
+        html += `
+            <div class="product ${product.stock <= 0 ? 'out' : ''}"
+                onclick='addToCart(${product.id}, "${product.name}", ${product.price})'>
+
+                <h4>${product.name}</h4>
+                <div class="size">${product.size ?? ''}</div>
+
+                <div class="price">₱${parseFloat(product.price).toFixed(2)}</div>
+
+                <div class="stock" style="color:${product.stock <= 5 ? 'red' : '#64748b'}">
+                    Stock: ${product.stock}
+                </div>
+            </div>
+        `;
+    });
+
+    grid.innerHTML = html;
 }
 </script>
 
