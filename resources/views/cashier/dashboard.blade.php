@@ -15,6 +15,7 @@
             height: 100vh;
         }
 
+        /* SIDEBAR */
         .sidebar {
             width: 220px;
             background: #0f172a;
@@ -28,14 +29,28 @@
 
         .sidebar a {
             display: block;
+            padding: 10px;
             color: #cbd5f5;
-            margin-bottom: 10px;
             text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: pointer;
         }
 
+        .sidebar a:hover {
+            background: #1e293b;
+        }
+
+        .active {
+            background: #22c55e;
+            color: white !important;
+        }
+
+        /* MAIN */
         .main {
             flex: 1;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .topbar {
@@ -51,6 +66,15 @@
             border: 1px solid #ddd;
         }
 
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* PRODUCTS */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -65,12 +89,14 @@
             cursor: pointer;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: 0.2s;
         }
 
         .product:hover {
             transform: scale(1.05);
         }
 
+        /* CART */
         .cart {
             width: 320px;
             background: #1e293b;
@@ -92,12 +118,6 @@
             margin-bottom: 10px;
         }
 
-        .qty input {
-            width: 60px;
-            text-align: center;
-            margin-top: 5px;
-        }
-
         .total {
             font-size: 20px;
             margin: 10px 0;
@@ -108,20 +128,25 @@
             border-radius: 8px;
             border: none;
             margin-bottom: 10px;
+            width: 100%;
         }
 
-        button.pay {
-            padding: 15px;
-            background: #22c55e;
+        button {
+            padding: 10px;
             border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
+            border-radius: 8px;
             cursor: pointer;
         }
 
-        button.pay:disabled {
-            background: gray;
+        .pay {
+            background: #22c55e;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
         }
     </style>
 </head>
@@ -134,13 +159,15 @@
     <div class="sidebar">
         <h2>💰 POS</h2>
 
-        <a href="#">New Sale</a>
-        <a href="#">Sales History</a>
-        <a href="#">Products</a>
+        <a onclick="showSection('pos')" class="active">🧾 New Sale</a>
+        <a onclick="showSection('dccr')">💰 DCCR</a>
+        <a onclick="showSection('deposit')">🏦 Deposit</a>
 
         <form method="POST" action="/logout">
             @csrf
-            <button style="margin-top:20px;">Logout</button>
+            <button style="margin-top:20px; width:100%; background:#ef4444; color:white;">
+                Logout
+            </button>
         </form>
     </div>
 
@@ -152,20 +179,56 @@
             <div>👤 {{ auth()->user()->username }}</div>
         </div>
 
-        <div class="search">
-            <input type="text" placeholder="Search product...">
+        <!-- POS -->
+        <div id="pos" class="section active">
+
+            <div class="search">
+                <input type="text" placeholder="Search product...">
+            </div>
+
+            <div class="grid">
+                @foreach($products as $product)
+                <div class="product"
+                    onclick="addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price }})">
+
+                    <h4>{{ $product->name }}</h4>
+                    <p>₱{{ number_format($product->price,2) }}</p>
+                    <small>Stock: {{ $product->stock }}</small>
+                </div>
+                @endforeach
+            </div>
+
         </div>
 
-        <div class="grid">
-            @foreach($products as $product)
-            <div class="product"
-                onclick="addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price }})">
+        <!-- DCCR -->
+        <div id="dccr" class="section">
+            <div class="card">
+                <h2>💰 Daily Cash Report</h2>
 
-                <h4>{{ $product->name }}</h4>
-                <p>₱{{ number_format($product->price, 2) }}</p>
-                <small>Stock: {{ $product->stock }}</small>
+                <p>Total Sales: ₱<span id="sales">{{ $todaySales ?? 0 }}</span></p>
+
+                <label>Actual Cash</label>
+                <input type="number" id="actual">
+
+                <h3>Difference: ₱<span id="diff">0</span></h3>
+
+                <button onclick="compute()">Compute</button>
             </div>
-            @endforeach
+        </div>
+
+        <!-- DEPOSIT -->
+        <div id="deposit" class="section">
+            <div class="card">
+                <h2>🏦 Deposit</h2>
+
+                <label>Amount</label>
+                <input type="number">
+
+                <label>Reference</label>
+                <input type="text">
+
+                <button>Submit</button>
+            </div>
         </div>
 
     </div>
@@ -192,99 +255,19 @@
 </div>
 
 <script>
-let cart = [];
+function showSection(id){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 
-function addToCart(id, name, price) {
-    let item = cart.find(i => i.id === id);
-
-    if (item) {
-        item.qty++;
-    } else {
-        cart.push({ id, name, price, qty: 1 });
-    }
-
-    render();
+    document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+    event.target.classList.add('active');
 }
 
-function updateQty(id, value) {
-    let item = cart.find(i => i.id === id);
-    let qty = parseInt(value);
-
-    if (qty <= 0 || isNaN(qty)) {
-        cart = cart.filter(i => i.id !== id);
-    } else {
-        item.qty = qty;
-    }
-
-    render();
-}
-
-function render() {
-    let html = '';
-    let total = 0;
-
-    cart.forEach(item => {
-        total += item.price * item.qty;
-
-        html += `
-            <div class="item">
-                <div>${item.name}</div>
-                <div>₱${(item.price * item.qty).toFixed(2)}</div>
-                <div class="qty">
-                    <input type="number" min="1" value="${item.qty}" 
-                        onchange="updateQty(${item.id}, this.value)">
-                </div>
-            </div>
-        `;
-    });
-
-    document.getElementById('cart').innerHTML = html;
-    document.getElementById('total').innerText = total.toFixed(2);
-
-    checkPay();
-}
-
-document.getElementById('cash').addEventListener('input', function () {
-    let cash = parseFloat(this.value) || 0;
-    let total = parseFloat(document.getElementById('total').innerText);
-
-    let change = cash - total;
-    document.getElementById('change').innerText =
-        change > 0 ? change.toFixed(2) : '0.00';
-
-    checkPay();
-});
-
-function checkPay() {
-    let cash = parseFloat(document.getElementById('cash').value) || 0;
-    let total = parseFloat(document.getElementById('total').innerText);
-
-    document.getElementById('payBtn').disabled = !(cash >= total && total > 0);
-}
-
-function checkout() {
-    fetch('/cashier/checkout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            items: cart,
-            total: document.getElementById('total').innerText
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert('Sale completed!');
-
-            // 🔥 AUTO REFRESH PARA UPDATE STOCK
-            location.reload();
-        } else {
-            alert(data.message);
-        }
-    });
+// DCCR compute
+function compute(){
+    let actual = parseFloat(document.getElementById('actual').value) || 0;
+    let sales = parseFloat(document.getElementById('sales').innerText) || 0;
+    document.getElementById('diff').innerText = (actual - sales).toFixed(2);
 }
 </script>
 
