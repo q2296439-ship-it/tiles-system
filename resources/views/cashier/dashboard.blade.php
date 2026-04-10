@@ -12,29 +12,30 @@
 
     .search input {
         width: 100%;
-        padding: 12px;
-        border-radius: 12px;
+        padding: 14px;
+        border-radius: 14px;
         border: 1px solid #ddd;
         background: #fff;
     }
 
     .pos-wrapper {
         background: #ffffff;
-        padding: 15px;
-        border-radius: 16px;
+        padding: 20px;
+        border-radius: 18px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
     .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 18px;
         margin-top: 15px;
     }
 
     .product {
         background: #f9fafb;
-        padding: 15px;
-        border-radius: 14px;
+        padding: 18px;
+        border-radius: 16px;
         text-align: center;
         cursor: pointer;
         border: 2px solid transparent;
@@ -43,23 +44,29 @@
 
     .product:hover {
         border-color: #22c55e;
-        transform: translateY(-3px);
+        transform: translateY(-4px);
     }
 
     .product h4 {
         margin: 8px 0;
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 600;
+    }
+
+    .size {
+        font-size: 12px;
+        color: #64748b;
     }
 
     .price {
         color: #22c55e;
         font-weight: bold;
+        margin-top: 5px;
     }
 
     .stock {
         font-size: 12px;
-        margin-top: 5px;
+        margin-top: 6px;
     }
 
     .out {
@@ -85,10 +92,11 @@
             onclick='addToCart({{ $product->id }}, @json($product->name), {{ $product->price }})'>
 
             <h4>{{ $product->name }}</h4>
+            <div class="size">{{ $product->size }}</div>
 
             <div class="price">₱{{ number_format($product->price,2) }}</div>
 
-            <div class="stock" style="color: {{ $product->stock <= 5 ? 'red' : 'gray' }}">
+            <div class="stock" style="color: {{ $product->stock <= 5 ? 'red' : '#64748b' }}">
                 Stock: {{ $product->stock }}
             </div>
 
@@ -112,21 +120,35 @@
 
     .item {
         background: #334155;
-        padding: 12px;
-        border-radius: 10px;
+        padding: 14px;
+        border-radius: 12px;
         margin-bottom: 10px;
+    }
+
+    .item-name {
+        font-weight: bold;
+        margin-bottom: 5px;
     }
 
     .qty-control {
         display: flex;
         align-items: center;
-        gap: 5px;
-        margin-top: 5px;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .qty-control button {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
     }
 
     .qty-control input {
-        width: 50px;
+        width: 55px;
         text-align: center;
+        border-radius: 6px;
+        border: none;
     }
 
     .total {
@@ -198,7 +220,7 @@ function renderCart(){
 
         html += `
             <div class="item">
-                <strong>${item.name}</strong><br>
+                <div class="item-name">${item.name}</div>
                 ₱${item.price}
 
                 <div class="qty-control">

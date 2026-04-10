@@ -18,13 +18,10 @@ class CashierController extends Controller
         // 🔥 TEMP (lahat muna)
         $products = Product::all();
 
-        // 👉 OPTIONAL (branch-based later)
-        // $products = Product::where('branch_id', $branchId)->get();
-
         return view('cashier.dashboard', compact('products'));
     }
 
-    // 🔥 CHECKOUT (FINAL FIXED)
+    // 🔥 CHECKOUT (REALTIME FIXED)
     public function checkout(Request $request)
     {
         try {
@@ -54,7 +51,6 @@ class CashierController extends Controller
 
             foreach ($request->items as $item) {
 
-                // 🔥 VALIDATE ITEM STRUCTURE
                 if (!isset($item['id'], $item['qty'], $item['price'])) {
                     throw new \Exception('Invalid cart data');
                 }
@@ -78,16 +74,20 @@ class CashierController extends Controller
                     'price' => $item['price']
                 ]);
 
-                // 🔥 DEDUCT STOCK (SAFE)
-                $product->stock = $product->stock - $item['qty'];
+                // 🔥 DEDUCT STOCK
+                $product->stock -= $item['qty'];
                 $product->save();
             }
 
             DB::commit();
 
+            // 🔥 IMPORTANT: RETURN UPDATED PRODUCTS
+            $updatedProducts = Product::all();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Sale completed successfully!'
+                'message' => 'Sale completed successfully!',
+                'products' => $updatedProducts // 🔥 realtime update
             ]);
 
         } catch (\Exception $e) {
