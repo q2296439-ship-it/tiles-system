@@ -59,7 +59,7 @@
         }
 
         .content {
-            margin-left: 230px; /* EXACT MATCH SA SIDEBAR WIDTH */
+            margin-left: 230px;
             padding: 30px;
             background: #f1f5f9;
             min-height: 100vh;
@@ -78,11 +78,13 @@
 <div class="sidebar">
     <h2>Manager Panel</h2>
 
+    {{-- MAIN --}}
     <p>MAIN</p>
     <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">
         📊 Dashboard
     </a>
 
+    {{-- OPERATIONS --}}
     <p>OPERATIONS</p>
     <a href="/admin/manager/approvals" class="{{ request()->is('admin/manager/approvals') ? 'active' : '' }}">
         🧾 Approvals
@@ -92,6 +94,7 @@
         💳 Transactions
     </a>
 
+    {{-- SALES --}}
     <p>SALES</p>
     <a href="/manager/daily-sales" class="{{ request()->is('manager/daily-sales') ? 'active' : '' }}">
         📅 Daily Sales
@@ -101,7 +104,9 @@
         📈 Sales Report
     </a>
 
+    {{-- INVENTORY --}}
     <p>INVENTORY</p>
+
     <a href="/manager/inventory" class="{{ request()->is('manager/inventory') ? 'active' : '' }}">
         📦 Branch Stock
     </a>
@@ -110,12 +115,25 @@
         📊 Inventory Report
     </a>
 
+    <a href="/manager/add-stock" class="{{ request()->is('manager/add-stock') ? 'active' : '' }}">
+        ➕ Add Stock
+    </a>
+
+    <a href="/manager/transfer-in" class="{{ request()->is('manager/transfer-in') ? 'active' : '' }}">
+        ⬅️ Transfer In
+    </a>
+
+    <a href="/manager/transfer-out" class="{{ request()->is('manager/transfer-out') ? 'active' : '' }}">
+        ➡️ Transfer Out
+    </a>
+
     <a href="/manager/transfers" class="{{ request()->is('manager/transfers') ? 'active' : '' }}">
         🔄 Transfer Requests
     </a>
 
     <hr>
 
+    {{-- ACCOUNT --}}
     <p>ACCOUNT</p>
     <a href="/logout" style="color:#f87171;">
         🚪 Logout
