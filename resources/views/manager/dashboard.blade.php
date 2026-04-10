@@ -7,11 +7,20 @@
         background: #f3f4f6;
     }
 
+    .header {
+        margin-bottom: 20px;
+    }
+
+    .header h2 {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
     .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
 
     .card {
@@ -20,21 +29,38 @@
         border-radius: 12px;
         margin-bottom: 20px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
     }
 
     .stat {
-        font-size: 22px;
+        font-size: 24px;
         font-weight: bold;
     }
 
     .label {
-        font-size: 14px;
-        color: gray;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .section-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 16px;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
+    }
+
+    table th {
+        background: #f9fafb;
+        font-size: 13px;
+        color: #6b7280;
     }
 
     table th, table td {
@@ -47,7 +73,8 @@
         padding: 5px 10px;
         border: none;
         cursor: pointer;
-        border-radius: 5px;
+        border-radius: 6px;
+        font-size: 12px;
     }
 
     .approve {
@@ -64,85 +91,93 @@
         color: #ef4444;
         font-weight: bold;
     }
+
+    .flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+    }
 </style>
 
-<div class="card">
+{{-- HEADER --}}
+<div class="header">
     <h2>📊 Manager Dashboard</h2>
     <p>Welcome, {{ auth()->user()->name }}</p>
 </div>
 
-{{-- 🔥 KPI CARDS --}}
+{{-- KPI CARDS --}}
 <div class="grid">
 
     <div class="card">
-        <div class="label">Today's Sales</div>
-        <div class="stat">
-            ₱{{ number_format($todaySales ?? 0, 2) }}
-        </div>
+        <div class="label">💰 Today's Sales</div>
+        <div class="stat">₱{{ number_format($todaySales ?? 0, 2) }}</div>
     </div>
 
     <div class="card">
-        <div class="label">Monthly Sales</div>
-        <div class="stat">
-            ₱{{ number_format($monthlySales ?? 0, 2) }}
-        </div>
+        <div class="label">📈 Monthly Sales</div>
+        <div class="stat">₱{{ number_format($monthlySales ?? 0, 2) }}</div>
     </div>
 
     <div class="card">
-        <div class="label">Total Orders</div>
-        <div class="stat">
-            {{ $totalOrders ?? 0 }}
-        </div>
+        <div class="label">🧾 Total Orders</div>
+        <div class="stat">{{ $totalOrders ?? 0 }}</div>
     </div>
 
     <div class="card">
-        <div class="label">Low Stock Items</div>
-        <div class="stat danger">
-            {{ $lowStockCount ?? 0 }}
-        </div>
+        <div class="label">⚠️ Low Stock Items</div>
+        <div class="stat danger">{{ $lowStockCount ?? 0 }}</div>
     </div>
 
 </div>
 
-{{-- 📈 TOP SELLING PRODUCTS --}}
-<div class="card">
-    <h3>🔥 Top Selling Products</h3>
+{{-- MAIN GRID --}}
+<div class="grid">
 
-    <table>
-        <tr>
-            <th>Product</th>
-            <th>Sold Qty</th>
-        </tr>
+    {{-- SALES OVERVIEW --}}
+    <div class="card" style="grid-column: span 2;">
+        <div class="flex">
+            <div class="section-title">📈 Sales Overview</div>
+            <select>
+                <option>Today</option>
+                <option>This Week</option>
+                <option>This Month</option>
+            </select>
+        </div>
 
-        @if(isset($topProducts))
-            @forelse($topProducts as $item)
-            <tr>
-                <td>{{ $item->product_name }}</td>
-                <td>{{ $item->total_qty }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="2">No data available</td>
-            </tr>
-            @endforelse
-        @else
-            {{-- UI fallback --}}
-            <tr>
-                <td>Sample Product A</td>
-                <td>120</td>
-            </tr>
-            <tr>
-                <td>Sample Product B</td>
-                <td>95</td>
-            </tr>
-        @endif
+        <div style="height:180px; display:flex; align-items:center; justify-content:center; color:gray;">
+            (Chart coming soon)
+        </div>
+    </div>
 
-    </table>
+    {{-- TOP PRODUCTS --}}
+    <div class="card">
+        <div class="section-title">🔥 Top Products</div>
+
+        <ul style="padding-left: 15px; font-size:14px;">
+            @if(isset($topProducts))
+                @foreach($topProducts as $item)
+                    <li>{{ $item->product_name }} - {{ $item->total_qty }} sold</li>
+                @endforeach
+            @else
+                <li>Sample Product A - 120 sold</li>
+                <li>Sample Product B - 95 sold</li>
+            @endif
+        </ul>
+    </div>
+
 </div>
 
-{{-- ⚠️ LOW STOCK ALERT --}}
+{{-- LOW STOCK --}}
 <div class="card">
-    <h3>⚠️ Low Stock Alert</h3>
+    <div class="section-title">⚠️ Low Stock Alert</div>
 
     <table>
         <tr>
@@ -162,19 +197,22 @@
             </tr>
             @endforelse
         @else
-            {{-- UI fallback --}}
             <tr>
                 <td>Sample Product</td>
                 <td class="danger">5</td>
             </tr>
         @endif
-
     </table>
 </div>
 
-{{-- 🧾 PENDING APPROVALS --}}
+{{-- APPROVALS --}}
 <div class="card">
-    <h3>🧾 Pending Approvals</h3>
+    <div class="flex">
+        <div class="section-title">🧾 Pending Approvals</div>
+        <span class="badge">
+            {{ isset($requests) ? count($requests) : 1 }} Requests
+        </span>
+    </div>
 
     <table>
         <tr>
@@ -209,7 +247,6 @@
             </tr>
             @endforelse
         @else
-            {{-- UI fallback --}}
             <tr>
                 <td>Sample Product</td>
                 <td>Main Branch</td>
@@ -220,7 +257,6 @@
                 </td>
             </tr>
         @endif
-
     </table>
 </div>
 
