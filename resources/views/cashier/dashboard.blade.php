@@ -172,7 +172,71 @@
         background: #22c55e;
         color: white;
         font-weight: bold;
-        transition: 0.2s;
+    }
+
+    /* 🔥 PRO MODAL */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(5px);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .modal-box {
+        background: #fff;
+        padding: 35px;
+        border-radius: 18px;
+        width: 340px;
+        text-align: center;
+        animation: pop 0.25s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    @keyframes pop {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .icon {
+        width: 60px;
+        height: 60px;
+        margin: auto;
+        background: #22c55e;
+        color: white;
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .actions button {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-print {
+        background: #22c55e;
+        color: white;
+    }
+
+    .btn-close {
+        background: #64748b;
+        color: white;
     }
 </style>
 
@@ -192,23 +256,19 @@
     💳 PAY
 </button>
 
-<!-- 🔥 NEW SUCCESS MODAL -->
-<div id="successModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+<!-- 🔥 PRO MODAL -->
+<div id="successModal" class="modal-overlay">
 
-    <div style="background:white; padding:30px; border-radius:12px; width:320px; text-align:center;">
+    <div class="modal-box">
 
-        <h3>✅ Payment Successful</h3>
+        <div class="icon">✔</div>
 
-        <p style="font-size:14px; color:gray;">Transaction completed</p>
+        <h2>Payment Successful</h2>
+        <p>Transaction completed successfully</p>
 
-        <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
-            <button onclick="printReceipt()" style="padding:10px 15px; background:#22c55e; color:white; border:none; border-radius:6px;">
-                🖨 Print
-            </button>
-
-            <button onclick="closeModal()" style="padding:10px 15px; background:#64748b; color:white; border:none; border-radius:6px;">
-                Close
-            </button>
+        <div class="actions">
+            <button class="btn-print" onclick="printReceipt()">🖨 Print</button>
+            <button class="btn-close" onclick="closeModal()">Close</button>
         </div>
 
     </div>
@@ -249,10 +309,8 @@ function renderCart(){
 
                 <div class="qty-control">
                     <button onclick="decreaseQty(${index})">-</button>
-
                     <input type="number" value="${item.qty}" min="1"
                         onchange="updateQty(${index}, this.value)">
-
                     <button onclick="increaseQty(${index})">+</button>
                 </div>
             </div>
@@ -265,29 +323,17 @@ function renderCart(){
     calculateChange();
 }
 
-function increaseQty(index){
-    cart[index].qty++;
-    renderCart();
-}
-
+function increaseQty(index){ cart[index].qty++; renderCart(); }
 function decreaseQty(index){
-    if(cart[index].qty > 1){
-        cart[index].qty--;
-    } else {
-        cart.splice(index, 1);
-    }
+    if(cart[index].qty > 1){ cart[index].qty--; }
+    else { cart.splice(index, 1); }
     renderCart();
 }
 
 function updateQty(index, value){
     let qty = parseInt(value);
-
-    if(qty <= 0 || isNaN(qty)){
-        cart.splice(index, 1);
-    } else {
-        cart[index].qty = qty;
-    }
-
+    if(qty <= 0 || isNaN(qty)){ cart.splice(index, 1); }
+    else { cart[index].qty = qty; }
     renderCart();
 }
 
@@ -310,19 +356,11 @@ function calculateChange(){
 }
 
 function checkout(){
-
     let cash = parseFloat(document.getElementById('cash').value) || 0;
     let total = parseFloat(document.getElementById('total').innerText) || 0;
 
-    if(cart.length === 0){
-        alert("No items in cart");
-        return;
-    }
-
-    if(cash !== total){
-        alert("Cash must be exact amount!");
-        return;
-    }
+    if(cart.length === 0){ alert("No items in cart"); return; }
+    if(cash !== total){ alert("Cash must be exact amount!"); return; }
 
     fetch('/cashier/checkout', {
         method: 'POST',
@@ -330,26 +368,18 @@ function checkout(){
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
-        body: JSON.stringify({
-            items: cart,
-            total: total
-        })
+        body: JSON.stringify({ items: cart, total: total })
     })
     .then(res => res.json())
     .then(data => {
-
         if(data.success){
-
             showSuccessModal();
-
             cart = [];
             renderCart();
-
             updateProducts(data.products);
         } else {
             alert(data.message);
         }
-
     })
     .catch(err => {
         console.error(err);
@@ -357,7 +387,6 @@ function checkout(){
     });
 }
 
-// 🔥 NEW FUNCTIONS
 function showSuccessModal(){
     document.getElementById('successModal').style.display = 'flex';
 }
@@ -375,16 +404,12 @@ function updateProducts(products){
     let html = '';
 
     products.forEach(product => {
-
         html += `
             <div class="product ${product.stock <= 0 ? 'out' : ''}"
                 onclick='addToCart(${product.id}, "${product.name}", ${product.price})'>
-
                 <h4>${product.name}</h4>
                 <div class="size">${product.size ?? ''}</div>
-
                 <div class="price">₱${parseFloat(product.price).toFixed(2)}</div>
-
                 <div class="stock" style="color:${product.stock <= 5 ? 'red' : '#64748b'}">
                     Stock: ${product.stock}
                 </div>
