@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        // 🔥 Load users with branch relation
+        // 🔥 Load users with branch relation (ready for future list page)
         $users = User::with('branch')->get();
 
         // 🔥 Get all branches
@@ -23,21 +23,25 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        // 🔥 VALIDATION (IMPORTANT)
+        // 🔥 VALIDATION (UPDATED)
         $request->validate([
             'username' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:4',
+            'employee_name' => 'required|string|max:255',
+            'employee_id' => 'required|string|max:255',
             'role' => 'required',
             'branch_id' => 'required|exists:branches,id',
         ]);
 
-        // 🔥 CREATE USER (FIXED NAME ERROR)
+        // 🔥 CREATE USER (UPDATED)
         User::create([
-            'name' => $request->username, // 🔥 FIX (important)
+            'name' => $request->employee_name, // 🔥 gamitin natin real name dito
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'employee_name' => $request->employee_name,
+            'employee_id' => $request->employee_id,
             'role' => $request->role,
             'branch_id' => $request->branch_id,
         ]);
