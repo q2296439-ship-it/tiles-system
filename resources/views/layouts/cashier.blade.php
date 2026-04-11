@@ -18,7 +18,7 @@
 
         /* SIDEBAR */
         .sidebar {
-            width: 220px;
+            width: 240px;
             background: linear-gradient(180deg, #0f172a, #020617);
             color: white;
             padding: 20px;
@@ -31,14 +31,22 @@
             font-size: 20px;
         }
 
+        .sidebar p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 18px 0 6px;
+            letter-spacing: 1px;
+        }
+
         .sidebar a {
             display: block;
             padding: 12px;
             color: #cbd5f5;
             text-decoration: none;
             border-radius: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             transition: 0.2s;
+            font-size: 14px;
         }
 
         .sidebar a:hover {
@@ -50,6 +58,12 @@
             background: #22c55e;
             color: white !important;
             font-weight: bold;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #334155;
+            margin: 15px 0;
         }
 
         .logout {
@@ -87,7 +101,7 @@
             margin-bottom: 15px;
         }
 
-        /* SCROLL FIX */
+        /* SCROLL */
         .content::-webkit-scrollbar,
         .cart::-webkit-scrollbar {
             width: 6px;
@@ -107,9 +121,51 @@
 <div class="sidebar">
     <h2>💰 POS</h2>
 
-    <a href="/cashier" class="active">🧾 New Sale</a>
-    <a href="/cashier/dccr">💰 DCCR</a>
-    <a href="/cashier/deposit">🏦 Deposit</a>
+    <!-- MAIN -->
+    <p>MAIN</p>
+    <a href="/cashier" class="{{ request()->is('cashier') ? 'active' : '' }}">
+        🧾 New Sale
+    </a>
+
+    <!-- SALES -->
+    <p>SALES</p>
+    <a href="/cashier/collection">
+        🧾 Add Collection Receipt
+    </a>
+
+    <a href="/cashier/collection-today">
+        📊 Collection Today
+    </a>
+
+    <a href="/cashier/dccr">
+        💰 DCCR
+    </a>
+
+    <a href="/cashier/deposit">
+        🏦 Deposit
+    </a>
+
+    <!-- INVENTORY -->
+    <p>INVENTORY</p>
+    <a href="/cashier/inventory">
+        📦 Inventory Stock
+    </a>
+
+    <a href="/cashier/transfer-in">
+        ⬇ Transfer In
+    </a>
+
+    <a href="/cashier/transfer-out">
+        ⬆ Transfer Out
+    </a>
+
+    <hr>
+
+    <!-- ACCOUNT -->
+    <p>ACCOUNT</p>
+    <a href="/cashier/change-password">
+        🔑 Change Password
+    </a>
 
     <div class="logout">
         <form method="POST" action="/logout">
@@ -129,7 +185,7 @@
     @yield('cart')
 </div>
 
-<!-- 🔥 IMPORTANT FIX (ITO ANG KULANG MO) -->
+<!-- SCRIPTS -->
 @yield('scripts')
 
 </body>
