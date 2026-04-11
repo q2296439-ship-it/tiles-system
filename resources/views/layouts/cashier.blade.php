@@ -21,9 +21,17 @@
             width: 240px;
             background: linear-gradient(180deg, #0f172a, #020617);
             color: white;
-            padding: 20px;
             display: flex;
             flex-direction: column;
+
+            height: 100vh;
+        }
+
+        /* 🔥 SCROLLABLE CONTENT */
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
         }
 
         .sidebar h2 {
@@ -66,8 +74,9 @@
             margin: 15px 0;
         }
 
+        /* 🔥 FIXED LOGOUT SA BABA */
         .logout {
-            margin-top: auto;
+            padding: 15px;
         }
 
         .logout button {
@@ -78,6 +87,16 @@
             border-radius: 10px;
             color: white;
             cursor: pointer;
+        }
+
+        /* SCROLL STYLE */
+        .sidebar-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
         }
 
         /* CONTENT */
@@ -119,60 +138,47 @@
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-    <h2>💰 POS</h2>
 
-    <!-- MAIN -->
-    <p>MAIN</p>
-    <a href="/cashier" class="{{ request()->is('cashier') ? 'active' : '' }}">
-        🧾 New Sale
-    </a>
+    <!-- 🔥 SCROLLABLE PART -->
+    <div class="sidebar-menu">
 
-    <!-- SALES -->
-    <p>SALES</p>
-    <a href="/cashier/collection">
-        🧾 Add Collection Receipt
-    </a>
+        <h2>💰 POS</h2>
 
-    <a href="/cashier/collection-today">
-        📊 Collection Today
-    </a>
+        <!-- MAIN -->
+        <p>MAIN</p>
+        <a href="/cashier" class="{{ request()->is('cashier') ? 'active' : '' }}">
+            🧾 New Sale
+        </a>
 
-    <a href="/cashier/dccr">
-        💰 DCCR
-    </a>
+        <!-- SALES -->
+        <p>SALES</p>
+        <a href="/cashier/collection">🧾 Add Collection Receipt</a>
+        <a href="/cashier/collection-today">📊 Collection Today</a>
+        <a href="/cashier/dccr">💰 DCCR</a>
+        <a href="/cashier/deposit">🏦 Deposit</a>
 
-    <a href="/cashier/deposit">
-        🏦 Deposit
-    </a>
+        <!-- INVENTORY -->
+        <p>INVENTORY</p>
+        <a href="/cashier/inventory">📦 Inventory Stock</a>
+        <a href="/cashier/transfer-in">⬇ Transfer In</a>
+        <a href="/cashier/transfer-out">⬆ Transfer Out</a>
 
-    <!-- INVENTORY -->
-    <p>INVENTORY</p>
-    <a href="/cashier/inventory">
-        📦 Inventory Stock
-    </a>
+        <hr>
 
-    <a href="/cashier/transfer-in">
-        ⬇ Transfer In
-    </a>
+        <!-- ACCOUNT -->
+        <p>ACCOUNT</p>
+        <a href="/cashier/change-password">🔑 Change Password</a>
 
-    <a href="/cashier/transfer-out">
-        ⬆ Transfer Out
-    </a>
+    </div>
 
-    <hr>
-
-    <!-- ACCOUNT -->
-    <p>ACCOUNT</p>
-    <a href="/cashier/change-password">
-        🔑 Change Password
-    </a>
-
+    <!-- 🔥 FIXED SA BABA -->
     <div class="logout">
         <form method="POST" action="/logout">
             @csrf
             <button>🚪 Logout</button>
         </form>
     </div>
+
 </div>
 
 <!-- CONTENT -->

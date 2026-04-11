@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tiles System</title>
+    <title>Nicole Tile System</title>
 
     <style>
         body {
