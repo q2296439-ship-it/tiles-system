@@ -2,21 +2,74 @@
 
 @section('content')
 
-<div class="content">
+<style>
+.container {
+    max-width: 1000px;
+    margin: auto;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 12px;
+    width: 100%;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background: #f9fafb;
+    text-align: left;
+}
+
+.table th, .table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+</style>
+
+<div class="container">
 
     <h2 style="margin-bottom:20px;">🏬 Branch Management</h2>
 
-    {{-- SUCCESS MESSAGE --}}
+    {{-- SUCCESS --}}
     @if(session('success'))
-        <div style="background:#d1fae5;padding:12px;margin-bottom:20px;border-radius:6px;">
+        <div style="background:#d1fae5;padding:12px;margin-bottom:15px;border-radius:6px;">
             {{ session('success') }}
         </div>
     @endif
 
-    {{-- ERROR MESSAGE --}}
+    {{-- ERROR --}}
     @if($errors->any())
-        <div style="background:#fee2e2;padding:12px;margin-bottom:20px;border-radius:6px;">
-            <ul style="margin:0; padding-left:15px;">
+        <div style="background:#fee2e2;padding:12px;margin-bottom:15px;border-radius:6px;">
+            <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -25,82 +78,52 @@
     @endif
 
     {{-- ADD FORM --}}
-    <div class="card" style="margin-bottom:25px;">
-        <h3 style="margin-bottom:15px;">Add Branch</h3>
+    <div class="card">
 
-        <form method="POST" action="/admin/branches/store" style="display:flex; gap:10px;">
+        <h3>Add Branch</h3>
+
+        <form method="POST" action="/admin/branches/store">
             @csrf
 
             <input 
                 type="text" 
                 name="name" 
-                placeholder="Enter branch name"
-                value="{{ old('name') }}"
-                style="padding:10px; width:300px; border:1px solid #ccc; border-radius:5px;" 
+                placeholder="Branch Name"
                 required
             >
 
-            <button type="submit"
-                style="padding:10px 20px; background:#2563eb; color:white; border:none; border-radius:5px; cursor:pointer;">
-                Add
-            </button>
+            <input 
+                type="text" 
+                name="address" 
+                placeholder="Branch Address"
+                required
+            >
+
+            <button type="submit">➕ Add Branch</button>
         </form>
+
     </div>
 
     {{-- LIST --}}
     <div class="card">
-        <h3 style="margin-bottom:15px;">Branch List</h3>
 
-        <table>
+        <h3>Branch List</h3>
+
+        <table class="table">
             <thead>
                 <tr>
-                    <th style="width:60px;">ID</th>
+                    <th>ID</th>
                     <th>Branch Name</th>
-                    <th style="width:180px;">Action</th>
+                    <th>Address</th>
                 </tr>
             </thead>
 
             <tbody>
                 @forelse($branches as $branch)
                 <tr>
-
-                    {{-- ID --}}
                     <td>{{ $branch->id }}</td>
-
-                    {{-- EDIT FORM --}}
-                    <td>
-                        <form method="POST" action="/admin/branches/update/{{ $branch->id }}" style="display:flex; gap:10px;">
-                            @csrf
-
-                            <input 
-                                type="text" 
-                                name="name"
-                                value="{{ $branch->name }}"
-                                style="padding:8px; width:100%; border:1px solid #ccc; border-radius:5px;"
-                                required
-                    </td>
-
-                    {{-- ACTION --}}
-                    <td style="display:flex; gap:5px;">
-
-                            <button type="submit"
-                                style="background:#16a34a;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;">
-                                Save
-                            </button>
-                        </form>
-
-                        <form method="POST" action="/admin/branches/delete/{{ $branch->id }}"
-                              onsubmit="return confirm('Delete this branch?')">
-                            @csrf
-
-                            <button type="submit"
-                                style="background:#dc2626;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;">
-                                Delete
-                            </button>
-                        </form>
-
-                    </td>
-
+                    <td>{{ $branch->name }}</td>
+                    <td>{{ $branch->address ?? '—' }}</td>
                 </tr>
                 @empty
                 <tr>
@@ -109,6 +132,7 @@
                 @endforelse
             </tbody>
         </table>
+
     </div>
 
 </div>
