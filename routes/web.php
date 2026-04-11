@@ -87,7 +87,7 @@ Route::post('/logout', [AuthController::class, 'logout']);
 
 
 // =====================
-// 🔥 MANAGER DASHBOARD (NEW)
+// MANAGER DASHBOARD
 // =====================
 Route::get('/manager', [InventoryController::class, 'approvals'])->middleware('auth');
 
@@ -111,8 +111,8 @@ Route::prefix('admin')->group(function () {
     // =====================
     Route::get('/branches', [BranchController::class, 'index']);
     Route::post('/branches/store', [BranchController::class, 'store']);
-    Route::post('/branches/update/{id}', [BranchController::class, 'update']);
-    Route::post('/branches/delete/{id}', [BranchController::class, 'delete']);
+
+    // ❌ tinanggal update/delete (ilipat sa manage page later)
 
     // =====================
     // PRODUCTS
@@ -156,6 +156,9 @@ Route::prefix('admin')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
 
+    // 🔥 NEW: MANAGE ACCOUNT
+    Route::get('/manage', [UserController::class, 'manage']);
+
     // =====================
     // REPORTS
     // =====================
@@ -194,7 +197,7 @@ Route::get('/inventory-dashboard', function () {
 
 
 // =====================
-// 🔥 FIX MANAGER PASSWORD
+// FIX MANAGER PASSWORD
 // =====================
 Route::get('/fix-manager-pass', function () {
 

@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        // 🔥 Load users with branch relation (ready for future list page)
+        // 🔥 Load users (for add user page if needed)
         $users = User::with('branch')->get();
 
         // 🔥 Get all branches
@@ -21,9 +21,18 @@ class UserController extends Controller
         return view('admin.users', compact('users', 'branches'));
     }
 
+    // 🔥 NEW: MANAGE PAGE
+    public function manage()
+    {
+        $users = User::with('branch')->get();
+        $branches = Branch::all();
+
+        return view('admin.manage', compact('users', 'branches'));
+    }
+
     public function store(Request $request)
     {
-        // 🔥 VALIDATION (UPDATED)
+        // 🔥 VALIDATION
         $request->validate([
             'username' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -34,9 +43,9 @@ class UserController extends Controller
             'branch_id' => 'required|exists:branches,id',
         ]);
 
-        // 🔥 CREATE USER (UPDATED)
+        // 🔥 CREATE USER
         User::create([
-            'name' => $request->employee_name, // 🔥 gamitin natin real name dito
+            'name' => $request->employee_name,
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -46,7 +55,6 @@ class UserController extends Controller
             'branch_id' => $request->branch_id,
         ]);
 
-        // 🔥 REDIRECT WITH SUCCESS MESSAGE
         return redirect('/admin/users')->with('success', 'User added successfully!');
     }
 }
