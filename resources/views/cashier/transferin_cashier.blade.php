@@ -33,10 +33,14 @@
             @endforeach
         </div>
 
-        <!-- 🔥 SHOW MORE BUTTON -->
-        <div style="text-align:center; margin-top:15px;">
-            <button id="showMoreBtn" style="padding:10px 20px; background:#0ea5e9; color:white; border:none; border-radius:8px;">
-                Show More
+        <!-- 🔥 PAGINATION BUTTONS -->
+        <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
+            <button id="prevBtn" style="padding:8px 15px; background:#64748b; color:white; border:none; border-radius:6px;">
+                ⬅ Back
+            </button>
+
+            <button id="nextBtn" style="padding:8px 15px; background:#0ea5e9; color:white; border:none; border-radius:6px;">
+                Next ➡
             </button>
         </div>
 
@@ -120,7 +124,8 @@
 @section('scripts')
 <script>
 let cart = [];
-let visibleCount = 6;
+let currentPage = 1;
+let perPage = 6;
 
 // ADD TO CART
 document.querySelectorAll('.product-card').forEach(card => {
@@ -162,37 +167,49 @@ function removeItem(index){
     renderCart();
 }
 
-// 🔥 INITIAL LIMIT
-function updateVisibleProducts() {
+// 🔥 SHOW PAGE
+function showPage() {
     let cards = document.querySelectorAll('.product-card');
 
+    let start = (currentPage - 1) * perPage;
+    let end = start + perPage;
+
     cards.forEach((card, index) => {
-        card.style.display = index < visibleCount ? 'block' : 'none';
+        card.style.display = (index >= start && index < end) ? 'block' : 'none';
     });
 
-    if (visibleCount >= cards.length) {
-        document.getElementById('showMoreBtn').style.display = 'none';
-    }
+    // disable buttons
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = end >= cards.length;
 }
 
-// 🔥 SHOW MORE
-document.getElementById('showMoreBtn').addEventListener('click', function() {
-    visibleCount += 6;
-    updateVisibleProducts();
+// NEXT
+document.getElementById('nextBtn').addEventListener('click', function() {
+    currentPage++;
+    showPage();
 });
 
-// 🔍 SEARCH
+// BACK
+document.getElementById('prevBtn').addEventListener('click', function() {
+    if (currentPage > 1) {
+        currentPage--;
+        showPage();
+    }
+});
+
+// 🔍 SEARCH (override pagination)
 document.getElementById('searchInput').addEventListener('keyup', function() {
     let value = this.value.toLowerCase();
     let cards = document.querySelectorAll('.product-card');
 
     if (value === "") {
-        visibleCount = 6;
-        updateVisibleProducts();
+        currentPage = 1;
+        showPage();
         return;
     }
 
-    document.getElementById('showMoreBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('prevBtn').style.display = 'none';
 
     cards.forEach(card => {
         let name = card.dataset.name;
@@ -220,11 +237,14 @@ document.getElementById('branchFilter').addEventListener('change', function() {
             card.style.display = 'none';
         }
     });
+
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('prevBtn').style.display = 'none';
 });
 
 // INIT
 document.addEventListener('DOMContentLoaded', function() {
-    updateVisibleProducts();
+    showPage();
 });
 </script>
 @endsection
