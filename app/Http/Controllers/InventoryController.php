@@ -114,35 +114,56 @@ class InventoryController extends Controller
         return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
     }
 
-    // =====================
-    // 🔥 STORE TRANSFER IN
-    // =====================
-    public function transferInStore(Request $request)
-    {
-        if (empty($request->items)) {
-            return back()->with('error', 'No items selected');
-        }
+   // =====================
+// 🔥 STORE TRANSFER IN
+// =====================
+public function transferInStore(Request $request)
+{
+    // ✅ check kung may items
+    if (empty($request->items)) {
+        return back()->with('error', 'No items selected');
+    }
 
-        $request->validate([
-            'from_branch_id' => 'required|exists:branches,id',
-        ]);
+    // ✅ validation
+    $request->validate([
+        'from_branch_id' => 'required|exists:branches,id',
+        'items' => 'required|array|min:1',
+    ]);
+
+    \DB::beginTransaction();
+
+    try {
 
         foreach ($request->items as $item) {
 
+            // ✅ safety check
+            if (!isset($item['product_id'], $item['qty'])) {
+                throw new \Exception('Invalid item data');
+            }
+
             StockMovement::create([
                 'product_id' => $item['product_id'],
-                'branch_id' => auth()->user()->branch_id,
+                'branch_id' => auth()->user()->branch_id, // destination
+                'from_branch_id' => $request->from_branch_id, // source
                 'type' => 'IN_REQUEST',
                 'quantity' => $item['qty'],
                 'reason' => 'Transfer IN Request',
                 'status' => 'pending',
-                'requested_by' => auth()->id(),
-                'from_branch_id' => $request->from_branch_id,
+                'requested_by' => auth()->id(), // 🔥 IMPORTANT
             ]);
         }
 
+        \DB::commit();
+
         return back()->with('success', 'Request sent to manager!');
+
+    } catch (\Exception $e) {
+
+        \DB::rollBack();
+
+        return back()->with('error', $e->getMessage());
     }
+}
 
     // =====================
     // 🔥 ADMIN TRANSFER OUT

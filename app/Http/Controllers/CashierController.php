@@ -15,13 +15,13 @@ class CashierController extends Controller
     {
         $user = Auth::user();
 
-        // ✅ sariling branch lang
+        // ✅ sariling branch lang products
         $products = Product::where('branch_id', $user->branch_id)->get();
 
         return view('cashier.dashboard', compact('products'));
     }
 
-    // 🔥 CHECKOUT (REALTIME FIXED)
+    // 🔥 CHECKOUT (REALTIME FIXED + SAFE)
     public function checkout(Request $request)
     {
         try {
@@ -34,6 +34,7 @@ class CashierController extends Controller
                 ], 401);
             }
 
+            // ✅ VALIDATION
             $request->validate([
                 'total' => 'required|numeric|min:0',
                 'items' => 'required|array|min:1'
@@ -41,6 +42,7 @@ class CashierController extends Controller
 
             DB::beginTransaction();
 
+            // ✅ CREATE SALE
             $sale = Sale::create([
                 'user_id' => $user->id,
                 'branch_id' => $user->branch_id,
@@ -49,6 +51,7 @@ class CashierController extends Controller
 
             foreach ($request->items as $item) {
 
+                // ✅ VALIDATE ITEM STRUCTURE
                 if (!isset($item['id'], $item['qty'], $item['price'])) {
                     throw new \Exception('Invalid cart data');
                 }
@@ -59,15 +62,17 @@ class CashierController extends Controller
                     throw new \Exception('Product not found');
                 }
 
-                // ✅ siguraduhin sariling branch lang
+                // ✅ IMPORTANT: sariling branch lang pwede ibenta
                 if ($product->branch_id != $user->branch_id) {
                     throw new \Exception('Invalid product branch');
                 }
 
+                // ✅ STOCK CHECK
                 if ($product->stock < $item['qty']) {
                     throw new \Exception('Not enough stock for ' . $product->name);
                 }
 
+                // ✅ SAVE SALE ITEM
                 SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
@@ -75,13 +80,14 @@ class CashierController extends Controller
                     'price' => $item['price']
                 ]);
 
+                // ✅ DEDUCT STOCK
                 $product->stock -= $item['qty'];
                 $product->save();
             }
 
             DB::commit();
 
-            // ✅ sariling branch lang ulit
+            // ✅ RETURN UPDATED PRODUCTS (same branch lang)
             $updatedProducts = Product::where('branch_id', $user->branch_id)->get();
 
             return response()->json([
