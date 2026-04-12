@@ -140,7 +140,8 @@
 
         <!-- MAIN -->
         <p>MAIN</p>
-        <a href="{{ url('/cashier') }}" class="{{ request()->is('cashier') ? 'active' : '' }}">
+        <a href="{{ url('/cashier') }}" 
+           class="{{ request()->is('cashier') ? 'active' : '' }}">
             🧾 New Sale
         </a>
 
@@ -155,13 +156,13 @@
         <p>INVENTORY</p>
         <a href="#">📦 Inventory Stock</a>
 
-        <!-- 🔥 TRANSFER IN (CONNECTED NA SA ROUTE) -->
+        <!-- ✅ FIXED TRANSFER IN -->
         <a href="{{ route('cashier.transfer.in') }}" 
-           class="{{ request()->is('cashier/transfer-in') ? 'active' : '' }}">
+           class="{{ request()->is('cashier/transfer-in*') ? 'active' : '' }}">
             ⬇ Transfer In
         </a>
 
-        <!-- 🔜 future -->
+        <!-- FUTURE -->
         <a href="#">⬆ Transfer Out</a>
 
         <hr>
@@ -173,7 +174,7 @@
     </div>
 
     <div class="logout">
-        <form method="POST" action="/logout">
+        <form method="POST" action="{{ url('/logout') }}">
             @csrf
             <button>🚪 Logout</button>
         </form>
