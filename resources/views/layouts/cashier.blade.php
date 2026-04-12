@@ -1,98 +1,122 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cashier POS</title>
+@extends('layouts.cashier') {{-- or layouts.app kung ito gamit mo sa POS --}}
 
-    <style>
-        * { box-sizing: border-box; }
+@section('content')
+<div class="container-fluid">
+    <div class="row">
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            height: 100vh;
-            background: #f1f5f9;
-        }
+        {{-- LEFT SIDE --}}
+        <div class="col-md-8">
+            <h4>Transfer In Request</h4>
 
-        .sidebar {
-            width: 240px;
-            background: linear-gradient(180deg, #0f172a, #020617);
-            color: white;
-            display: flex;
-            flex-direction: column;
-        }
+            <input type="text" id="search" class="form-control mb-3" placeholder="Search product...">
 
-        .sidebar-menu {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
+            <div class="row" id="product-list">
+                @foreach($products as $product)
+                    <div class="col-md-4 mb-3">
+                        <div class="card p-3 product-card"
+                             data-id="{{ $product->id }}"
+                             data-name="{{ $product->name }}">
+                             
+                            <h6>{{ $product->name }}</h6>
+                            <p class="text-success">₱{{ number_format($product->price,2) }}</p>
+                            <small>Stock: {{ $product->stock }}</small>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
 
-        .sidebar h2 { margin-bottom: 20px; }
+        {{-- RIGHT SIDE --}}
+        <div class="col-md-4">
+            <h5>Request Cart</h5>
 
-        .sidebar p {
-            font-size: 11px;
-            color: #94a3b8;
-            margin: 18px 0 6px;
-        }
+            {{-- ✅ ONLY FIX NEEDED --}}
+            <form action="{{ route('cashier.transfer.in.store') }}" method="POST">
+                @csrf
 
-        .sidebar a {
-            display: block;
-            padding: 12px;
-            color: #cbd5f5;
-            text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 6px;
-        }
+                <table class="table" id="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
 
-        .sidebar a:hover { background: #1e293b; }
+                <div class="mb-2">
+                    <label>From Branch</label>
+                    <select name="from_branch_id" class="form-control" required>
+                        <option value="">Select Branch</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}">
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-        .active {
-            background: #22c55e;
-            color: white !important;
-        }
+                <div class="mb-2">
+                    <label>Notes</label>
+                    <textarea name="notes" class="form-control"></textarea>
+                </div>
 
-        .logout { padding: 15px; }
-
-        .content {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="sidebar">
-    <div class="sidebar-menu">
-
-        <h2>💰 POS</h2>
-
-        <p>MAIN</p>
-        <a href="{{ url('/cashier') }}" class="{{ request()->is('cashier') ? 'active' : '' }}">
-            🧾 New Sale
-        </a>
-
-        <p>INVENTORY</p>
-        <a href="{{ route('cashier.transfer.in') }}" 
-           class="{{ request()->is('cashier/transfer-in*') ? 'active' : '' }}">
-            ⬇ Transfer In
-        </a>
+                <button class="btn btn-primary w-100">Submit Request</button>
+            </form>
+        </div>
 
     </div>
-
-    <div class="logout">
-        <form method="POST" action="{{ url('/logout') }}">
-            @csrf
-            <button>Logout</button>
-        </form>
-    </div>
 </div>
+@endsection
 
-<div class="content">
-    @yield('content')
-</div>
 
-</body>
-</html>
+@section('scripts')
+<script>
+let cart = [];
+
+document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('click', () => {
+        let id = card.dataset.id;
+        let name = card.dataset.name;
+
+        let existing = cart.find(item => item.id == id);
+
+        if (existing) {
+            existing.qty++;
+        } else {
+            cart.push({id, name, qty: 1});
+        }
+
+        renderCart();
+    });
+});
+
+function renderCart() {
+    let tbody = document.querySelector('#cart-table tbody');
+    tbody.innerHTML = '';
+
+    cart.forEach((item, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>
+                    ${item.name}
+                    <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
+                </td>
+                <td>
+                    <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1" class="form-control">
+                </td>
+                <td>
+                    <button type="button" onclick="removeItem(${index})">❌</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+</script>
+@endsection
