@@ -13,7 +13,7 @@
     box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
 
-/* TABLE */
+/* TABLE BASE */
 .table { 
     width:100%; 
     border-collapse:collapse; 
@@ -29,7 +29,7 @@
     border-bottom:1px solid #eee; 
 }
 
-/* INPUT FIX */
+/* INPUT */
 input, select {
     padding:8px;
     border:1px solid #ddd;
@@ -56,33 +56,46 @@ input, select {
 .delete { background:#dc2626; }
 
 /* 🔥 USERS TABLE WIDTH */
-.table th:nth-child(1),
-.table td:nth-child(1) { width:20%; }
+.users-table th:nth-child(1),
+.users-table td:nth-child(1) { width:20%; }
 
-.table th:nth-child(2),
-.table td:nth-child(2) { width:20%; }
+.users-table th:nth-child(2),
+.users-table td:nth-child(2) { width:20%; }
 
-.table th:nth-child(3),
-.table td:nth-child(3) { width:15%; }
+.users-table th:nth-child(3),
+.users-table td:nth-child(3) { width:15%; }
 
-.table th:nth-child(4),
-.table td:nth-child(4) { width:20%; }
+.users-table th:nth-child(4),
+.users-table td:nth-child(4) { width:20%; }
 
-.table th:nth-child(5),
-.table td:nth-child(5) { width:15%; }
+.users-table th:nth-child(5),
+.users-table td:nth-child(5) { width:15%; }
 
-.table th:nth-child(6),
-.table td:nth-child(6) { 
+.users-table th:nth-child(6),
+.users-table td:nth-child(6) { 
     width:10%; 
     text-align:center;
 }
 
-/* 🔥 ROW ALIGN */
+/* 🔥 BRANCHES TABLE WIDTH (SEPARATE FIX) */
+.branches-table th:nth-child(1),
+.branches-table td:nth-child(1) { width:40%; }
+
+.branches-table th:nth-child(2),
+.branches-table td:nth-child(2) { width:40%; }
+
+.branches-table th:nth-child(3),
+.branches-table td:nth-child(3) { 
+    width:20%; 
+    text-align:center;
+}
+
+/* ALIGNMENT */
 .table td {
     vertical-align: middle;
 }
 
-/* 🔥 BUTTON ALIGN */
+/* BUTTON ALIGN */
 .action-buttons {
     display:flex;
     align-items:center;
@@ -90,7 +103,7 @@ input, select {
     gap:8px;
 }
 
-/* 🔥 HOVER EFFECT (PRO LOOK) */
+/* HOVER */
 .table tr:hover {
     background:#f9fafb;
 }
@@ -105,7 +118,7 @@ input, select {
 
 <h3>Users</h3>
 
-<table class="table">
+<table class="table users-table">
 <thead>
 <tr>
     <th>Username</th>
@@ -179,12 +192,12 @@ input, select {
 
 <h3>Branches</h3>
 
-<table class="table">
+<table class="table branches-table">
 <thead>
 <tr>
-    <th style="width:40%;">Name</th>
-    <th style="width:40%;">Address</th>
-    <th style="width:20%; text-align:center;">Action</th>
+    <th>Name</th>
+    <th>Address</th>
+    <th>Action</th>
 </tr>
 </thead>
 

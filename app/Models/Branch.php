@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Branch extends Model
 {
     protected $fillable = [
-        'name'
+        'name',
+        'address' // 🔥 FIX: idagdag ito
     ];
 
     // 🔥 relationship: isang branch maraming products
