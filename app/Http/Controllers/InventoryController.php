@@ -88,7 +88,7 @@ class InventoryController extends Controller
     $requests = StockMovement::with(['product','branch','from_branch'])
         ->where('type', 'IN_REQUEST')
         ->where('branch_id', auth()->user()->branch_id) // 👈 para sa sariling branch lang
-        ->whereIn('status', ['pending', 'approved_sender']) // 👈 filter
+        ->whereIn('status', ['status', 'pending']) // 👈 filter
         ->latest()
         ->get();
 
