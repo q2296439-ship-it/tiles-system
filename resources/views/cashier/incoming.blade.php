@@ -2,40 +2,91 @@
 
 @section('content')
 
-<h2 style="margin-bottom:20px;">📦 Incoming Transfer Stock</h2>
+<style>
+    .table-wrapper {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+    }
 
-<div style="background:white; padding:20px; border-radius:10px;">
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-    <table style="width:100%; border-collapse:collapse;">
-        <tr style="background:#f9fafb;">
+    th {
+        background: #f1f5f9;
+        font-size: 13px;
+        color: #64748b;
+        text-align: left;
+    }
+
+    th, td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 14px;
+    }
+
+    /* ALIGNMENT */
+    th:nth-child(3),
+    td:nth-child(3),
+    th:nth-child(4),
+    td:nth-child(4),
+    th:nth-child(5),
+    td:nth-child(5) {
+        text-align: center;
+    }
+
+    /* STATUS */
+    .status-ready {
+        color: #16a34a;
+        font-weight: 500;
+    }
+
+    /* BUTTON */
+    .btn-receive {
+        background: #16a34a;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    h2 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+</style>
+
+<h2>📦 Incoming Transfer Stock</h2>
+
+<div class="table-wrapper">
+
+    <table>
+        <tr>
             <th style="padding:10px;">Product</th>
             <th>From Branch</th>
             <th>Qty</th>
             <th>Status</th>
-            <th style="text-align:center;">Action</th>
+            <th>Action</th>
         </tr>
 
         @forelse($requests as $req)
         <tr>
             <td>{{ $req->product->name ?? '-' }}</td>
             <td>{{ $req->from_branch->name ?? '-' }}</td>
-            <td style="text-align:center;">{{ $req->quantity }}</td>
+            <td>{{ $req->quantity }}</td>
 
-            <td style="text-align:center; color:green;">
+            <td class="status-ready">
                 Ready to Receive
             </td>
 
-            <td style="text-align:center;">
+            <td>
                 <form action="/cashier/receive/{{ $req->id }}" method="POST">
                     @csrf
-                    <button style="
-                        background:#16a34a;
-                        color:white;
-                        padding:6px 12px;
-                        border:none;
-                        border-radius:6px;
-                        cursor:pointer;
-                    ">
+                    <button class="btn-receive">
                         ✔ Receive
                     </button>
                 </form>
