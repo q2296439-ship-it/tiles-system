@@ -26,7 +26,7 @@
             @endforeach
         </div>
 
-        <!-- CART (NASA ILALIM NA) -->
+        <!-- CART -->
         <div style="margin-top:25px; background:white; padding:20px; border-radius:12px;">
             <h4>🛒 Request Cart</h4>
 
@@ -37,7 +37,7 @@
 
                 <hr>
 
-                <!-- FROM / TO -->
+                <!-- FROM / TO (BOTH DROPDOWN) -->
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;">
                         <label>From Branch</label>
@@ -51,7 +51,11 @@
 
                     <div style="flex:1;">
                         <label>To Branch</label>
-                        <input type="text" value="{{ auth()->user()->branch->name ?? '' }}" readonly style="width:100%; padding:8px;">
+                        <select name="to_branch_id" style="width:100%; padding:8px;">
+                            <option value="{{ auth()->user()->branch_id }}">
+                                {{ auth()->user()->branch->name ?? 'My Branch' }}
+                            </option>
+                        </select>
                     </div>
                 </div>
 
@@ -68,35 +72,39 @@
 
     </div>
 
-    <!-- RIGHT SIDE (REQUEST HISTORY) -->
-    <div style="flex:1; background:#0f172a; color:white; padding:20px; border-radius:12px;">
+</div>
+@endsection
 
-        <h4>📋 Requests</h4>
 
-        @forelse($requests ?? [] as $req)
-        <div style="background:#1e293b; padding:10px; margin-bottom:10px; border-radius:8px;">
-            
-            <strong>{{ $req->from_branch->name ?? 'N/A' }} → {{ $req->branch->name ?? 'N/A' }}</strong>
-            <br>
-            <small>{{ $req->created_at }}</small>
-            <br>
+{{-- RIGHT PANEL (LAYOUT CART AREA) --}}
+@section('cart')
 
-            <span style="color:yellow;">
-                {{ ucfirst($req->status) }}
-            </span>
+<h3>📋 Requests</h3>
 
-            <ul style="margin-top:5px;">
-                <li>{{ $req->product->name }} ({{ $req->quantity }})</li>
-            </ul>
+@forelse($requests as $req)
+<div style="margin-bottom:15px; background:#1e293b; padding:10px; border-radius:10px;">
 
-        </div>
-        @empty
-            <p>No requests yet</p>
-        @endforelse
+    <strong>
+        {{ $req->from_branch->name ?? 'N/A' }} → {{ $req->branch->name ?? 'N/A' }}
+    </strong>
+    
+    <br>
+    <small>{{ $req->created_at->format('M d, Y h:i A') }}</small>
+    <br>
 
+    <span style="color:yellow;">
+        {{ ucfirst($req->status) }}
+    </span>
+
+    <div style="margin-top:5px;">
+        {{ $req->product->name }} ({{ $req->quantity }})
     </div>
 
 </div>
+@empty
+    <p>No requests yet</p>
+@endforelse
+
 @endsection
 
 
