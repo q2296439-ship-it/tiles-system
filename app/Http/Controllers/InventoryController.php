@@ -231,58 +231,58 @@ class InventoryController extends Controller
     // 🔥 APPROVAL PAGE (UPDATED FLOW)
     // =====================
     public function approvals()
-    {
-        $branchId = auth()->user()->branch_id;
+{
+    $branchId = auth()->user()->branch_id;
 
-        $requests = StockMovement::with(['product','branch','from_branch'])
-            ->where('type', 'IN_REQUEST')
-            ->where(function($query) use ($branchId) {
+    $requests = StockMovement::with(['product','branch','from_branch'])
+        ->where('type', 'IN_REQUEST')
+        ->where(function($query) use ($branchId) {
 
-                // SENDER
-                $query->where(function($q) use ($branchId) {
-                    $q->where('from_branch_id', $branchId)
-                      ->where('status', 'pending');
-                });
+            // FIRST APPROVAL (receiver - nag request)
+            $query->where(function($q) use ($branchId) {
+                $q->where('branch_id', $branchId)
+                  ->where('status', 'pending');
+            });
 
-                // RECEIVER
-                $query->orWhere(function($q) use ($branchId) {
-                    $q->where('branch_id', $branchId)
-                      ->where('status', 'approved_sender');
-                });
+            // SECOND APPROVAL (sender - magbibigay)
+            $query->orWhere(function($q) use ($branchId) {
+                $q->where('from_branch_id', $branchId)
+                  ->where('status', 'approved_receiver');
+            });
 
-            })
-            ->latest()
-            ->get();
+        })
+        ->latest()
+        ->get();
 
-        return view('manager.approvals', compact('requests'));
-    }
+    return view('manager.approvals', compact('requests'));
+}
 
     // =====================
     // 🔥 APPROVE (DUAL FLOW)
     // =====================
     public function approve($id)
-    {
-        $movement = StockMovement::findOrFail($id);
+{
+    $movement = StockMovement::findOrFail($id);
 
-        if ($movement->status == 'pending') {
+    // STEP 1: Manager ng RECEIVER (San Isidro)
+    if ($movement->status == 'pending') {
 
-            // FIRST APPROVAL
-            $movement->status = 'approved_sender';
-            $movement->approved_by = auth()->id();
-            $movement->approved_at = now();
+        $movement->status = 'approved_receiver';
 
-        } elseif ($movement->status == 'approved_sender') {
-
-            // SECOND APPROVAL
-            $movement->status = 'completed';
-
-            // (next step natin stock logic)
-        }
-
-        $movement->save();
-
-        return back()->with('success', 'Approval updated!');
     }
+    // STEP 2: Manager ng SENDER (Arayat)
+    elseif ($movement->status == 'approved_receiver') {
+
+        $movement->status = 'approved_sender';
+
+    }
+
+    $movement->approved_by = auth()->id();
+    $movement->approved_at = now();
+    $movement->save();
+
+    return back()->with('success', 'Approval updated!');
+}
 
     // =====================
     // 🔥 REJECT
