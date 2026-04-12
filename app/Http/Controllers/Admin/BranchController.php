@@ -24,11 +24,13 @@ class BranchController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:branches,name'
+            'name' => 'required|unique:branches,name',
+            'address' => 'nullable|string|max:255'
         ]);
 
         Branch::create([
-            'name' => $request->name
+            'name' => $request->name,
+            'address' => $request->address // 🔥 ADD
         ]);
 
         return redirect('/admin/branches')
@@ -41,16 +43,19 @@ class BranchController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255'
         ]);
 
         $branch = Branch::findOrFail($id);
 
         $branch->update([
-            'name' => $request->name
+            'name' => $request->name,
+            'address' => $request->address // 🔥 ADD
         ]);
 
-        return redirect('/admin/branches')
+        // 🔥 IMPORTANT FIX (para bumalik sa manage page)
+        return redirect('/admin/manage')
             ->with('success', 'Branch updated successfully!');
     }
 
@@ -63,7 +68,8 @@ class BranchController extends Controller
 
         $branch->delete();
 
-        return redirect('/admin/branches')
+        // 🔥 IMPORTANT FIX
+        return redirect('/admin/manage')
             ->with('success', 'Branch deleted successfully!');
     }
 }

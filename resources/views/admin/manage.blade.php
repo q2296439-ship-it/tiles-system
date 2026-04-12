@@ -12,13 +12,20 @@
     box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
 .table { width:100%; border-collapse:collapse; }
-.table th, .table td { padding:10px; border-bottom:1px solid #eee; }
+
+.table th, .table td { 
+    padding:12px; 
+    border-bottom:1px solid #eee; 
+}
+
 input, select {
     padding:6px;
     border:1px solid #ddd;
     border-radius:6px;
     width:100%;
+    box-sizing: border-box;
 }
+
 .btn {
     padding:6px 10px;
     border:none;
@@ -26,8 +33,37 @@ input, select {
     cursor:pointer;
     color:white;
 }
+
 .save { background:#16a34a; }
 .delete { background:#dc2626; }
+
+/* 🔥 ALIGNMENT FIX */
+.table th:nth-child(1),
+.table td:nth-child(1) { width: 25%; }
+
+.table th:nth-child(2),
+.table td:nth-child(2) { width: 25%; }
+
+.table th:nth-child(3),
+.table td:nth-child(3) { width: 15%; }
+
+.table th:nth-child(4),
+.table td:nth-child(4) { width: 20%; }
+
+.table th:nth-child(5),
+.table td:nth-child(5) { width: 15%; }
+
+.table th:nth-child(6),
+.table td:nth-child(6) { width: 20%; text-align:center; }
+
+.table td { vertical-align: middle; }
+
+/* 🔥 BUTTON ALIGN */
+.action-buttons {
+    display:flex;
+    gap:5px;
+    justify-content:center;
+}
 </style>
 
 <div class="container">
@@ -89,7 +125,7 @@ input, select {
 <input type="password" name="password" placeholder="New password (optional)">
 </td>
 
-<td style="display:flex; gap:5px;">
+<td class="action-buttons">
 
 <button class="btn save">Save</button>
 </form>
@@ -137,7 +173,7 @@ input, select {
 <input type="text" name="address" value="{{ $branch->address }}">
 </td>
 
-<td style="display:flex; gap:5px;">
+<td class="action-buttons">
 
 <button class="btn save">Save</button>
 </form>
