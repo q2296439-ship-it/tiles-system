@@ -5,11 +5,13 @@
 
     <!-- LEFT SIDE -->
     <div style="flex:2;">
-        <h3 style="margin-bottom:15px;">Transfer In Request</h3>
+
+        <h3>Transfer In Request</h3>
 
         <input type="text" placeholder="🔍 Search product..." 
                style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px;">
 
+        <!-- PRODUCTS -->
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px;">
             @foreach($products as $product)
             <div class="product-card"
@@ -23,35 +25,74 @@
             </div>
             @endforeach
         </div>
+
+        <!-- CART (NASA ILALIM NA) -->
+        <div style="margin-top:25px; background:white; padding:20px; border-radius:12px;">
+            <h4>🛒 Request Cart</h4>
+
+            <form action="{{ route('cashier.transfer.in.store') }}" method="POST">
+                @csrf
+
+                <div id="cart-items"></div>
+
+                <hr>
+
+                <!-- FROM / TO -->
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label>From Branch</label>
+                        <select name="from_branch_id" style="width:100%; padding:8px;">
+                            <option value="">Select</option>
+                            @foreach($branches as $branch)
+                                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div style="flex:1;">
+                        <label>To Branch</label>
+                        <input type="text" value="{{ auth()->user()->branch->name ?? '' }}" readonly style="width:100%; padding:8px;">
+                    </div>
+                </div>
+
+                <br>
+
+                <label>Notes</label>
+                <textarea name="notes" style="width:100%; padding:10px;"></textarea>
+
+                <button style="margin-top:10px; width:100%; padding:12px; background:#22c55e; border:none; border-radius:8px; color:white;">
+                    Submit Request
+                </button>
+            </form>
+        </div>
+
     </div>
 
-    <!-- RIGHT SIDE -->
+    <!-- RIGHT SIDE (REQUEST HISTORY) -->
     <div style="flex:1; background:#0f172a; color:white; padding:20px; border-radius:12px;">
 
-        <h4>🛒 Request Cart</h4>
+        <h4>📋 Requests</h4>
 
-        <form action="{{ route('cashier.transfer.in.store') }}" method="POST">
-            @csrf
+        @forelse($requests ?? [] as $req)
+        <div style="background:#1e293b; padding:10px; margin-bottom:10px; border-radius:8px;">
+            
+            <strong>{{ $req->from_branch->name ?? 'N/A' }} → {{ $req->branch->name ?? 'N/A' }}</strong>
+            <br>
+            <small>{{ $req->created_at }}</small>
+            <br>
 
-            <div id="cart-items" style="margin-top:15px;"></div>
+            <span style="color:yellow;">
+                {{ ucfirst($req->status) }}
+            </span>
 
-            <hr style="margin:15px 0; border-color:#334155;">
+            <ul style="margin-top:5px;">
+                <li>{{ $req->product->name }} ({{ $req->quantity }})</li>
+            </ul>
 
-            <label>From Branch</label>
-            <select name="from_branch_id" style="width:100%; padding:10px; border-radius:8px; margin-bottom:10px;">
-                <option value="">Select Branch</option>
-                @foreach($branches as $branch)
-                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                @endforeach
-            </select>
-
-            <label>Notes</label>
-            <textarea name="notes" style="width:100%; padding:10px; border-radius:8px;"></textarea>
-
-            <button style="margin-top:15px; width:100%; padding:12px; background:#22c55e; border:none; border-radius:10px; color:white;">
-                Submit Request
-            </button>
-        </form>
+        </div>
+        @empty
+            <p>No requests yet</p>
+        @endforelse
 
     </div>
 
@@ -63,7 +104,6 @@
 <script>
 let cart = [];
 
-// CLICK PRODUCT
 document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
         let id = card.dataset.id;
@@ -81,26 +121,22 @@ document.querySelectorAll('.product-card').forEach(card => {
     });
 });
 
-// RENDER CART
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
 
     cart.forEach((item, index) => {
         container.innerHTML += `
-            <div style="margin-bottom:10px; background:#1e293b; padding:10px; border-radius:8px;">
+            <div style="margin-bottom:10px; padding:10px; background:#f1f5f9; border-radius:8px;">
                 <strong>${item.name}</strong>
-                <br>
-                <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1"
-                       style="width:60px; margin-top:5px;">
+                <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1" style="width:60px;">
                 <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
-                <button type="button" onclick="removeItem(${index})" style="float:right;">❌</button>
+                <button type="button" onclick="removeItem(${index})">❌</button>
             </div>
         `;
     });
 }
 
-// REMOVE
 function removeItem(index){
     cart.splice(index,1);
     renderCart();

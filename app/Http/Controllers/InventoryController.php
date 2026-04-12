@@ -85,7 +85,13 @@ class InventoryController extends Controller
         $products = Product::all();
         $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
 
-        return view('cashier.transferin_cashier', compact('products', 'branches'));
+        // 🔥 ADD THIS (RIGHT PANEL DATA)
+        $requests = StockMovement::with(['product','branch','from_branch'])
+            ->where('type', 'IN_REQUEST')
+            ->latest()
+            ->get();
+
+        return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
     }
 
     // =====================
