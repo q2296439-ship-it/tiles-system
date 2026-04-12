@@ -30,7 +30,8 @@
         <div class="col-md-4">
             <h5>Request Cart</h5>
 
-            <form action="{{ route('transfer.request.store') }}" method="POST">
+            {{-- ✅ FIXED ROUTE --}}
+            <form action="{{ route('cashier.transfer.in.store') }}" method="POST">
                 @csrf
 
                 <table class="table" id="cart-table">
@@ -69,11 +70,14 @@
 
     </div>
 </div>
+@endsection
 
-{{-- JS --}}
+
+@section('scripts')
 <script>
 let cart = [];
 
+// ADD PRODUCT
 document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
         let id = card.dataset.id;
@@ -91,6 +95,7 @@ document.querySelectorAll('.product-card').forEach(card => {
     });
 });
 
+// RENDER CART
 function renderCart() {
     let tbody = document.querySelector('#cart-table tbody');
     tbody.innerHTML = '';
@@ -113,6 +118,7 @@ function renderCart() {
     });
 }
 
+// REMOVE ITEM
 function removeItem(index) {
     cart.splice(index, 1);
     renderCart();
