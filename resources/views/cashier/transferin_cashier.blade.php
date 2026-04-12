@@ -48,13 +48,15 @@
         <div style="margin-top:25px; background:white; padding:20px; border-radius:12px;">
             <h4>🛒 Request Cart</h4>
 
-            <form action="{{ route('cashier.transfer.in.store') }}" method="POST">
+            <!-- ✅ FIXED (ADD ID) -->
+            <form id="transferForm" action="{{ route('cashier.transfer.in.store') }}" method="POST">
                 @csrf
 
                 <div id="cart-items"></div>
 
                 <hr>
 
+                <!-- FROM / TO -->
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;">
                         <label>From Branch</label>
@@ -81,7 +83,6 @@
                 <label>Notes</label>
                 <textarea name="notes" style="width:100%; padding:10px;"></textarea>
 
-                <!-- 🔥 FIXED BUTTON -->
                 <button type="submit" style="margin-top:10px; width:100%; padding:12px; background:#22c55e; border:none; border-radius:8px; color:white;">
                     Submit Request
                 </button>
@@ -94,7 +95,9 @@
 @endsection
 
 
+{{-- RIGHT PANEL --}}
 @section('cart')
+
 <h3>📋 Requests</h3>
 
 @forelse($requests as $req)
@@ -105,7 +108,8 @@
     </strong>
     
     <br>
-    <small>{{ $req->created_at->format('M d, Y h:i A') }}</small><br>
+    <small>{{ $req->created_at->format('M d, Y h:i A') }}</small>
+    <br>
 
     <span style="color:yellow;">
         {{ ucfirst($req->status) }}
@@ -119,6 +123,7 @@
 @empty
     <p>No requests yet</p>
 @endforelse
+
 @endsection
 
 
@@ -143,11 +148,13 @@ document.querySelectorAll('.product-card').forEach(card => {
             cart.push({id, name, qty:1});
         }
 
+        console.log("CART:", cart); // 🔥 DEBUG
+
         renderCart();
     });
 });
 
-// 🔥 FIXED RENDER CART
+// RENDER CART
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
@@ -175,8 +182,11 @@ function removeItem(index){
     renderCart();
 }
 
-// 🔥 PREVENT EMPTY SUBMIT
-document.querySelector("form").addEventListener("submit", function(e) {
+// 🔥 FIXED SUBMIT (IMPORTANT)
+document.getElementById("transferForm").addEventListener("submit", function(e) {
+
+    console.log("SUBMIT:", cart);
+
     if (cart.length === 0) {
         e.preventDefault();
         alert("No items in cart!");
