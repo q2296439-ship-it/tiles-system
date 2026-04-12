@@ -82,10 +82,19 @@ class InventoryController extends Controller
     // =====================
     public function transferInForm()
 {
-    $branchId = auth()->user()->branch_id;
+    $products = Product::where('branch_id', auth()->user()->branch_id)->get();
 
-$products = Product::withSum(['stockMovements as branch_stock' => function ($q) use ($branchId) {
-    $q->where('branch_id', $branchId);
+    $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
+
+    $requests = StockMovement::with(['product','branch','from_branch'])
+        ->where('type', 'IN_REQUEST')
+        ->where('branch_id', auth()->user()->branch_id)
+        ->whereIn('status', ['pending', 'approved_receiver'])
+        ->latest()
+        ->get();
+
+    return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
+}
 }], 'quantity')->get();
     $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
 
