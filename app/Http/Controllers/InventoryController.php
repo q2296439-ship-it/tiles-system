@@ -507,4 +507,38 @@ class InventoryController extends Controller
 
         return back()->with('success', 'Stock released!');
     }
+    // =====================
+// 🔥 CASHIER INCOMING (NEW)
+// =====================
+public function incoming()
+{
+    $branchId = auth()->user()->branch_id;
+
+    $requests = StockMovement::with(['product','from_branch'])
+        ->where('branch_id', $branchId)
+        ->where('type', 'IN_REQUEST')
+        ->where('status', 'approved_sender') // galing sa manager release
+        ->latest()
+        ->get();
+
+    return view('cashier.incoming', compact('requests'));
+}
+// =====================
+// 🔥 RECEIVE STOCK (NEW)
+// =====================
+public function receive($id)
+{
+    $movement = StockMovement::findOrFail($id);
+
+    $product = Product::find($movement->product_id);
+    $product->stock += $movement->quantity;
+    $product->save();
+
+    $movement->status = 'completed';
+    $movement->received_by = auth()->id();
+    $movement->received_at = now();
+    $movement->save();
+
+    return back()->with('success', 'Stock received!');
+}
 }
