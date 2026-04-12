@@ -130,10 +130,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // 🔥 MANAGER
 // =====================
 Route::get('/manager', [InventoryController::class, 'managerDashboard'])->middleware('auth');
-
 Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->middleware('auth');
 
-// ✅ NEW (TRANSFER OUT)
 Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutManager'])->middleware('auth');
 Route::post('/manager/release/{id}', [InventoryController::class, 'release'])->middleware('auth');
 
@@ -207,13 +205,18 @@ Route::prefix('admin')->group(function () {
     Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
 
     Route::get('/sales/brand', [SalesReportController::class, 'perBrand']);
-    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf']);
-    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel']);
+
+    // 🔥 FIXED HERE
+    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])
+        ->name('report.brand.pdf');
+
+    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])
+        ->name('report.brand.excel');
 });
 
 
 // =====================
-// 🔥 CASHIER (FINAL FIX)
+// 🔥 CASHIER
 // =====================
 Route::prefix('cashier')->group(function () {
 
@@ -226,7 +229,6 @@ Route::prefix('cashier')->group(function () {
     Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])
         ->name('cashier.transfer.in.store');
 
-    // ✅ NEW (INCOMING)
     Route::get('/incoming', [InventoryController::class, 'incoming']);
     Route::post('/receive/{id}', [InventoryController::class, 'receive']);
 });
