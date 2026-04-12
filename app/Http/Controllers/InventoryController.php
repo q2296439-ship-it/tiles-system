@@ -42,6 +42,7 @@ class InventoryController extends Controller
                 'price' => $request->new_price,
                 'stock' => $request->quantity,
                 'color' => 'N/A',
+                'branch_id' => $request->branch_id, // ✅ FIX
             ]);
 
             StockMovement::create([
@@ -77,24 +78,24 @@ class InventoryController extends Controller
         return back()->with('success', 'Saved successfully!');
     }
 
-   // =====================
-// 🔥 CASHIER: TRANSFER IN FORM
-// =====================
-public function transferInForm()
-{
-    $products = Product::where('branch_id', auth()->user()->branch_id)->get();
+    // =====================
+    // 🔥 CASHIER: TRANSFER IN FORM
+    // =====================
+    public function transferInForm()
+    {
+        $products = Product::where('branch_id', '!=', auth()->user()->branch_id)->get(); // ✅ FIX
 
-    $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
+        $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
 
-    $requests = StockMovement::with(['product','branch','from_branch'])
-        ->where('type', 'IN_REQUEST')
-        ->where('branch_id', auth()->user()->branch_id)
-        ->whereIn('status', ['pending', 'approved_receiver'])
-        ->latest()
-        ->get();
+        $requests = StockMovement::with(['product','branch','from_branch'])
+            ->where('type', 'IN_REQUEST')
+            ->where('branch_id', auth()->user()->branch_id)
+            ->whereIn('status', ['pending', 'approved_receiver'])
+            ->latest()
+            ->get();
 
-    return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
-}
+        return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
+    }
 
     // =====================
     // 🔥 STORE TRANSFER IN
@@ -234,58 +235,49 @@ public function transferInForm()
     // 🔥 APPROVAL PAGE (UPDATED FLOW)
     // =====================
     public function approvals()
-{
-    $branchId = auth()->user()->branch_id;
+    {
+        $branchId = auth()->user()->branch_id;
 
-    $requests = StockMovement::with(['product','branch','from_branch'])
-        ->where('type', 'IN_REQUEST')
-        ->where(function($query) use ($branchId) {
+        $requests = StockMovement::with(['product','branch','from_branch'])
+            ->where('type', 'IN_REQUEST')
+            ->where(function($query) use ($branchId) {
 
-            // FIRST APPROVAL (receiver - nag request)
-            $query->where(function($q) use ($branchId) {
-                $q->where('branch_id', $branchId)
-                  ->where('status', 'pending');
-            });
+                $query->where(function($q) use ($branchId) {
+                    $q->where('branch_id', $branchId)
+                      ->where('status', 'pending');
+                });
 
-            // SECOND APPROVAL (sender - magbibigay)
-            $query->orWhere(function($q) use ($branchId) {
-                $q->where('from_branch_id', $branchId)
-                  ->where('status', 'approved_receiver');
-            });
+                $query->orWhere(function($q) use ($branchId) {
+                    $q->where('from_branch_id', $branchId)
+                      ->where('status', 'approved_receiver');
+                });
 
-        })
-        ->latest()
-        ->get();
+            })
+            ->latest()
+            ->get();
 
-    return view('manager.approvals', compact('requests'));
-}
+        return view('manager.approvals', compact('requests'));
+    }
 
     // =====================
     // 🔥 APPROVE (DUAL FLOW)
     // =====================
     public function approve($id)
-{
-    $movement = StockMovement::findOrFail($id);
+    {
+        $movement = StockMovement::findOrFail($id);
 
-    // STEP 1: Manager ng RECEIVER (San Isidro)
-    if ($movement->status == 'pending') {
+        if ($movement->status == 'pending') {
+            $movement->status = 'approved_receiver';
+        } elseif ($movement->status == 'approved_receiver') {
+            $movement->status = 'approved_sender';
+        }
 
-        $movement->status = 'approved_receiver';
+        $movement->approved_by = auth()->id();
+        $movement->approved_at = now();
+        $movement->save();
 
+        return back()->with('success', 'Approval updated!');
     }
-    // STEP 2: Manager ng SENDER (Arayat)
-    elseif ($movement->status == 'approved_receiver') {
-
-        $movement->status = 'approved_sender';
-
-    }
-
-    $movement->approved_by = auth()->id();
-    $movement->approved_at = now();
-    $movement->save();
-
-    return back()->with('success', 'Approval updated!');
-}
 
     // =====================
     // 🔥 REJECT
@@ -479,8 +471,9 @@ public function transferInForm()
 
         return back()->with('success', 'Stock transferred successfully');
     }
-        // =====================
-    // 🔥 MANAGER TRANSFER OUT (NEW)
+
+    // =====================
+    // 🔥 MANAGER TRANSFER OUT
     // =====================
     public function transferOutManager()
     {
@@ -497,7 +490,7 @@ public function transferInForm()
     }
 
     // =====================
-    // 🔥 RELEASE STOCK (NEW)
+    // 🔥 RELEASE STOCK
     // =====================
     public function release($id)
     {
@@ -510,38 +503,40 @@ public function transferInForm()
 
         return back()->with('success', 'Stock released!');
     }
+
     // =====================
-// 🔥 CASHIER INCOMING (NEW)
-// =====================
-public function incoming()
-{
-    $branchId = auth()->user()->branch_id;
+    // 🔥 CASHIER INCOMING
+    // =====================
+    public function incoming()
+    {
+        $branchId = auth()->user()->branch_id;
 
-    $requests = StockMovement::with(['product','from_branch'])
-        ->where('branch_id', $branchId)
-        ->where('type', 'IN_REQUEST')
-        ->where('status', 'approved_sender') // galing sa manager release
-        ->latest()
-        ->get();
+        $requests = StockMovement::with(['product','from_branch'])
+            ->where('branch_id', $branchId)
+            ->where('type', 'IN_REQUEST')
+            ->where('status', 'approved_sender')
+            ->latest()
+            ->get();
 
-    return view('cashier.incoming', compact('requests'));
-}
-// =====================
-// 🔥 RECEIVE STOCK (NEW)
-// =====================
-public function receive($id)
-{
-    $movement = StockMovement::findOrFail($id);
+        return view('cashier.incoming', compact('requests'));
+    }
 
-    $product = Product::find($movement->product_id);
-    $product->stock += $movement->quantity;
-    $product->save();
+    // =====================
+    // 🔥 RECEIVE STOCK
+    // =====================
+    public function receive($id)
+    {
+        $movement = StockMovement::findOrFail($id);
 
-    $movement->status = 'completed';
-    $movement->received_by = auth()->id();
-    $movement->received_at = now();
-    $movement->save();
+        $product = Product::find($movement->product_id);
+        $product->stock += $movement->quantity;
+        $product->save();
 
-    return back()->with('success', 'Stock received!');
-}
+        $movement->status = 'completed';
+        $movement->received_by = auth()->id();
+        $movement->received_at = now();
+        $movement->save();
+
+        return back()->with('success', 'Stock received!');
+    }
 }
