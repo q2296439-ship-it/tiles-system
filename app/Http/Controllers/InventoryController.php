@@ -90,12 +90,13 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 ADMIN: TRANSFER IN TABLE
+    // 🔥 ADMIN: TRANSFER IN TABLE (FIXED LOGIC)
     // =====================
     public function transferInAdmin()
     {
         $transfers = StockMovement::with(['product','branch','requester','approver'])
-            ->where('type', 'IN')
+            ->where('type', 'OUT') // 🔥 galing sa OUT
+            ->where('status', 'approved') // 🔥 waiting acceptance
             ->latest()
             ->get();
 
@@ -139,16 +140,18 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 ACCEPT TRANSFER
+    // 🔥 ACCEPT TRANSFER (FINAL STEP)
     // =====================
     public function acceptTransfer($id)
     {
         $movement = StockMovement::findOrFail($id);
 
+        // 🔥 add stock ONLY after acceptance
         $product = Product::find($movement->product_id);
         $product->stock += $movement->quantity;
         $product->save();
 
+        // 🔥 mark completed
         $movement->status = 'completed';
         $movement->save();
 
@@ -169,28 +172,18 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 APPROVE (UPDATED 🔥)
+    // 🔥 APPROVE (FIXED - NO AUTO IN)
     // =====================
     public function approve($id)
     {
         $movement = StockMovement::findOrFail($id);
 
-        // approve
         $movement->status = 'approved';
         $movement->approved_by = auth()->id();
         $movement->approved_at = now();
         $movement->save();
 
-        // 🔥 AUTO CREATE TRANSFER IN
-        StockMovement::create([
-            'product_id' => $movement->product_id,
-            'branch_id' => $movement->branch_id,
-            'type' => 'IN',
-            'quantity' => $movement->quantity,
-            'reason' => 'Transfer In (Auto)',
-            'status' => 'pending',
-            'requested_by' => $movement->requested_by,
-        ]);
+        // ❌ REMOVED AUTO TRANSFER IN (CORRECT LOGIC)
 
         return back()->with('success', 'Request approved!');
     }
