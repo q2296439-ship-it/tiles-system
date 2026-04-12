@@ -164,7 +164,6 @@
         ➕ Add New Stock
     </a>
 
-    <!-- ✅ FIXED (DIRECT URL) -->
     <a href="/admin/inventory/transfer-in"
        class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
         ⬅ Transfer In
@@ -174,8 +173,10 @@
     <a href="#">📄 Delivery Report</a>
 
     <div class="menu-title">USER</div>
+
+    <!-- ✅ FIX LANG DITO -->
     <a href="/admin/users">➕ Add User</a>
-    <a href="/admin/users">👥 Manage Account</a>
+    <a href="/admin/manage" class="{{ request()->is('admin/manage') ? 'active' : '' }}">👥 Manage Account</a>
 
     <a href="/admin/branches" class="{{ request()->is('admin/branches') ? 'active' : '' }}">🏬 Add Branch</a>
 
