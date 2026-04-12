@@ -13,10 +13,10 @@ class CashierController extends Controller
 {
     public function index(Request $request)
     {
-        $branchId = $request->branch_id;
+        $user = Auth::user();
 
-        // 🔥 TEMP (lahat muna)
-        $products = Product::all();
+        // ✅ sariling branch lang
+        $products = Product::where('branch_id', $user->branch_id)->get();
 
         return view('cashier.dashboard', compact('products'));
     }
@@ -34,7 +34,6 @@ class CashierController extends Controller
                 ], 401);
             }
 
-            // 🔥 VALIDATION
             $request->validate([
                 'total' => 'required|numeric|min:0',
                 'items' => 'required|array|min:1'
@@ -42,7 +41,6 @@ class CashierController extends Controller
 
             DB::beginTransaction();
 
-            // 🔥 CREATE SALE
             $sale = Sale::create([
                 'user_id' => $user->id,
                 'branch_id' => $user->branch_id,
@@ -61,12 +59,15 @@ class CashierController extends Controller
                     throw new \Exception('Product not found');
                 }
 
-                // 🔥 CHECK STOCK
+                // ✅ siguraduhin sariling branch lang
+                if ($product->branch_id != $user->branch_id) {
+                    throw new \Exception('Invalid product branch');
+                }
+
                 if ($product->stock < $item['qty']) {
                     throw new \Exception('Not enough stock for ' . $product->name);
                 }
 
-                // 🔥 SAVE SALE ITEM
                 SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
@@ -74,20 +75,19 @@ class CashierController extends Controller
                     'price' => $item['price']
                 ]);
 
-                // 🔥 DEDUCT STOCK
                 $product->stock -= $item['qty'];
                 $product->save();
             }
 
             DB::commit();
 
-            // 🔥 IMPORTANT: RETURN UPDATED PRODUCTS
-            $updatedProducts = Product::all();
+            // ✅ sariling branch lang ulit
+            $updatedProducts = Product::where('branch_id', $user->branch_id)->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Sale completed successfully!',
-                'products' => $updatedProducts // 🔥 realtime update
+                'products' => $updatedProducts
             ]);
 
         } catch (\Exception $e) {
