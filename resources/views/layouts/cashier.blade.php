@@ -16,7 +16,6 @@
             background: #f1f5f9;
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: 240px;
             background: linear-gradient(180deg, #0f172a, #020617);
@@ -95,14 +94,12 @@
             border-radius: 10px;
         }
 
-        /* CONTENT */
         .content {
             flex: 1;
             padding: 25px;
             overflow-y: auto;
         }
 
-        /* CART */
         .cart {
             width: 320px;
             background: linear-gradient(180deg, #1e293b, #020617);
@@ -115,17 +112,6 @@
         .cart h2 {
             margin-bottom: 15px;
         }
-
-        .content::-webkit-scrollbar,
-        .cart::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .content::-webkit-scrollbar-thumb,
-        .cart::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 10px;
-        }
     </style>
 </head>
 
@@ -133,41 +119,35 @@
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-
     <div class="sidebar-menu">
 
         <h2>💰 POS</h2>
 
-        <!-- MAIN -->
         <p>MAIN</p>
         <a href="{{ url('/cashier') }}" 
            class="{{ request()->is('cashier') ? 'active' : '' }}">
             🧾 New Sale
         </a>
 
-        <!-- SALES -->
         <p>SALES</p>
         <a href="#">🧾 Add Collection Receipt</a>
         <a href="#">📊 Collection Today</a>
         <a href="#">💰 DCCR</a>
         <a href="#">🏦 Deposit</a>
 
-        <!-- INVENTORY -->
         <p>INVENTORY</p>
         <a href="#">📦 Inventory Stock</a>
 
-        <!-- ✅ FIXED TRANSFER IN -->
+        <!-- ✅ FIXED -->
         <a href="{{ route('cashier.transfer.in') }}" 
            class="{{ request()->is('cashier/transfer-in*') ? 'active' : '' }}">
             ⬇ Transfer In
         </a>
 
-        <!-- FUTURE -->
         <a href="#">⬆ Transfer Out</a>
 
         <hr>
 
-        <!-- ACCOUNT -->
         <p>ACCOUNT</p>
         <a href="#">🔑 Change Password</a>
 
@@ -179,21 +159,59 @@
             <button>🚪 Logout</button>
         </form>
     </div>
-
 </div>
 
 <!-- CONTENT -->
 <div class="content">
-    @yield('content')
+
+    <h3>Transfer In Request</h3>
+
+    <form action="{{ route('cashier.transfer.in.store') }}" method="POST">
+        @csrf
+
+        <table border="1" width="100%" cellpadding="10">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($products as $index => $product)
+                <tr>
+                    <td>
+                        {{ $product->name }}
+                        <input type="hidden" name="items[{{ $index }}][product_id]" value="{{ $product->id }}">
+                    </td>
+                    <td>
+                        <input type="number" name="items[{{ $index }}][qty]" min="0" value="0">
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <br>
+
+        <label>From Branch</label>
+        <select name="from_branch_id" required>
+            <option value="">Select Branch</option>
+            @foreach($branches as $branch)
+                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+            @endforeach
+        </select>
+
+        <br><br>
+
+        <button type="submit">Submit Request</button>
+    </form>
+
 </div>
 
 <!-- CART -->
 <div class="cart">
-    @yield('cart')
+    <h2>Cart Area</h2>
 </div>
-
-<!-- SCRIPTS -->
-@yield('scripts')
 
 </body>
 </html>
