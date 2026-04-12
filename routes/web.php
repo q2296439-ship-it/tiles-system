@@ -143,19 +143,18 @@ Route::prefix('admin')->group(function () {
     Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
 
     // =====================
-    // 🔥 ADMIN VIEW (FIXED)
+    // 🔥 ADMIN VIEW
     // =====================
     Route::get('/inventory/transfer-out', [InventoryController::class, 'transferOutAdmin'])->name('inventory.transfer.out');
-
     Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInAdmin'])->name('inventory.transfer.in');
 
     // =====================
-    // 🔥 EMPLOYEE ACTIONS (KEEP)
+    // 🔥 EMPLOYEE ACTIONS
     // =====================
     Route::post('/inventory/transfer-out', [InventoryController::class, 'transferOutStore'])->name('inventory.transfer.out.store');
-
     Route::post('/inventory/transfer-accept/{id}', [InventoryController::class, 'acceptTransfer'])->name('inventory.transfer.accept');
 
+    // (OLD - keep)
     Route::post('/inventory/transfer-in-old', [InventoryController::class, 'transferInStore']);
 
     // =====================
@@ -169,9 +168,7 @@ Route::prefix('admin')->group(function () {
     // =====================
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
-
     Route::get('/manage', [UserController::class, 'manage']);
-
     Route::post('/users/update/{id}', [UserController::class, 'update']);
     Route::post('/users/delete/{id}', [UserController::class, 'delete']);
 
@@ -198,10 +195,18 @@ Route::prefix('admin')->group(function () {
 
 
 // =====================
-// CASHIER
+// 🔥 CASHIER
 // =====================
-Route::get('/cashier', [CashierController::class, 'index']);
-Route::post('/cashier/checkout', [CashierController::class, 'checkout']);
+Route::prefix('cashier')->group(function () {
+
+    Route::get('/', [CashierController::class, 'index']);
+    Route::post('/checkout', [CashierController::class, 'checkout']);
+
+    // 🔥 TRANSFER IN (REQUEST)
+    Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])->name('cashier.transfer.in');
+    Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])->name('cashier.transfer.in.store');
+
+});
 
 
 // =====================

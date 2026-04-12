@@ -23,11 +23,9 @@
             color: white;
             display: flex;
             flex-direction: column;
-
             height: 100vh;
         }
 
-        /* 🔥 SCROLLABLE CONTENT */
         .sidebar-menu {
             flex: 1;
             overflow-y: auto;
@@ -74,7 +72,6 @@
             margin: 15px 0;
         }
 
-        /* 🔥 FIXED LOGOUT SA BABA */
         .logout {
             padding: 15px;
         }
@@ -89,7 +86,6 @@
             cursor: pointer;
         }
 
-        /* SCROLL STYLE */
         .sidebar-menu::-webkit-scrollbar {
             width: 6px;
         }
@@ -120,7 +116,6 @@
             margin-bottom: 15px;
         }
 
-        /* SCROLL */
         .content::-webkit-scrollbar,
         .cart::-webkit-scrollbar {
             width: 6px;
@@ -139,39 +134,44 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
 
-    <!-- 🔥 SCROLLABLE PART -->
     <div class="sidebar-menu">
 
         <h2>💰 POS</h2>
 
         <!-- MAIN -->
         <p>MAIN</p>
-        <a href="/cashier" class="{{ request()->is('cashier') ? 'active' : '' }}">
+        <a href="{{ url('/cashier') }}" class="{{ request()->is('cashier') ? 'active' : '' }}">
             🧾 New Sale
         </a>
 
         <!-- SALES -->
         <p>SALES</p>
-        <a href="/cashier/collection">🧾 Add Collection Receipt</a>
-        <a href="/cashier/collection-today">📊 Collection Today</a>
-        <a href="/cashier/dccr">💰 DCCR</a>
-        <a href="/cashier/deposit">🏦 Deposit</a>
+        <a href="#">🧾 Add Collection Receipt</a>
+        <a href="#">📊 Collection Today</a>
+        <a href="#">💰 DCCR</a>
+        <a href="#">🏦 Deposit</a>
 
         <!-- INVENTORY -->
         <p>INVENTORY</p>
-        <a href="/cashier/inventory">📦 Inventory Stock</a>
-        <a href="/cashier/transfer-in">⬇ Transfer In</a>
-        <a href="/cashier/transfer-out">⬆ Transfer Out</a>
+        <a href="#">📦 Inventory Stock</a>
+
+        <!-- 🔥 TRANSFER IN (CONNECTED NA SA ROUTE) -->
+        <a href="{{ route('cashier.transfer.in') }}" 
+           class="{{ request()->is('cashier/transfer-in') ? 'active' : '' }}">
+            ⬇ Transfer In
+        </a>
+
+        <!-- 🔜 future -->
+        <a href="#">⬆ Transfer Out</a>
 
         <hr>
 
         <!-- ACCOUNT -->
         <p>ACCOUNT</p>
-        <a href="/cashier/change-password">🔑 Change Password</a>
+        <a href="#">🔑 Change Password</a>
 
     </div>
 
-    <!-- 🔥 FIXED SA BABA -->
     <div class="logout">
         <form method="POST" action="/logout">
             @csrf

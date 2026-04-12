@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\Branch;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InventoryController extends Controller
 {
@@ -77,6 +78,47 @@ class InventoryController extends Controller
     }
 
     // =====================
+    // 🔥 CASHIER: TRANSFER IN FORM (REQUEST)
+    // =====================
+    public function transferInForm()
+    {
+        $products = Product::all();
+        $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
+
+        return view('cashier.transferin_cashier', compact('products', 'branches'));
+    }
+
+    // =====================
+    // 🔥 CASHIER: STORE TRANSFER IN REQUEST (MULTI ITEM)
+    // =====================
+    public function transferInStore(Request $request)
+    {
+        if (empty($request->items)) {
+            return back()->with('error', 'No items selected');
+        }
+
+        $request->validate([
+            'from_branch_id' => 'required|exists:branches,id',
+        ]);
+
+        foreach ($request->items as $item) {
+
+            StockMovement::create([
+                'product_id' => $item['product_id'],
+                'branch_id' => auth()->user()->branch_id, // requesting branch
+                'type' => 'IN_REQUEST',
+                'quantity' => $item['qty'],
+                'reason' => 'Transfer IN Request',
+                'status' => 'pending',
+                'requested_by' => auth()->id(),
+                'from_branch_id' => $request->from_branch_id,
+            ]);
+        }
+
+        return back()->with('success', 'Request sent to manager!');
+    }
+
+    // =====================
     // 🔥 ADMIN: TRANSFER OUT TABLE
     // =====================
     public function transferOutAdmin()
@@ -90,13 +132,12 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 ADMIN: TRANSFER IN TABLE (FIXED LOGIC)
+    // 🔥 ADMIN: TRANSFER IN TABLE
     // =====================
     public function transferInAdmin()
     {
         $transfers = StockMovement::with(['product','branch','requester','approver'])
-            ->where('type', 'OUT') // 🔥 galing sa OUT
-            ->where('status', 'approved') // 🔥 waiting acceptance
+            ->where('type', 'IN_REQUEST')
             ->latest()
             ->get();
 
@@ -146,12 +187,10 @@ class InventoryController extends Controller
     {
         $movement = StockMovement::findOrFail($id);
 
-        // 🔥 add stock ONLY after acceptance
         $product = Product::find($movement->product_id);
         $product->stock += $movement->quantity;
         $product->save();
 
-        // 🔥 mark completed
         $movement->status = 'completed';
         $movement->save();
 
@@ -172,7 +211,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 APPROVE (FIXED - NO AUTO IN)
+    // 🔥 APPROVE
     // =====================
     public function approve($id)
     {
@@ -182,8 +221,6 @@ class InventoryController extends Controller
         $movement->approved_by = auth()->id();
         $movement->approved_at = now();
         $movement->save();
-
-        // ❌ REMOVED AUTO TRANSFER IN (CORRECT LOGIC)
 
         return back()->with('success', 'Request approved!');
     }
