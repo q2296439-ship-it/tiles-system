@@ -44,7 +44,7 @@
 
                 <hr>
 
-                <!-- 🔥 FROM / TO -->
+                <!-- FROM / TO -->
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;">
                         <label>From Branch</label>
@@ -133,6 +133,7 @@ document.querySelectorAll('.product-card').forEach(card => {
     });
 });
 
+// RENDER CART
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
@@ -149,6 +150,7 @@ function renderCart() {
     });
 }
 
+// REMOVE ITEM
 function removeItem(index){
     cart.splice(index,1);
     renderCart();
@@ -170,14 +172,14 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
     });
 });
 
-// 🔥 DROPDOWN FILTER (MAIN FEATURE)
+// 🔥 DROPDOWN FILTER (FIXED)
 document.getElementById('branchFilter').addEventListener('change', function() {
     let selected = this.value;
 
     document.querySelectorAll('.product-card').forEach(card => {
         let branchId = card.dataset.branchId;
 
-        if (selected === "" || branchId === selected) {
+        if (selected === "" || Number(branchId) === Number(selected)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
