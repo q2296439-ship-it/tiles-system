@@ -48,14 +48,14 @@
 
             </form>
 
-            <!-- 🔥 EXPORT BUTTONS (FIXED) -->
-            <a href="#"
+            <!-- 🔥 EXPORT BUTTONS (FIXED FINAL) -->
+            <a href="{{ route('report.brand.excel', request()->all()) }}"
                class="export-btn"
                style="padding:6px 12px; background:green; color:white; text-decoration:none; display:inline-block;">
                 📊 Export Excel
             </a>
 
-            <a href="#"
+            <a href="{{ route('report.brand.pdf', request()->all()) }}"
                target="_blank"
                class="export-btn"
                style="padding:6px 12px; background:#e5e7eb; color:black; text-decoration:none; display:inline-block;">
