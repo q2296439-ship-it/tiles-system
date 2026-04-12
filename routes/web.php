@@ -82,7 +82,6 @@ Route::get('/create-branches', function () {
 // =====================
 Route::get('/fix-db', function () {
 
-    // 🔍 hanapin lahat ng check constraint sa table
     $constraints = DB::select("
         SELECT conname 
         FROM pg_constraint 
@@ -90,12 +89,10 @@ Route::get('/fix-db', function () {
         AND contype = 'c'
     ");
 
-    // 🔥 delete lahat ng constraint
     foreach ($constraints as $c) {
         DB::statement("ALTER TABLE stock_movements DROP CONSTRAINT {$c->conname}");
     }
 
-    // ✅ add tamang constraint
     DB::statement("
         ALTER TABLE stock_movements 
         ADD CONSTRAINT stock_movements_type_check 
@@ -103,6 +100,20 @@ Route::get('/fix-db', function () {
     ");
 
     return 'DB FIXED FINAL';
+});
+
+
+// =====================
+// 🔥 ADD COLUMN (ETO LANG DINAGDAG 🔥)
+// =====================
+Route::get('/fix-column', function () {
+
+    DB::statement("
+        ALTER TABLE stock_movements 
+        ADD COLUMN IF NOT EXISTS from_branch_id BIGINT
+    ");
+
+    return 'COLUMN ADDED';
 });
 
 
@@ -126,22 +137,18 @@ Route::get('/manager', [InventoryController::class, 'approvals'])->middleware('a
 // =====================
 Route::prefix('admin')->group(function () {
 
-    // DASHBOARD
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // POS
     Route::get('/pos', function () {
         return view('admin.pos');
     });
 
-    // BRANCHES
     Route::get('/branches', [BranchController::class, 'index']);
     Route::post('/branches/store', [BranchController::class, 'store']);
     Route::post('/branches/update/{id}', [BranchController::class, 'update']);
     Route::post('/branches/delete/{id}', [BranchController::class, 'delete']);
 
-    // PRODUCTS
     Route::prefix('products')->group(function () {
 
         Route::get('/', [ProductController::class, 'index']);
@@ -155,39 +162,31 @@ Route::prefix('admin')->group(function () {
         Route::get('/export', [ProductController::class, 'export']);
     });
 
-    // INVENTORY
     Route::get('/inventory', [InventoryController::class, 'index']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
-    // ADD STOCK
     Route::get('/inventory/add-stock', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
 
-    // ADMIN VIEW
     Route::get('/inventory/transfer-out', [InventoryController::class, 'transferOutAdmin'])->name('inventory.transfer.out');
     Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInAdmin'])->name('inventory.transfer.in');
 
-    // EMPLOYEE ACTIONS
     Route::post('/inventory/transfer-out', [InventoryController::class, 'transferOutStore'])->name('inventory.transfer.out.store');
     Route::post('/inventory/transfer-accept/{id}', [InventoryController::class, 'acceptTransfer'])->name('inventory.transfer.accept');
 
-    // OLD
     Route::post('/inventory/transfer-in-old', [InventoryController::class, 'transferInStore']);
 
-    // MANAGER APPROVAL
     Route::post('/manager/approve/{id}', [InventoryController::class, 'approve']);
     Route::post('/manager/reject/{id}', [InventoryController::class, 'reject']);
 
-    // USERS
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
     Route::get('/manage', [UserController::class, 'manage']);
     Route::post('/users/update/{id}', [UserController::class, 'update']);
     Route::post('/users/delete/{id}', [UserController::class, 'delete']);
 
-    // REPORTS
     Route::get('/reports', function () {
         return view('admin.reports');
     });
