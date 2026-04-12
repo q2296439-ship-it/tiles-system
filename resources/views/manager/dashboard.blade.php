@@ -77,7 +77,6 @@
         vertical-align: middle;
     }
 
-    /* ALIGNMENT FIX */
     th:nth-child(3),
     td:nth-child(3) {
         text-align: center;
@@ -88,7 +87,6 @@
         text-align: center;
     }
 
-    /* BUTTON ALIGN FIX */
     td:last-child {
         display: flex;
         justify-content: center;
@@ -174,7 +172,7 @@
 <div class="card" style="margin-top:20px;">
     <div class="flex">
         <div class="section-title">🧾 Pending Approvals</div>
-        <span class="badge">4 Requests</span>
+        <span class="badge">{{ count($requests) }} Requests</span>
     </div>
 
     <table>
@@ -185,15 +183,33 @@
             <th>Action</th>
         </tr>
 
+        @forelse($requests as $req)
         <tr>
-            <td>Floor Tiles</td>
-            <td>Arayat Pampanga</td>
-            <td>100</td>
+            <td>{{ $req->product->name }}</td>
             <td>
-                <button class="approve">Approve</button>
-                <button class="reject">Reject</button>
+                {{ $req->from_branch->name ?? 'N/A' }}
+                →
+                {{ $req->branch->name ?? 'N/A' }}
+            </td>
+            <td>{{ $req->quantity }}</td>
+            <td>
+                <form method="POST" action="/admin/manager/approve/{{ $req->id }}">
+                    @csrf
+                    <button class="approve">Approve</button>
+                </form>
+
+                <form method="POST" action="/admin/manager/reject/{{ $req->id }}">
+                    @csrf
+                    <button class="reject">Reject</button>
+                </form>
             </td>
         </tr>
+        @empty
+        <tr>
+            <td colspan="4">No pending requests</td>
+        </tr>
+        @endforelse
+
     </table>
 </div>
 

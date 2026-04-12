@@ -85,7 +85,6 @@ class InventoryController extends Controller
         $products = Product::all();
         $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
 
-        // 🔥 ADD THIS (RIGHT PANEL DATA)
         $requests = StockMovement::with(['product','branch','from_branch'])
             ->where('type', 'IN_REQUEST')
             ->latest()
@@ -111,7 +110,7 @@ class InventoryController extends Controller
 
             StockMovement::create([
                 'product_id' => $item['product_id'],
-                'branch_id' => auth()->user()->branch_id, // requesting branch
+                'branch_id' => auth()->user()->branch_id,
                 'type' => 'IN_REQUEST',
                 'quantity' => $item['qty'],
                 'reason' => 'Transfer IN Request',
@@ -187,7 +186,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 ACCEPT TRANSFER (FINAL STEP)
+    // 🔥 ACCEPT TRANSFER
     // =====================
     public function acceptTransfer($id)
     {
@@ -204,11 +203,12 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 MANAGER APPROVAL
+    // 🔥 MANAGER APPROVAL (FIXED)
     // =====================
     public function approvals()
     {
-        $requests = StockMovement::with(['product', 'branch'])
+        $requests = StockMovement::with(['product', 'branch', 'from_branch'])
+            ->where('type', 'IN_REQUEST')
             ->where('status', 'pending')
             ->latest()
             ->get();
