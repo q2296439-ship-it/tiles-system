@@ -77,10 +77,10 @@ class InventoryController extends Controller
         return back()->with('success', 'Saved successfully!');
     }
 
-    // =====================
-    // 🔥 CASHIER: TRANSFER IN FORM
-    // =====================
-    public function transferInForm()
+   // =====================
+// 🔥 CASHIER: TRANSFER IN FORM
+// =====================
+public function transferInForm()
 {
     $products = Product::where('branch_id', auth()->user()->branch_id)->get();
 
@@ -90,18 +90,6 @@ class InventoryController extends Controller
         ->where('type', 'IN_REQUEST')
         ->where('branch_id', auth()->user()->branch_id)
         ->whereIn('status', ['pending', 'approved_receiver'])
-        ->latest()
-        ->get();
-
-    return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
-}
-}], 'quantity')->get();
-    $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
-
-    $requests = StockMovement::with(['product','branch','from_branch'])
-        ->where('type', 'IN_REQUEST')
-        ->where('branch_id', auth()->user()->branch_id) // 👈 para sa sariling branch lang
-        ->whereIn('status',['pending', 'approved_receiver']) // 👈 filter
         ->latest()
         ->get();
 
