@@ -86,7 +86,9 @@
 
     {{-- OPERATIONS --}}
     <p>OPERATIONS</p>
-    <a href="/admin/manager/approvals" class="{{ request()->is('admin/manager/approvals') ? 'active' : '' }}">
+
+    <!-- ✅ FIXED LINK -->
+    <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">
         🧾 Approvals
     </a>
 

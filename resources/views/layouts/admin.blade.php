@@ -142,9 +142,6 @@
     <div class="menu-title">MAIN</div>
     <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
 
-    <!-- 🔥 ADDED APPROVAL LINK -->
-    <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">🧾 Approvals</a>
-
     <div class="menu-title">POS / SALES</div>
     <a href="/admin/pos" class="{{ request()->is('admin/pos') ? 'active' : '' }}">💰 POS</a>
 
@@ -159,6 +156,7 @@
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
     <a href="#">🏷 Per Model</a>
 
+    <!-- 🔥 FIXED INVENTORY LINKS -->
     <div class="menu-title">INVENTORY</div>
 
     <a href="/admin/inventory" 
