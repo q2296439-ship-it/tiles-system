@@ -33,6 +33,13 @@
             @endforeach
         </div>
 
+        <!-- 🔥 SHOW MORE BUTTON -->
+        <div style="text-align:center; margin-top:15px;">
+            <button id="showMoreBtn" style="padding:10px 20px; background:#0ea5e9; color:white; border:none; border-radius:8px;">
+                Show More
+            </button>
+        </div>
+
         <!-- CART -->
         <div style="margin-top:25px; background:white; padding:20px; border-radius:12px;">
             <h4>🛒 Request Cart</h4>
@@ -44,7 +51,6 @@
 
                 <hr>
 
-                <!-- FROM / TO -->
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;">
                         <label>From Branch</label>
@@ -114,6 +120,7 @@
 @section('scripts')
 <script>
 let cart = [];
+let visibleCount = 6;
 
 // ADD TO CART
 document.querySelectorAll('.product-card').forEach(card => {
@@ -142,7 +149,7 @@ function renderCart() {
         container.innerHTML += `
             <div style="margin-bottom:10px; padding:10px; background:#f1f5f9; border-radius:8px;">
                 <strong>${item.name}</strong>
-                <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1" style="width:60px;">
+                <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1">
                 <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
                 <button type="button" onclick="removeItem(${index})">❌</button>
             </div>
@@ -150,17 +157,44 @@ function renderCart() {
     });
 }
 
-// REMOVE ITEM
 function removeItem(index){
     cart.splice(index,1);
     renderCart();
 }
 
+// 🔥 INITIAL LIMIT
+function updateVisibleProducts() {
+    let cards = document.querySelectorAll('.product-card');
+
+    cards.forEach((card, index) => {
+        card.style.display = index < visibleCount ? 'block' : 'none';
+    });
+
+    if (visibleCount >= cards.length) {
+        document.getElementById('showMoreBtn').style.display = 'none';
+    }
+}
+
+// 🔥 SHOW MORE
+document.getElementById('showMoreBtn').addEventListener('click', function() {
+    visibleCount += 6;
+    updateVisibleProducts();
+});
+
 // 🔍 SEARCH
 document.getElementById('searchInput').addEventListener('keyup', function() {
     let value = this.value.toLowerCase();
+    let cards = document.querySelectorAll('.product-card');
 
-    document.querySelectorAll('.product-card').forEach(card => {
+    if (value === "") {
+        visibleCount = 6;
+        updateVisibleProducts();
+        return;
+    }
+
+    document.getElementById('showMoreBtn').style.display = 'none';
+
+    cards.forEach(card => {
         let name = card.dataset.name;
         let branch = card.dataset.branch;
 
@@ -172,11 +206,12 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
     });
 });
 
-// 🔥 DROPDOWN FILTER (FIXED)
+// 🔥 DROPDOWN FILTER
 document.getElementById('branchFilter').addEventListener('change', function() {
     let selected = this.value;
+    let cards = document.querySelectorAll('.product-card');
 
-    document.querySelectorAll('.product-card').forEach(card => {
+    cards.forEach(card => {
         let branchId = card.dataset.branchId;
 
         if (selected === "" || Number(branchId) === Number(selected)) {
@@ -185,6 +220,11 @@ document.getElementById('branchFilter').addEventListener('change', function() {
             card.style.display = 'none';
         }
     });
+});
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+    updateVisibleProducts();
 });
 </script>
 @endsection
