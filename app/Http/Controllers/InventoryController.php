@@ -81,7 +81,7 @@ class InventoryController extends Controller
     // =====================
     public function transferOutAdmin()
     {
-        $transfers = StockMovement::with(['product','branch'])
+        $transfers = StockMovement::with(['product','branch','requester','approver'])
             ->where('type', 'OUT')
             ->latest()
             ->get();
@@ -94,7 +94,7 @@ class InventoryController extends Controller
     // =====================
     public function transferInAdmin()
     {
-        $transfers = StockMovement::with(['product','branch'])
+        $transfers = StockMovement::with(['product','branch','requester','approver'])
             ->where('type', 'IN')
             ->latest()
             ->get();
@@ -103,7 +103,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 TRANSFER OUT (EMPLOYEE SIDE - KEEP)
+    // 🔥 TRANSFER OUT (EMPLOYEE SIDE)
     // =====================
     public function transferOutForm()
     {
@@ -114,7 +114,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 STORE TRANSFER OUT
+    // 🔥 STORE TRANSFER OUT (FIXED)
     // =====================
     public function transferOutStore(Request $request)
     {
@@ -132,6 +132,7 @@ class InventoryController extends Controller
             'quantity' => $request->quantity,
             'reason' => 'Transfer Request',
             'status' => 'pending',
+            'requested_by' => auth()->id(), // 🔥 ADDED
         ]);
 
         return back()->with('success', 'Transfer request submitted!');
@@ -168,13 +169,15 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 APPROVE
+    // 🔥 APPROVE (FIXED)
     // =====================
     public function approve($id)
     {
         $movement = StockMovement::findOrFail($id);
 
         $movement->status = 'approved';
+        $movement->approved_by = auth()->id(); // 🔥 ADDED
+        $movement->approved_at = now();        // 🔥 ADDED
         $movement->save();
 
         return back()->with('success', 'Request approved!');

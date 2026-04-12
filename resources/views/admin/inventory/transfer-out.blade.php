@@ -62,6 +62,8 @@ h2 { margin-bottom:20px; }
     <th>To Branch</th>
     <th>Quantity</th>
     <th>Status</th>
+    <th>Requested By</th> {{-- 🔥 NEW --}}
+    <th>Approved By</th> {{-- 🔥 NEW --}}
     <th>Date</th>
 </tr>
 </thead>
@@ -81,11 +83,17 @@ h2 { margin-bottom:20px; }
         </span>
     </td>
 
+    {{-- 🔥 REQUESTED BY --}}
+    <td>{{ $t->requester->name ?? 'N/A' }}</td>
+
+    {{-- 🔥 APPROVED BY --}}
+    <td>{{ $t->approver->name ?? 'N/A' }}</td>
+
     <td>{{ $t->created_at->format('Y-m-d') }}</td>
 </tr>
 @empty
 <tr>
-    <td colspan="6">No transfer records found.</td>
+    <td colspan="8">No transfer records found.</td>
 </tr>
 @endforelse
 
