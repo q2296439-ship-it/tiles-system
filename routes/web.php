@@ -209,19 +209,19 @@ Route::prefix('admin')->group(function () {
 
 
 // =====================
-// 🔥 CASHIER (FIXED)
+// 🔥 CASHIER (FINAL FIX)
 // =====================
 Route::prefix('cashier')->group(function () {
 
     Route::get('/', [CashierController::class, 'index']);
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
-    // ✅ ADD LANG (FIX)
     Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])
         ->name('cashier.transfer.in');
 
+    // ✅ FINAL FIX (MATCH SA BLADE)
     Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])
-        ->name('cashier.transfer.store');
+        ->name('cashier.transfer.in.store');
 });
 
 
