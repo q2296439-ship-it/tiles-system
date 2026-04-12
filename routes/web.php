@@ -112,8 +112,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/branches', [BranchController::class, 'index']);
     Route::post('/branches/store', [BranchController::class, 'store']);
 
-    // ❌ tinanggal update/delete (ilipat sa manage page later)
-
     // =====================
     // PRODUCTS
     // =====================
@@ -158,6 +156,10 @@ Route::prefix('admin')->group(function () {
 
     // 🔥 NEW: MANAGE ACCOUNT
     Route::get('/manage', [UserController::class, 'manage']);
+
+    // 🔥 NEW: USER UPDATE & DELETE
+    Route::post('/users/update/{id}', [UserController::class, 'update']);
+    Route::post('/users/delete/{id}', [UserController::class, 'delete']);
 
     // =====================
     // REPORTS

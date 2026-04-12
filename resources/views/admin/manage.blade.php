@@ -3,112 +3,158 @@
 @section('content')
 
 <style>
-.container {
-    max-width: 1100px;
-    margin: auto;
-}
-
+.container { max-width: 1200px; margin:auto; }
 .card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+.table { width:100%; border-collapse:collapse; }
+.table th, .table td { padding:10px; border-bottom:1px solid #eee; }
+input, select {
+    padding:6px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    width:100%;
 }
-
-.table th {
-    background: #f9fafb;
-    text-align: left;
-    font-size: 14px;
+.btn {
+    padding:6px 10px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    color:white;
 }
-
-.table th, .table td {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-}
-
-.badge {
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    color: white;
-}
-
-.admin { background: #ef4444; }
-.manager { background: #3b82f6; }
-.cashier { background: #22c55e; }
-.audit { background: #f59e0b; }
-
+.save { background:#16a34a; }
+.delete { background:#dc2626; }
 </style>
 
 <div class="container">
 
-    <h2 style="margin-bottom:20px;">👥 Manage Accounts</h2>
+<h2>👥 Manage Accounts</h2>
 
-    {{-- SUCCESS --}}
-    @if(session('success'))
-        <div style="background:#d1fae5;padding:12px;margin-bottom:15px;border-radius:6px;">
-            {{ session('success') }}
-        </div>
-    @endif
+{{-- USERS --}}
+<div class="card">
 
-    <div class="card">
+<h3>Users</h3>
 
-        <h3>User List</h3>
+<table class="table">
+<thead>
+<tr>
+    <th>Username</th>
+    <th>Email</th>
+    <th>Role</th>
+    <th>Branch</th>
+    <th>Password</th>
+    <th>Action</th>
+</tr>
+</thead>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Branch</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
+<tbody>
+@foreach($users as $user)
+<tr>
 
-            <tbody>
-                @forelse($users as $user)
-                <tr>
+<form method="POST" action="/admin/users/update/{{ $user->id }}">
+@csrf
 
-                    <td>{{ $user->id }}</td>
+<td>
+<input type="text" name="username" value="{{ $user->username }}">
+</td>
 
-                    <td>{{ $user->username }}</td>
+<td>
+<input type="email" name="email" value="{{ $user->email }}">
+</td>
 
-                    <td>{{ $user->email }}</td>
+<td>
+<select name="role">
+    <option value="admin" {{ $user->role=='admin'?'selected':'' }}>Admin</option>
+    <option value="branch_manager" {{ $user->role=='branch_manager'?'selected':'' }}>Manager</option>
+    <option value="cashier" {{ $user->role=='cashier'?'selected':'' }}>Cashier</option>
+    <option value="audit" {{ $user->role=='audit'?'selected':'' }}>Audit</option>
+</select>
+</td>
 
-                    <td>
-                        @if($user->role == 'admin')
-                            <span class="badge admin">Admin</span>
-                        @elseif($user->role == 'branch_manager')
-                            <span class="badge manager">Manager</span>
-                        @elseif($user->role == 'cashier')
-                            <span class="badge cashier">Cashier</span>
-                        @elseif($user->role == 'audit')
-                            <span class="badge audit">Audit</span>
-                        @endif
-                    </td>
+<td>
+<select name="branch_id">
+@foreach($branches as $branch)
+<option value="{{ $branch->id }}" {{ $user->branch_id == $branch->id ? 'selected':'' }}>
+{{ $branch->name }}
+</option>
+@endforeach
+</select>
+</td>
 
-                    <td>{{ $user->branch->name ?? '—' }}</td>
+<td>
+<input type="password" name="password" placeholder="New password (optional)">
+</td>
 
-                    <td>{{ $user->created_at->format('Y-m-d') }}</td>
+<td style="display:flex; gap:5px;">
 
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6">No users found</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+<button class="btn save">Save</button>
+</form>
 
-    </div>
+<form method="POST" action="/admin/users/delete/{{ $user->id }}">
+@csrf
+<button class="btn delete" onclick="return confirm('Delete user?')">Delete</button>
+</form>
+
+</td>
+
+</tr>
+@endforeach
+</tbody>
+</table>
+
+</div>
+
+{{-- BRANCHES --}}
+<div class="card">
+
+<h3>Branches</h3>
+
+<table class="table">
+<thead>
+<tr>
+    <th>Name</th>
+    <th>Address</th>
+    <th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+@foreach($branches as $branch)
+<tr>
+
+<form method="POST" action="/admin/branches/update/{{ $branch->id }}">
+@csrf
+
+<td>
+<input type="text" name="name" value="{{ $branch->name }}">
+</td>
+
+<td>
+<input type="text" name="address" value="{{ $branch->address }}">
+</td>
+
+<td style="display:flex; gap:5px;">
+
+<button class="btn save">Save</button>
+</form>
+
+<form method="POST" action="/admin/branches/delete/{{ $branch->id }}">
+@csrf
+<button class="btn delete" onclick="return confirm('Delete branch?')">Delete</button>
+</form>
+
+</td>
+
+</tr>
+@endforeach
+</tbody>
+</table>
+
+</div>
 
 </div>
 

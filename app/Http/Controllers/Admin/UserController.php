@@ -57,4 +57,40 @@ class UserController extends Controller
 
         return redirect('/admin/users')->with('success', 'User added successfully!');
     }
+
+    // 🔥 UPDATE USER (INLINE EDIT)
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'username' => 'required|string|max:255',
+            'email' => 'required|email',
+            'role' => 'required',
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->role = $request->role;
+        $user->branch_id = $request->branch_id;
+
+        // 🔥 OPTIONAL PASSWORD RESET
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return back()->with('success', 'User updated successfully!');
+    }
+
+    // 🔥 DELETE USER
+    public function delete($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return back()->with('success', 'User deleted successfully!');
+    }
 }
