@@ -33,7 +33,7 @@
             @endforeach
         </div>
 
-        <!-- 🔥 PAGINATION BUTTONS -->
+        <!-- PAGINATION -->
         <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
             <button id="prevBtn" style="padding:8px 15px; background:#64748b; color:white; border:none; border-radius:6px;">
                 ⬅ Back
@@ -81,7 +81,8 @@
                 <label>Notes</label>
                 <textarea name="notes" style="width:100%; padding:10px;"></textarea>
 
-                <button style="margin-top:10px; width:100%; padding:12px; background:#22c55e; border:none; border-radius:8px; color:white;">
+                <!-- 🔥 FIXED BUTTON -->
+                <button type="submit" style="margin-top:10px; width:100%; padding:12px; background:#22c55e; border:none; border-radius:8px; color:white;">
                     Submit Request
                 </button>
             </form>
@@ -130,6 +131,7 @@ let perPage = 6;
 // ADD TO CART
 document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
+
         let id = card.dataset.id;
         let name = card.dataset.name;
 
@@ -145,29 +147,43 @@ document.querySelectorAll('.product-card').forEach(card => {
     });
 });
 
-// RENDER CART
+// 🔥 FIXED RENDER CART
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
 
     cart.forEach((item, index) => {
-        container.innerHTML += `
-            <div style="margin-bottom:10px; padding:10px; background:#f1f5f9; border-radius:8px;">
-                <strong>${item.name}</strong>
-                <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1">
-                <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
-                <button type="button" onclick="removeItem(${index})">❌</button>
-            </div>
+
+        let div = document.createElement('div');
+
+        div.style = "margin-bottom:10px; padding:10px; background:#f1f5f9; border-radius:8px;";
+
+        div.innerHTML = `
+            <strong>${item.name}</strong>
+            <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
+            <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1" style="width:60px; margin-left:10px;">
+            <button type="button" onclick="removeItem(${index})">❌</button>
         `;
+
+        container.appendChild(div);
     });
 }
 
+// REMOVE
 function removeItem(index){
     cart.splice(index,1);
     renderCart();
 }
 
-// 🔥 SHOW PAGE
+// 🔥 PREVENT EMPTY SUBMIT
+document.querySelector("form").addEventListener("submit", function(e) {
+    if (cart.length === 0) {
+        e.preventDefault();
+        alert("No items in cart!");
+    }
+});
+
+// PAGINATION
 function showPage() {
     let cards = document.querySelectorAll('.product-card');
 
@@ -178,7 +194,6 @@ function showPage() {
         card.style.display = (index >= start && index < end) ? 'block' : 'none';
     });
 
-    // disable buttons
     document.getElementById('prevBtn').disabled = currentPage === 1;
     document.getElementById('nextBtn').disabled = end >= cards.length;
 }
@@ -197,7 +212,7 @@ document.getElementById('prevBtn').addEventListener('click', function() {
     }
 });
 
-// 🔍 SEARCH (override pagination)
+// SEARCH
 document.getElementById('searchInput').addEventListener('keyup', function() {
     let value = this.value.toLowerCase();
     let cards = document.querySelectorAll('.product-card');
@@ -223,7 +238,7 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
     });
 });
 
-// 🔥 DROPDOWN FILTER
+// FILTER
 document.getElementById('branchFilter').addEventListener('change', function() {
     let selected = this.value;
     let cards = document.querySelectorAll('.product-card');
