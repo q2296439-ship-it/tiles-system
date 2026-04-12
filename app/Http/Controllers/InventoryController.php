@@ -228,12 +228,29 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 APPROVAL PAGE (FIXED)
+    // 🔥 APPROVAL PAGE (UPDATED FLOW)
     // =====================
     public function approvals()
     {
+        $branchId = auth()->user()->branch_id;
+
         $requests = StockMovement::with(['product','branch','from_branch'])
-            ->where('status', 'pending')
+            ->where('type', 'IN_REQUEST')
+            ->where(function($query) use ($branchId) {
+
+                // SENDER
+                $query->where(function($q) use ($branchId) {
+                    $q->where('from_branch_id', $branchId)
+                      ->where('status', 'pending');
+                });
+
+                // RECEIVER
+                $query->orWhere(function($q) use ($branchId) {
+                    $q->where('branch_id', $branchId)
+                      ->where('status', 'approved_sender');
+                });
+
+            })
             ->latest()
             ->get();
 
@@ -241,18 +258,30 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 APPROVE
+    // 🔥 APPROVE (DUAL FLOW)
     // =====================
     public function approve($id)
     {
         $movement = StockMovement::findOrFail($id);
 
-        $movement->status = 'approved';
-        $movement->approved_by = auth()->id();
-        $movement->approved_at = now();
+        if ($movement->status == 'pending') {
+
+            // FIRST APPROVAL
+            $movement->status = 'approved_sender';
+            $movement->approved_by = auth()->id();
+            $movement->approved_at = now();
+
+        } elseif ($movement->status == 'approved_sender') {
+
+            // SECOND APPROVAL
+            $movement->status = 'completed';
+
+            // (next step natin stock logic)
+        }
+
         $movement->save();
 
-        return back()->with('success', 'Request approved!');
+        return back()->with('success', 'Approval updated!');
     }
 
     // =====================
