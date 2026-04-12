@@ -21,7 +21,12 @@
 
                 <strong>{{ $product->name }}</strong>
                 <p style="color:green;">₱{{ number_format($product->price,2) }}</p>
+
                 <small>Stock: {{ $product->stock }}</small>
+                <br>
+                <small style="color:#64748b;">
+                    Branch: {{ $product->branch->name ?? 'N/A' }}
+                </small>
             </div>
             @endforeach
         </div>
@@ -37,7 +42,7 @@
 
                 <hr>
 
-                <!-- FROM / TO (BOTH DROPDOWN) -->
+                <!-- FROM / TO -->
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;">
                         <label>From Branch</label>
@@ -76,7 +81,7 @@
 @endsection
 
 
-{{-- RIGHT PANEL (LAYOUT CART AREA) --}}
+{{-- RIGHT PANEL --}}
 @section('cart')
 
 <h3>📋 Requests</h3>
