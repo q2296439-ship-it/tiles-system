@@ -78,7 +78,7 @@ Route::get('/create-branches', function () {
 
 
 // =====================
-// 🔥 FIX DB (FINAL WORKING 🔥)
+// 🔥 FIX DB
 // =====================
 Route::get('/fix-db', function () {
 
@@ -104,7 +104,7 @@ Route::get('/fix-db', function () {
 
 
 // =====================
-// 🔥 ADD COLUMN (ETO LANG DINAGDAG 🔥)
+// 🔥 ADD COLUMN
 // =====================
 Route::get('/fix-column', function () {
 
@@ -127,9 +127,12 @@ Route::post('/logout', [AuthController::class, 'logout']);
 
 
 // =====================
-// MANAGER DASHBOARD
+// 🔥 MANAGER
 // =====================
 Route::get('/manager', [InventoryController::class, 'approvals'])->middleware('auth');
+
+// ✅ NEW (ETO FIX)
+Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->middleware('auth');
 
 
 // =====================
@@ -170,11 +173,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/inventory/add-stock', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
 
-    Route::get('/inventory/transfer-out', [InventoryController::class, 'transferOutAdmin'])->name('inventory.transfer.out');
-    Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInAdmin'])->name('inventory.transfer.in');
+    Route::get('/inventory/transfer-out', [InventoryController::class, 'transferOutAdmin']);
+    Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInAdmin']);
 
-    Route::post('/inventory/transfer-out', [InventoryController::class, 'transferOutStore'])->name('inventory.transfer.out.store');
-    Route::post('/inventory/transfer-accept/{id}', [InventoryController::class, 'acceptTransfer'])->name('inventory.transfer.accept');
+    Route::post('/inventory/transfer-out', [InventoryController::class, 'transferOutStore']);
+    Route::post('/inventory/transfer-accept/{id}', [InventoryController::class, 'acceptTransfer']);
 
     Route::post('/inventory/transfer-in-old', [InventoryController::class, 'transferInStore']);
 
@@ -191,18 +194,18 @@ Route::prefix('admin')->group(function () {
         return view('admin.reports');
     });
 
-    Route::get('/sales/daily', [SalesReportController::class, 'daily'])->name('report.daily');
-    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf'])->name('report.daily.pdf');
-    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel'])->name('report.daily.excel');
+    Route::get('/sales/daily', [SalesReportController::class, 'daily']);
+    Route::get('/sales/daily/pdf', [SalesReportController::class, 'exportDailyPdf']);
+    Route::get('/sales/daily/excel', [SalesReportController::class, 'exportExcel']);
 
-    Route::get('/sales/branch', [SalesReportController::class, 'perBranch'])->name('report.branch');
+    Route::get('/sales/branch', [SalesReportController::class, 'perBranch']);
     Route::get('/sales/branch/data', [SalesReportController::class, 'branchData']);
-    Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf'])->name('report.branch.pdf');
-    Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel'])->name('report.branch.excel');
+    Route::get('/sales/branch/pdf', [SalesReportController::class, 'exportPdf']);
+    Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
 
-    Route::get('/sales/brand', [SalesReportController::class, 'perBrand'])->name('report.brand');
-    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])->name('report.brand.pdf');
-    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])->name('report.brand.excel');
+    Route::get('/sales/brand', [SalesReportController::class, 'perBrand']);
+    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf']);
+    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel']);
 });
 
 
@@ -214,8 +217,8 @@ Route::prefix('cashier')->group(function () {
     Route::get('/', [CashierController::class, 'index']);
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
-    Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])->name('cashier.transfer.in');
-    Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])->name('cashier.transfer.in.store');
+    Route::get('/transfer-in', [InventoryController::class, 'transferInForm']);
+    Route::post('/transfer-in', [InventoryController::class, 'transferInStore']);
 });
 
 
