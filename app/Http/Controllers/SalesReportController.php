@@ -385,30 +385,32 @@ class SalesReportController extends Controller
     }
 
     public function exportPdf(Request $request)
-    {
-        $start = $request->start_date 
-            ? $request->start_date . ' 00:00:00' 
-            : null;
+{
+    $range = $request->range ?? 'today';
 
-        $end = $request->end_date 
-            ? $request->end_date . ' 23:59:59' 
-            : null;
-
-        $branchId = $request->branch_id;
-
-        $branches = $this->getBranchData($start, $end, $branchId);
-        $grandTotal = $branches->sum('total_sales');
-
-        $branchName = null;
-        if ($branchId) {
-            $branch = DB::table('branches')->where('id', $branchId)->first();
-            $branchName = $branch->name ?? null;
-        }
-
-        $pdf = Pdf::loadView('admin.reports.branch_pdf', compact(
-            'branches','grandTotal','branchName','request'
-        ));
-
-        return $pdf->stream('branch_report.pdf');
+    // 🔥 FIX: para gumana today/week/month
+    if ($request->start_date && $request->end_date) {
+        $start = $request->start_date . ' 00:00:00';
+        $end = $request->end_date . ' 23:59:59';
+    } else {
+        [$start, $end] = $this->getDateRange($range);
     }
+
+    $branchId = $request->branch_id;
+
+    $branches = $this->getBranchData($start, $end, $branchId);
+    $grandTotal = $branches->sum('total_sales');
+
+    $branchName = null;
+    if ($branchId) {
+        $branch = DB::table('branches')->where('id', $branchId)->first();
+        $branchName = $branch->name ?? null;
+    }
+
+    $pdf = Pdf::loadView('admin.reports.branch_pdf', compact(
+        'branches','grandTotal','branchName','request','range','start','end'
+    ));
+
+    return $pdf->stream('branch_report.pdf');
+}
 }
