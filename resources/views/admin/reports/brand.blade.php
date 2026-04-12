@@ -48,14 +48,14 @@
 
             </form>
 
-            <!-- 🔥 EXPORT BUTTONS -->
-            <a href="{{ route('report.brand.excel', request()->all()) }}"
+            <!-- 🔥 EXPORT BUTTONS (FIXED) -->
+            <a href="#"
                class="export-btn"
                style="padding:6px 12px; background:green; color:white; text-decoration:none; display:inline-block;">
                 📊 Export Excel
             </a>
 
-            <a href="{{ route('report.brand.pdf', request()->all()) }}"
+            <a href="#"
                target="_blank"
                class="export-btn"
                style="padding:6px 12px; background:#e5e7eb; color:black; text-decoration:none; display:inline-block;">
@@ -156,17 +156,15 @@ new Chart(document.getElementById('brandChart'), {
 document.getElementById('lastUpdated').innerText =
     "Last updated: " + new Date().toLocaleTimeString();
 
-// 🔥 SAFE AUTO REFRESH (FIXED)
+// 🔥 SAFE AUTO REFRESH
 let isDownloading = false;
 
-// detect export clicks
 document.querySelectorAll('.export-btn').forEach(link => {
     link.addEventListener('click', () => {
         isDownloading = true;
     });
 });
 
-// refresh only if NOT downloading
 setInterval(() => {
     if (!isDownloading) {
         location.reload();
