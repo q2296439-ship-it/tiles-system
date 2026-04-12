@@ -77,7 +77,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 TRANSFER IN FORM
+    // 🔥 TRANSFER IN FORM (OLD - KEEP)
     // =====================
     public function transferInForm()
     {
@@ -88,7 +88,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 TRANSFER REQUEST (PENDING)
+    // 🔥 TRANSFER REQUEST (OLD SYSTEM)
     // =====================
     public function transferInStore(Request $request)
     {
@@ -112,7 +112,74 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 NEW: MANAGER APPROVAL PAGE
+    // 🔥 NEW: TRANSFER OUT FORM
+    // =====================
+    public function transferOutForm()
+    {
+        $products = Product::all();
+        $branches = Branch::all();
+
+        return view('inventory.transfer_out', compact('products', 'branches'));
+    }
+
+    // =====================
+    // 🔥 NEW: STORE TRANSFER OUT (REQUEST)
+    // =====================
+    public function transferOutStore(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'from_branch_id' => 'required|exists:branches,id',
+            'to_branch_id' => 'required|different:from_branch_id|exists:branches,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        // 🔥 CREATE PENDING TRANSFER
+        StockMovement::create([
+            'product_id' => $request->product_id,
+            'branch_id' => $request->from_branch_id,
+            'type' => 'OUT',
+            'quantity' => $request->quantity,
+            'reason' => 'Transfer Request',
+            'status' => 'pending',
+        ]);
+
+        return back()->with('success', 'Transfer request submitted!');
+    }
+
+    // =====================
+    // 🔥 NEW: TRANSFER IN VIEW (TABLE VIEW NA)
+    // =====================
+    public function transferIn()
+    {
+        $transfers = StockMovement::with(['product','branch'])
+            ->where('status', 'approved')
+            ->latest()
+            ->get();
+
+        return view('inventory.transfer_in', compact('transfers'));
+    }
+
+    // =====================
+    // 🔥 ACCEPT TRANSFER
+    // =====================
+    public function acceptTransfer($id)
+    {
+        $movement = StockMovement::findOrFail($id);
+
+        // ADD STOCK SA RECEIVING BRANCH
+        $product = Product::find($movement->product_id);
+        $product->stock += $movement->quantity;
+        $product->save();
+
+        $movement->status = 'completed';
+        $movement->save();
+
+        return back()->with('success', 'Transfer accepted!');
+    }
+
+    // =====================
+    // 🔥 MANAGER APPROVAL PAGE
     // =====================
     public function approvals()
     {
@@ -133,8 +200,6 @@ class InventoryController extends Controller
 
         $movement->status = 'approved';
         $movement->save();
-
-        // OPTIONAL: dagdag stock logic dito kung gusto mo
 
         return back()->with('success', 'Request approved!');
     }

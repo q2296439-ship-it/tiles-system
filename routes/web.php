@@ -111,8 +111,6 @@ Route::prefix('admin')->group(function () {
     // =====================
     Route::get('/branches', [BranchController::class, 'index']);
     Route::post('/branches/store', [BranchController::class, 'store']);
-
-    // 🔥 FIX (ITO KULANG MO)
     Route::post('/branches/update/{id}', [BranchController::class, 'update']);
     Route::post('/branches/delete/{id}', [BranchController::class, 'delete']);
 
@@ -140,11 +138,28 @@ Route::prefix('admin')->group(function () {
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
 
+    // ADD STOCK
     Route::get('/inventory/add-stock', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory/add-stock', [InventoryController::class, 'store'])->name('inventory.store');
 
-    Route::get('/inventory/transfer-in', [InventoryController::class, 'transferInForm'])->name('inventory.transfer.in');
-    Route::post('/inventory/transfer-in', [InventoryController::class, 'transferInStore'])->name('inventory.transfer.store');
+    // =====================
+    // 🔥 TRANSFER OUT (NEW)
+    // =====================
+    Route::get('/inventory/transfer-out', [InventoryController::class, 'transferOutForm'])->name('inventory.transfer.out');
+    Route::post('/inventory/transfer-out', [InventoryController::class, 'transferOutStore'])->name('inventory.transfer.out.store');
+
+    // =====================
+    // 🔥 TRANSFER IN (NEW TABLE VIEW)
+    // =====================
+    Route::get('/inventory/transfer-in', [InventoryController::class, 'transferIn'])->name('inventory.transfer.in');
+
+    // 🔥 ACCEPT TRANSFER
+    Route::post('/inventory/transfer-accept/{id}', [InventoryController::class, 'acceptTransfer'])->name('inventory.transfer.accept');
+
+    // =====================
+    // 🔥 OLD TRANSFER (KEEP)
+    // =====================
+    Route::post('/inventory/transfer-in-old', [InventoryController::class, 'transferInStore']);
 
     // =====================
     // MANAGER APPROVAL ACTIONS
@@ -158,10 +173,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
 
-    // 🔥 NEW: MANAGE ACCOUNT
+    // 🔥 MANAGE ACCOUNT
     Route::get('/manage', [UserController::class, 'manage']);
 
-    // 🔥 USER UPDATE & DELETE
+    // USER UPDATE & DELETE
     Route::post('/users/update/{id}', [UserController::class, 'update']);
     Route::post('/users/delete/{id}', [UserController::class, 'delete']);
 

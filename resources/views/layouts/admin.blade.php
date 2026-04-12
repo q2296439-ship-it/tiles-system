@@ -156,28 +156,43 @@
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
     <a href="#">🏷 Per Model</a>
 
+    <!-- 🔥 FIXED INVENTORY LINKS -->
     <div class="menu-title">INVENTORY</div>
-    <a href="/admin/inventory" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
+
+    <a href="/admin/inventory" 
+       class="{{ request()->is('admin/inventory') ? 'active' : '' }}">
+        📦 Overview Stock
+    </a>
 
     <a href="{{ route('inventory.create') }}" 
        class="{{ request()->is('admin/inventory/add-stock') ? 'active' : '' }}">
         ➕ Add New Stock
     </a>
 
-    <a href="/admin/inventory/transfer-in"
-       class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
-        ⬅ Transfer In
+    <a href="/admin/inventory/transfer-out"
+       class="{{ request()->is('admin/inventory/transfer-out') ? 'active' : '' }}">
+        🔄 Transfer Out
     </a>
 
-    <a href="#">➡ Transfer Out</a>
-    <a href="#">📄 Delivery Report</a>
+    <a href="/admin/inventory/transfer-in"
+       class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
+        📥 Transfer In
+    </a>
+
+    <a href="/admin/inventory/movements"
+       class="{{ request()->is('admin/inventory/movements') ? 'active' : '' }}">
+        📜 Stock Movements
+    </a>
+
+    <a href="/admin/inventory/delivery-report"
+       class="{{ request()->is('admin/inventory/delivery-report') ? 'active' : '' }}">
+        📄 Delivery Report
+    </a>
 
     <div class="menu-title">USER</div>
 
-    <!-- ✅ FIX LANG DITO -->
     <a href="/admin/users">➕ Add User</a>
     <a href="/admin/manage" class="{{ request()->is('admin/manage') ? 'active' : '' }}">👥 Manage Account</a>
-
     <a href="/admin/branches" class="{{ request()->is('admin/branches') ? 'active' : '' }}">🏬 Add Branch</a>
 
     <div class="menu-title">ACCOUNT</div>
