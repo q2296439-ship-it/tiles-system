@@ -8,7 +8,8 @@
 
         <h3>Transfer In Request</h3>
 
-        <input type="text" placeholder="🔍 Search product..." 
+        <!-- 🔥 UPDATED SEARCH -->
+        <input type="text" id="searchInput" placeholder="🔍 Search product or branch..." 
                style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px;">
 
         <!-- PRODUCTS -->
@@ -16,7 +17,8 @@
             @foreach($products as $product)
             <div class="product-card"
                  data-id="{{ $product->id }}"
-                 data-name="{{ $product->name }}"
+                 data-name="{{ strtolower($product->name) }}"
+                 data-branch="{{ strtolower($product->branch->name ?? '') }}"
                  style="background:white; padding:15px; border-radius:12px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
 
                 <strong>{{ $product->name }}</strong>
@@ -117,6 +119,7 @@
 <script>
 let cart = [];
 
+// 🔥 CLICK ADD TO CART
 document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
         let id = card.dataset.id;
@@ -134,6 +137,7 @@ document.querySelectorAll('.product-card').forEach(card => {
     });
 });
 
+// 🔥 RENDER CART
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
@@ -150,9 +154,26 @@ function renderCart() {
     });
 }
 
+// 🔥 REMOVE ITEM
 function removeItem(index){
     cart.splice(index,1);
     renderCart();
 }
+
+// 🔥 SEARCH FUNCTION (PRODUCT + BRANCH)
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let value = this.value.toLowerCase();
+
+    document.querySelectorAll('.product-card').forEach(card => {
+        let name = card.dataset.name;
+        let branch = card.dataset.branch;
+
+        if (name.includes(value) || branch.includes(value)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
 </script>
 @endsection
