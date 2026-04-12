@@ -8,24 +8,24 @@
 
         <h3>Transfer In Request</h3>
 
-        <!-- 🔥 UPDATED SEARCH -->
+        <!-- 🔍 SEARCH -->
         <input type="text" id="searchInput" placeholder="🔍 Search product or branch..." 
                style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px;">
 
         <!-- PRODUCTS -->
-        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px;">
+        <div id="productContainer" style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px;">
             @foreach($products as $product)
             <div class="product-card"
                  data-id="{{ $product->id }}"
                  data-name="{{ strtolower($product->name) }}"
                  data-branch="{{ strtolower($product->branch->name ?? '') }}"
+                 data-branch-id="{{ $product->branch_id }}"
                  style="background:white; padding:15px; border-radius:12px; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
 
                 <strong>{{ $product->name }}</strong>
                 <p style="color:green;">₱{{ number_format($product->price,2) }}</p>
 
-                <small>Stock: {{ $product->stock }}</small>
-                <br>
+                <small>Stock: {{ $product->stock }}</small><br>
                 <small style="color:#64748b;">
                     Branch: {{ $product->branch->name ?? 'N/A' }}
                 </small>
@@ -44,12 +44,12 @@
 
                 <hr>
 
-                <!-- FROM / TO -->
+                <!-- 🔥 FROM / TO -->
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;">
                         <label>From Branch</label>
-                        <select name="from_branch_id" style="width:100%; padding:8px;">
-                            <option value="">Select</option>
+                        <select id="branchFilter" name="from_branch_id" style="width:100%; padding:8px;">
+                            <option value="">All Branch</option>
                             @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                             @endforeach
@@ -83,9 +83,7 @@
 @endsection
 
 
-{{-- RIGHT PANEL --}}
 @section('cart')
-
 <h3>📋 Requests</h3>
 
 @forelse($requests as $req)
@@ -96,8 +94,7 @@
     </strong>
     
     <br>
-    <small>{{ $req->created_at->format('M d, Y h:i A') }}</small>
-    <br>
+    <small>{{ $req->created_at->format('M d, Y h:i A') }}</small><br>
 
     <span style="color:yellow;">
         {{ ucfirst($req->status) }}
@@ -111,7 +108,6 @@
 @empty
     <p>No requests yet</p>
 @endforelse
-
 @endsection
 
 
@@ -119,7 +115,7 @@
 <script>
 let cart = [];
 
-// 🔥 CLICK ADD TO CART
+// ADD TO CART
 document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
         let id = card.dataset.id;
@@ -137,7 +133,6 @@ document.querySelectorAll('.product-card').forEach(card => {
     });
 });
 
-// 🔥 RENDER CART
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
@@ -154,13 +149,12 @@ function renderCart() {
     });
 }
 
-// 🔥 REMOVE ITEM
 function removeItem(index){
     cart.splice(index,1);
     renderCart();
 }
 
-// 🔥 SEARCH FUNCTION (PRODUCT + BRANCH)
+// 🔍 SEARCH
 document.getElementById('searchInput').addEventListener('keyup', function() {
     let value = this.value.toLowerCase();
 
@@ -169,6 +163,21 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
         let branch = card.dataset.branch;
 
         if (name.includes(value) || branch.includes(value)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// 🔥 DROPDOWN FILTER (MAIN FEATURE)
+document.getElementById('branchFilter').addEventListener('change', function() {
+    let selected = this.value;
+
+    document.querySelectorAll('.product-card').forEach(card => {
+        let branchId = card.dataset.branchId;
+
+        if (selected === "" || branchId === selected) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
