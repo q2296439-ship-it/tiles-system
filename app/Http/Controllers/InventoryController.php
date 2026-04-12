@@ -103,7 +103,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 TRANSFER OUT (EMPLOYEE SIDE)
+    // 🔥 TRANSFER OUT FORM
     // =====================
     public function transferOutForm()
     {
@@ -114,7 +114,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 STORE TRANSFER OUT (FIXED)
+    // 🔥 STORE TRANSFER OUT
     // =====================
     public function transferOutStore(Request $request)
     {
@@ -132,7 +132,7 @@ class InventoryController extends Controller
             'quantity' => $request->quantity,
             'reason' => 'Transfer Request',
             'status' => 'pending',
-            'requested_by' => auth()->id(), // 🔥 ADDED
+            'requested_by' => auth()->id(),
         ]);
 
         return back()->with('success', 'Transfer request submitted!');
@@ -156,7 +156,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 MANAGER APPROVAL PAGE
+    // 🔥 MANAGER APPROVAL
     // =====================
     public function approvals()
     {
@@ -169,16 +169,28 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 APPROVE (FIXED)
+    // 🔥 APPROVE (UPDATED 🔥)
     // =====================
     public function approve($id)
     {
         $movement = StockMovement::findOrFail($id);
 
+        // approve
         $movement->status = 'approved';
-        $movement->approved_by = auth()->id(); // 🔥 ADDED
-        $movement->approved_at = now();        // 🔥 ADDED
+        $movement->approved_by = auth()->id();
+        $movement->approved_at = now();
         $movement->save();
+
+        // 🔥 AUTO CREATE TRANSFER IN
+        StockMovement::create([
+            'product_id' => $movement->product_id,
+            'branch_id' => $movement->branch_id,
+            'type' => 'IN',
+            'quantity' => $movement->quantity,
+            'reason' => 'Transfer In (Auto)',
+            'status' => 'pending',
+            'requested_by' => $movement->requested_by,
+        ]);
 
         return back()->with('success', 'Request approved!');
     }
