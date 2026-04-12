@@ -476,4 +476,35 @@ class InventoryController extends Controller
 
         return back()->with('success', 'Stock transferred successfully');
     }
+        // =====================
+    // 🔥 MANAGER TRANSFER OUT (NEW)
+    // =====================
+    public function transferOutManager()
+    {
+        $branchId = auth()->user()->branch_id;
+
+        $requests = StockMovement::with(['product','branch'])
+            ->where('from_branch_id', $branchId)
+            ->where('type', 'IN_REQUEST')
+            ->where('status', 'approved_receiver')
+            ->latest()
+            ->get();
+
+        return view('manager.transfer-out', compact('requests'));
+    }
+
+    // =====================
+    // 🔥 RELEASE STOCK (NEW)
+    // =====================
+    public function release($id)
+    {
+        $movement = StockMovement::findOrFail($id);
+
+        $movement->status = 'approved_sender';
+        $movement->released_by = auth()->id();
+        $movement->released_at = now();
+        $movement->save();
+
+        return back()->with('success', 'Stock released!');
+    }
 }

@@ -133,6 +133,10 @@ Route::get('/manager', [InventoryController::class, 'managerDashboard'])->middle
 
 Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->middleware('auth');
 
+// ✅ NEW (TRANSFER OUT)
+Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutManager'])->middleware('auth');
+Route::post('/manager/release/{id}', [InventoryController::class, 'release'])->middleware('auth');
+
 
 // =====================
 // ADMIN GROUP
@@ -219,9 +223,12 @@ Route::prefix('cashier')->group(function () {
     Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])
         ->name('cashier.transfer.in');
 
-    // ✅ FINAL FIX (MATCH SA BLADE)
     Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])
         ->name('cashier.transfer.in.store');
+
+    // ✅ NEW (INCOMING)
+    Route::get('/incoming', [InventoryController::class, 'incoming']);
+    Route::post('/receive/{id}', [InventoryController::class, 'receive']);
 });
 
 

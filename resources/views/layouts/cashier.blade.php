@@ -162,7 +162,11 @@
             ⬇ Transfer In
         </a>
 
-        <a href="#">⬆ Transfer Out</a>
+        <!-- ✅ FIXED INCOMING -->
+        <a href="{{ url('/cashier/incoming') }}" 
+           class="{{ request()->is('cashier/incoming*') ? 'active' : '' }}">
+            📦 Incoming Transfer Stock
+        </a>
 
         <hr>
 
