@@ -127,11 +127,10 @@ Route::post('/logout', [AuthController::class, 'logout']);
 
 
 // =====================
-// 🔥 MANAGER
+// 🔥 MANAGER (FIXED)
 // =====================
-Route::get('/manager', [InventoryController::class, 'approvals'])->middleware('auth');
+Route::get('/manager', [InventoryController::class, 'managerDashboard'])->middleware('auth');
 
-// ✅ NEW (ETO FIX)
 Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->middleware('auth');
 
 

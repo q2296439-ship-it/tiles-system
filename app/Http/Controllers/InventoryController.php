@@ -78,7 +78,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 CASHIER: TRANSFER IN FORM (REQUEST)
+    // 🔥 CASHIER: TRANSFER IN FORM
     // =====================
     public function transferInForm()
     {
@@ -94,7 +94,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 CASHIER: STORE TRANSFER IN REQUEST (MULTI ITEM)
+    // 🔥 STORE TRANSFER IN
     // =====================
     public function transferInStore(Request $request)
     {
@@ -124,7 +124,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 ADMIN: TRANSFER OUT TABLE
+    // 🔥 ADMIN TRANSFER OUT
     // =====================
     public function transferOutAdmin()
     {
@@ -137,7 +137,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 ADMIN: TRANSFER IN TABLE
+    // 🔥 ADMIN TRANSFER IN
     // =====================
     public function transferInAdmin()
     {
@@ -203,17 +203,41 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 MANAGER APPROVAL (FIXED)
+    // 🔥 MANAGER DASHBOARD (NEW)
     // =====================
-    public function approvals()
+    public function managerDashboard()
     {
-        $requests = StockMovement::with(['product', 'branch', 'from_branch'])
+        $requests = StockMovement::with(['product','branch','from_branch'])
             ->where('type', 'IN_REQUEST')
             ->where('status', 'pending')
             ->latest()
             ->get();
 
-        return view('manager.dashboard', compact('requests'));
+        $todaySales = 0;
+        $monthlySales = 0;
+        $totalOrders = 0;
+        $lowStockCount = Product::where('stock', '<=', 10)->count();
+
+        return view('manager.dashboard', compact(
+            'requests',
+            'todaySales',
+            'monthlySales',
+            'totalOrders',
+            'lowStockCount'
+        ));
+    }
+
+    // =====================
+    // 🔥 APPROVAL PAGE (FIXED)
+    // =====================
+    public function approvals()
+    {
+        $requests = StockMovement::with(['product','branch','from_branch'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        return view('manager.approvals', compact('requests'));
     }
 
     // =====================
