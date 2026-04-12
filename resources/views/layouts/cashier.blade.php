@@ -1,122 +1,199 @@
-@extends('layouts.cashier') {{-- or layouts.app kung ito gamit mo sa POS --}}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cashier POS</title>
 
-@section('content')
-<div class="container-fluid">
-    <div class="row">
-
-        {{-- LEFT SIDE --}}
-        <div class="col-md-8">
-            <h4>Transfer In Request</h4>
-
-            <input type="text" id="search" class="form-control mb-3" placeholder="Search product...">
-
-            <div class="row" id="product-list">
-                @foreach($products as $product)
-                    <div class="col-md-4 mb-3">
-                        <div class="card p-3 product-card"
-                             data-id="{{ $product->id }}"
-                             data-name="{{ $product->name }}">
-                             
-                            <h6>{{ $product->name }}</h6>
-                            <p class="text-success">₱{{ number_format($product->price,2) }}</p>
-                            <small>Stock: {{ $product->stock }}</small>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- RIGHT SIDE --}}
-        <div class="col-md-4">
-            <h5>Request Cart</h5>
-
-            {{-- ✅ ONLY FIX NEEDED --}}
-            <form action="{{ route('cashier.transfer.in.store') }}" method="POST">
-                @csrf
-
-                <table class="table" id="cart-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Qty</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-
-                <div class="mb-2">
-                    <label>From Branch</label>
-                    <select name="from_branch_id" class="form-control" required>
-                        <option value="">Select Branch</option>
-                        @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}">
-                                {{ $branch->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="mb-2">
-                    <label>Notes</label>
-                    <textarea name="notes" class="form-control"></textarea>
-                </div>
-
-                <button class="btn btn-primary w-100">Submit Request</button>
-            </form>
-        </div>
-
-    </div>
-</div>
-@endsection
-
-
-@section('scripts')
-<script>
-let cart = [];
-
-document.querySelectorAll('.product-card').forEach(card => {
-    card.addEventListener('click', () => {
-        let id = card.dataset.id;
-        let name = card.dataset.name;
-
-        let existing = cart.find(item => item.id == id);
-
-        if (existing) {
-            existing.qty++;
-        } else {
-            cart.push({id, name, qty: 1});
+    <style>
+        * {
+            box-sizing: border-box;
         }
 
-        renderCart();
-    });
-});
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            height: 100vh;
+            background: #f1f5f9;
+        }
 
-function renderCart() {
-    let tbody = document.querySelector('#cart-table tbody');
-    tbody.innerHTML = '';
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            background: linear-gradient(180deg, #0f172a, #020617);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
 
-    cart.forEach((item, index) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>
-                    ${item.name}
-                    <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
-                </td>
-                <td>
-                    <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1" class="form-control">
-                </td>
-                <td>
-                    <button type="button" onclick="removeItem(${index})">❌</button>
-                </td>
-            </tr>
-        `;
-    });
-}
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
 
-function removeItem(index) {
-    cart.splice(index, 1);
-    renderCart();
-}
-</script>
-@endsection
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .sidebar p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 18px 0 6px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            color: #cbd5f5;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .sidebar a:hover {
+            background: #1e293b;
+            color: white;
+        }
+
+        .active {
+            background: #22c55e;
+            color: white !important;
+            font-weight: bold;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #334155;
+            margin: 15px 0;
+        }
+
+        .logout {
+            padding: 15px;
+        }
+
+        .logout button {
+            width: 100%;
+            padding: 12px;
+            background: #ef4444;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        /* CART */
+        .cart {
+            width: 320px;
+            background: linear-gradient(180deg, #1e293b, #020617);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart h2 {
+            margin-bottom: 15px;
+        }
+
+        .content::-webkit-scrollbar,
+        .cart::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content::-webkit-scrollbar-thumb,
+        .cart::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+    <div class="sidebar-menu">
+
+        <h2>💰 POS</h2>
+
+        <!-- MAIN -->
+        <p>MAIN</p>
+        <a href="{{ url('/cashier') }}" 
+           class="{{ request()->is('cashier') ? 'active' : '' }}">
+            🧾 New Sale
+        </a>
+
+        <!-- SALES -->
+        <p>SALES</p>
+        <a href="#">🧾 Add Collection Receipt</a>
+        <a href="#">📊 Collection Today</a>
+        <a href="#">💰 DCCR</a>
+        <a href="#">🏦 Deposit</a>
+
+        <!-- INVENTORY -->
+        <p>INVENTORY</p>
+        <a href="#">📦 Inventory Stock</a>
+
+        <!-- TRANSFER -->
+        <a href="{{ route('cashier.transfer.in') }}" 
+           class="{{ request()->is('cashier/transfer-in*') ? 'active' : '' }}">
+            ⬇ Transfer In
+        </a>
+
+        <a href="#">⬆ Transfer Out</a>
+
+        <hr>
+
+        <!-- ACCOUNT -->
+        <p>ACCOUNT</p>
+        <a href="#">🔑 Change Password</a>
+
+    </div>
+
+    <!-- LOGOUT -->
+    <div class="logout">
+        <form method="POST" action="{{ url('/logout') }}">
+            @csrf
+            <button>🚪 Logout</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+    @yield('content')
+</div>
+
+<!-- CART -->
+<div class="cart">
+    @yield('cart')
+</div>
+
+<!-- SCRIPTS -->
+@yield('scripts')
+
+</body>
+</html>
