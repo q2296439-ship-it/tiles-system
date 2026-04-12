@@ -78,6 +78,17 @@ Route::get('/create-branches', function () {
 
 
 // =====================
+// 🔥 FIX DB (ADDED LANG)
+// =====================
+Route::get('/fix-db', function () {
+    DB::statement("ALTER TABLE stock_movements DROP CONSTRAINT stock_movements_type_check");
+    DB::statement("ALTER TABLE stock_movements ADD CONSTRAINT stock_movements_type_check CHECK (type IN ('IN','OUT','IN_REQUEST'))");
+
+    return 'DB FIXED SUCCESS';
+});
+
+
+// =====================
 // AUTH
 // =====================
 Route::get('/', [AuthController::class, 'showLogin']);
