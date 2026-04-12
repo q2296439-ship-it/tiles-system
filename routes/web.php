@@ -127,7 +127,7 @@ Route::post('/logout', [AuthController::class, 'logout']);
 
 
 // =====================
-// 🔥 MANAGER (FIXED)
+// 🔥 MANAGER
 // =====================
 Route::get('/manager', [InventoryController::class, 'managerDashboard'])->middleware('auth');
 
@@ -209,15 +209,19 @@ Route::prefix('admin')->group(function () {
 
 
 // =====================
-// 🔥 CASHIER
+// 🔥 CASHIER (FIXED)
 // =====================
 Route::prefix('cashier')->group(function () {
 
     Route::get('/', [CashierController::class, 'index']);
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
-    Route::get('/transfer-in', [InventoryController::class, 'transferInForm']);
-    Route::post('/transfer-in', [InventoryController::class, 'transferInStore']);
+    // ✅ ADD LANG (FIX)
+    Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])
+        ->name('cashier.transfer.in');
+
+    Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])
+        ->name('cashier.transfer.store');
 });
 
 
