@@ -25,45 +25,74 @@ class InventoryController extends Controller
     // =====================
     // STORE STOCK 🔥
     // =====================
-   else {
+   public function store(Request $request)
+{
+    if ($request->new_name) {
 
-    $request->validate([
-        'product_id' => 'required|exists:products,id',
-        'quantity' => 'required|integer|min:1',
-        'branch_id' => 'required|exists:branches,id'
-    ]);
+        $request->validate([
+            'new_name' => 'required|string',
+            'new_price' => 'required|numeric',
+            'quantity' => 'required|integer|min:1',
+            'branch_id' => 'required|exists:branches,id'
+        ]);
 
-    $existingProduct = Product::findOrFail($request->product_id);
-
-    // 🔥 CHECK kung may existing product sa branch
-    $product = Product::where('name', $existingProduct->name)
-        ->where('size', $existingProduct->size)
-        ->where('branch_id', $request->branch_id)
-        ->first();
-
-    if ($product) {
-        // ✅ dagdag stock sa tamang branch
-        $product->stock += $request->quantity;
-        $product->save();
-    } else {
-        // ✅ create new product for that branch
         $product = Product::create([
-            'name' => $existingProduct->name,
-            'size' => $existingProduct->size,
-            'price' => $existingProduct->price,
+            'name' => $request->new_name,
+            'size' => $request->new_size,
+            'price' => $request->new_price,
             'stock' => $request->quantity,
-            'color' => $existingProduct->color,
+            'color' => 'N/A',
             'branch_id' => $request->branch_id,
+        ]);
+
+        StockMovement::create([
+            'product_id' => $product->id,
+            'branch_id' => $request->branch_id,
+            'type' => 'IN',
+            'quantity' => $request->quantity,
+            'reason' => 'New Product Added',
+        ]);
+
+    } else {
+
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+            'branch_id' => 'required|exists:branches,id'
+        ]);
+
+        $existingProduct = Product::findOrFail($request->product_id);
+
+        // 🔥 check if product exists in selected branch
+        $product = Product::where('name', $existingProduct->name)
+            ->where('size', $existingProduct->size)
+            ->where('branch_id', $request->branch_id)
+            ->first();
+
+        if ($product) {
+            $product->stock += $request->quantity;
+            $product->save();
+        } else {
+            $product = Product::create([
+                'name' => $existingProduct->name,
+                'size' => $existingProduct->size,
+                'price' => $existingProduct->price,
+                'stock' => $request->quantity,
+                'color' => $existingProduct->color,
+                'branch_id' => $request->branch_id,
+            ]);
+        }
+
+        StockMovement::create([
+            'product_id' => $product->id,
+            'branch_id' => $request->branch_id,
+            'type' => 'IN',
+            'quantity' => $request->quantity,
+            'reason' => 'Manual Add',
         ]);
     }
 
-    StockMovement::create([
-        'product_id' => $product->id,
-        'branch_id' => $request->branch_id,
-        'type' => 'IN',
-        'quantity' => $request->quantity,
-        'reason' => 'Manual Add',
-    ]);
+    return back()->with('success', 'Saved successfully!');
 }
 
     // =====================
