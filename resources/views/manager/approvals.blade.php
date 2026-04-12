@@ -9,7 +9,6 @@
         vertical-align: middle;
     }
 
-    /* CENTER IMPORTANT COLUMNS */
     th:nth-child(3),
     td:nth-child(3),
     th:nth-child(4),
@@ -19,13 +18,11 @@
         text-align: center;
     }
 
-    /* ACTION COLUMN */
     th:last-child,
     td:last-child {
         text-align: center;
     }
 
-    /* ACTION FLEX FIX */
     .action-wrapper {
         display: flex;
         justify-content: center;
@@ -33,7 +30,6 @@
         gap: 6px;
     }
 
-    /* INPUT STYLE */
     .action-wrapper input {
         height: 30px;
         padding: 5px;
@@ -42,7 +38,6 @@
         width: 100px;
     }
 
-    /* BUTTON STYLE */
     .btn-approve {
         background: #22c55e;
         color: white;
@@ -79,7 +74,8 @@
             <th>Action</th>
         </tr>
 
-        @forelse($requests->where('type','IN_REQUEST') as $req)
+        {{-- ✅ RECEIVER SIDE --}}
+        @forelse($requests->where('type','IN_REQUEST')->where('status','pending') as $req)
         <tr>
             <td>{{ $req->product->name ?? '-' }}</td>
             <td>{{ $req->from_branch->name ?? '-' }} → {{ $req->branch->name ?? '-' }}</td>
@@ -89,14 +85,12 @@
             <td>
                 <div class="action-wrapper">
 
-                    <!-- APPROVE -->
                     <form action="/admin/manager/approve/{{ $req->id }}" method="POST">
                         @csrf
                         <input type="text" name="manager_note" placeholder="Reason..." required>
                         <button class="btn-approve">✔</button>
                     </form>
 
-                    <!-- REJECT -->
                     <form action="/admin/manager/reject/{{ $req->id }}" method="POST">
                         @csrf
                         <input type="text" name="manager_note" placeholder="Reason..." required>
@@ -131,7 +125,8 @@
             <th>Action</th>
         </tr>
 
-        @forelse($requests->where('type','OUT') as $req)
+        {{-- ✅ SENDER SIDE --}}
+        @forelse($requests->where('type','IN_REQUEST')->where('status','approved_receiver') as $req)
         <tr>
             <td>{{ $req->product->name ?? '-' }}</td>
             <td>{{ $req->from_branch->name ?? '-' }} → {{ $req->branch->name ?? '-' }}</td>
