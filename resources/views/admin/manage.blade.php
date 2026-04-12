@@ -4,6 +4,7 @@
 
 <style>
 .container { max-width: 1200px; margin:auto; }
+
 .card {
     background:white;
     padding:20px;
@@ -11,58 +12,87 @@
     margin-bottom:20px;
     box-shadow:0 4px 10px rgba(0,0,0,0.05);
 }
-.table { width:100%; border-collapse:collapse; }
+
+/* TABLE */
+.table { 
+    width:100%; 
+    border-collapse:collapse; 
+}
+
+.table th {
+    background:#f9fafb;
+    text-align:left;
+}
 
 .table th, .table td { 
-    padding:12px; 
+    padding:14px; 
     border-bottom:1px solid #eee; 
 }
 
+/* INPUT FIX */
 input, select {
-    padding:6px;
+    padding:8px;
     border:1px solid #ddd;
     border-radius:6px;
     width:100%;
     box-sizing: border-box;
+    height:38px;
 }
 
+/* BUTTON */
 .btn {
-    padding:6px 10px;
+    padding:6px 12px;
     border:none;
     border-radius:6px;
     cursor:pointer;
     color:white;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .save { background:#16a34a; }
 .delete { background:#dc2626; }
 
-/* 🔥 ALIGNMENT FIX */
+/* 🔥 USERS TABLE WIDTH */
 .table th:nth-child(1),
-.table td:nth-child(1) { width: 25%; }
+.table td:nth-child(1) { width:20%; }
 
 .table th:nth-child(2),
-.table td:nth-child(2) { width: 25%; }
+.table td:nth-child(2) { width:20%; }
 
 .table th:nth-child(3),
-.table td:nth-child(3) { width: 15%; }
+.table td:nth-child(3) { width:15%; }
 
 .table th:nth-child(4),
-.table td:nth-child(4) { width: 20%; }
+.table td:nth-child(4) { width:20%; }
 
 .table th:nth-child(5),
-.table td:nth-child(5) { width: 15%; }
+.table td:nth-child(5) { width:15%; }
 
 .table th:nth-child(6),
-.table td:nth-child(6) { width: 20%; text-align:center; }
+.table td:nth-child(6) { 
+    width:10%; 
+    text-align:center;
+}
 
-.table td { vertical-align: middle; }
+/* 🔥 ROW ALIGN */
+.table td {
+    vertical-align: middle;
+}
 
 /* 🔥 BUTTON ALIGN */
 .action-buttons {
     display:flex;
-    gap:5px;
+    align-items:center;
     justify-content:center;
+    gap:8px;
+}
+
+/* 🔥 HOVER EFFECT (PRO LOOK) */
+.table tr:hover {
+    background:#f9fafb;
 }
 </style>
 
@@ -152,9 +182,9 @@ input, select {
 <table class="table">
 <thead>
 <tr>
-    <th>Name</th>
-    <th>Address</th>
-    <th>Action</th>
+    <th style="width:40%;">Name</th>
+    <th style="width:40%;">Address</th>
+    <th style="width:20%; text-align:center;">Action</th>
 </tr>
 </thead>
 
