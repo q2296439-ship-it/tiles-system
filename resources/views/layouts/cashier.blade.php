@@ -241,7 +241,10 @@
 
         <!-- INVENTORY -->
         <p>Inventory</p>
-        <a href="#">📦 Inventory Stock</a>
+        <a href="{{ route('cashier.inventory.stock') }}"
+           class="{{ request()->is('cashier/inventory-stock') ? 'active' : '' }}">
+            📦 Inventory Stock
+        </a>
 
         <a href="{{ route('cashier.transfer.in') }}"
            class="{{ request()->is('cashier/transfer-in*') ? 'active' : '' }}">

@@ -228,6 +228,10 @@ Route::prefix('cashier')->group(function () {
     Route::get('/', [CashierController::class, 'index']);
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
+    // 🔥 INVENTORY STOCK
+    Route::get('/inventory-stock', [InventoryController::class, 'overviewStock'])
+        ->name('cashier.inventory.stock');
+
     Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])
         ->name('cashier.transfer.in');
 
