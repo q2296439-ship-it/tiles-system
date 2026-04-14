@@ -169,7 +169,7 @@ class ProductController extends Controller
             StockMovement::create([
                 'product_id' => $product->id,
                 'branch_id' => $request->branch_id,
-                'type' => 'ADJUST',
+                'type' => 'IN',
                 'quantity' => $request->stock,
                 'reason' => 'Product updated',
             ]);
