@@ -70,7 +70,10 @@ border-radius:8px;margin-bottom:15px;
 <div class="page">
 <div class="receipt-card">
 
-<form method="POST" action="{{ route('cashier.return.store') }}">
+<form method="POST"
+      action="{{ route('cashier.return.store') }}"
+      autocomplete="off"
+      id="returnForm">
 @csrf
 
 @if(session('success'))
@@ -89,14 +92,39 @@ border-radius:8px;margin-bottom:15px;
 <div class="label-box">↩ RETURN RECEIPT</div>
 
 <div style="display:flex;gap:10px;flex-wrap:wrap;">
-<input type="text" name="return_no" class="input" style="width:140px;" placeholder="Return No" required>
-<input type="date" name="return_date" class="input" style="width:170px;" value="{{ date('Y-m-d') }}" required>
+<input type="text"
+       name="return_no"
+       class="input"
+       style="width:140px;"
+       placeholder="Return No"
+       value="{{ session('success') ? '' : old('return_no') }}"
+       autocomplete="off"
+       required>
+
+<input type="date"
+       name="return_date"
+       class="input"
+       style="width:170px;"
+       value="{{ session('success') ? date('Y-m-d') : old('return_date', date('Y-m-d')) }}"
+       autocomplete="off"
+       required>
 </div>
 </div>
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
-<input type="text" name="receipt_no" class="input" placeholder="Original Receipt No">
-<input type="text" name="customer_name" class="input" placeholder="Customer Name">
+<input type="text"
+       name="receipt_no"
+       class="input"
+       placeholder="Original Receipt No"
+       value="{{ session('success') ? '' : old('receipt_no') }}"
+       autocomplete="off">
+
+<input type="text"
+       name="customer_name"
+       class="input"
+       placeholder="Customer Name"
+       value="{{ session('success') ? '' : old('customer_name') }}"
+       autocomplete="off">
 </div>
 
 <div class="table-wrap">
@@ -113,10 +141,10 @@ border-radius:8px;margin-bottom:15px;
 </thead>
 <tbody>
 <tr>
-<td><input type="number" name="items[0][qty]" class="input qty" value="1"></td>
-<td><input type="text" name="items[0][unit]" class="input"></td>
-<td><input type="text" name="items[0][description]" class="input"></td>
-<td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0"></td>
+<td><input type="number" name="items[0][qty]" class="input qty" value="1" autocomplete="off"></td>
+<td><input type="text" name="items[0][unit]" class="input" autocomplete="off"></td>
+<td><input type="text" name="items[0][description]" class="input" autocomplete="off"></td>
+<td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0" autocomplete="off"></td>
 <td><input type="number" step="0.01" name="items[0][amount]" class="input amount" value="0" readonly></td>
 <td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
 </tr>
@@ -133,7 +161,11 @@ border-radius:8px;margin-bottom:15px;
 <div class="footer-box">
 <div class="note-box">
 <strong>Reason</strong><br><br>
-<textarea name="reason" class="input" style="height:120px;" required></textarea>
+<textarea name="reason"
+          class="input"
+          style="height:120px;"
+          autocomplete="off"
+          required>{{ session('success') ? '' : old('reason') }}</textarea>
 </div>
 
 <div class="total-box">
@@ -159,10 +191,10 @@ let rowIndex = 1;
 function addRow(){
 document.querySelector('#itemsTable tbody').insertAdjacentHTML('beforeend', `
 <tr>
-<td><input type="number" name="items[${rowIndex}][qty]" class="input qty" value="1"></td>
-<td><input type="text" name="items[${rowIndex}][unit]" class="input"></td>
-<td><input type="text" name="items[${rowIndex}][description]" class="input"></td>
-<td><input type="number" step="0.01" name="items[${rowIndex}][unit_price]" class="input price" value="0"></td>
+<td><input type="number" name="items[${rowIndex}][qty]" class="input qty" value="1" autocomplete="off"></td>
+<td><input type="text" name="items[${rowIndex}][unit]" class="input" autocomplete="off"></td>
+<td><input type="text" name="items[${rowIndex}][description]" class="input" autocomplete="off"></td>
+<td><input type="number" step="0.01" name="items[${rowIndex}][unit_price]" class="input price" value="0" autocomplete="off"></td>
 <td><input type="number" step="0.01" name="items[${rowIndex}][amount]" class="input amount" value="0" readonly></td>
 <td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
 </tr>
@@ -195,6 +227,24 @@ document.getElementById('totalAmount').value = total.toFixed(2);
 }
 
 computeAll();
+
+@if(session('success'))
+document.addEventListener('DOMContentLoaded', function () {
+document.getElementById('returnForm').reset();
+document.querySelector('#itemsTable tbody').innerHTML = `
+<tr>
+<td><input type="number" name="items[0][qty]" class="input qty" value="1" autocomplete="off"></td>
+<td><input type="text" name="items[0][unit]" class="input" autocomplete="off"></td>
+<td><input type="text" name="items[0][description]" class="input" autocomplete="off"></td>
+<td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0" autocomplete="off"></td>
+<td><input type="number" step="0.01" name="items[0][amount]" class="input amount" value="0" readonly></td>
+<td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
+</tr>
+`;
+rowIndex = 1;
+computeAll();
+});
+@endif
 </script>
 
 @endsection

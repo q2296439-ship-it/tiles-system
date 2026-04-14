@@ -124,7 +124,10 @@
 <div class="page">
 <div class="receipt-card">
 
-<form method="POST" action="{{ route('cashier.collection.cancel.store') }}">
+<form method="POST"
+      action="{{ route('cashier.collection.cancel.store') }}"
+      autocomplete="off"
+      id="cancelForm">
 @csrf
 
 @if(session('success'))
@@ -152,7 +155,8 @@
                name="receipt_no"
                class="input"
                style="width:140px;"
-               value="{{ old('receipt_no') }}"
+               value="{{ session('success') ? '' : old('receipt_no') }}"
+               autocomplete="off"
                required>
 
         <strong>Date</strong>
@@ -160,7 +164,8 @@
                name="receipt_date"
                class="input"
                style="width:170px;"
-               value="{{ old('receipt_date', date('Y-m-d')) }}"
+               value="{{ session('success') ? date('Y-m-d') : old('receipt_date', date('Y-m-d')) }}"
+               autocomplete="off"
                required>
     </div>
 </div>
@@ -170,7 +175,8 @@
            name="customer_name"
            class="input"
            placeholder="SOLD TO"
-           value="{{ old('customer_name') }}">
+           value="{{ session('success') ? '' : old('customer_name') }}"
+           autocomplete="off">
 
     <input type="text"
            class="input"
@@ -196,7 +202,8 @@
 
         <textarea name="cancel_reason"
                   class="textarea"
-                  required>{{ old('cancel_reason') }}</textarea>
+                  autocomplete="off"
+                  required>{{ session('success') ? '' : old('cancel_reason') }}</textarea>
     </div>
 
     <div class="total-box">
@@ -232,5 +239,13 @@
 
 </div>
 </div>
+
+@if(session('success'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('cancelForm').reset();
+});
+</script>
+@endif
 
 @endsection
