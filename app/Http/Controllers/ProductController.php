@@ -30,7 +30,7 @@ class ProductController extends Controller
     }
 
     // =====================
-    // 🔥 ADMIN OVERVIEW STOCK (NEW)
+    // ADMIN OVERVIEW STOCK
     // =====================
     public function overviewStock()
     {
@@ -51,7 +51,7 @@ class ProductController extends Controller
     }
 
     // =====================
-    // STORE PRODUCT 🔥 FIXED
+    // STORE PRODUCT
     // =====================
     public function store(Request $request)
     {
@@ -77,6 +77,7 @@ class ProductController extends Controller
                 'size' => $request->size,
                 'color' => $request->color,
                 'price' => $request->price,
+                'stock' => $request->stock,
                 'low_stock_threshold' => $request->low_stock_threshold,
                 'branch_id' => $request->branch_id,
             ]);
@@ -119,7 +120,7 @@ class ProductController extends Controller
     }
 
     // =====================
-    // UPDATE PRODUCT 🔥 FIXED
+    // UPDATE PRODUCT
     // =====================
     public function update(Request $request, $id)
     {
@@ -134,11 +135,13 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'stock' => 'required|integer|min:0',
             'low_stock_threshold' => 'required|integer',
+            'branch_id' => 'required|exists:branches,id',
         ]);
 
         DB::beginTransaction();
 
         try {
+
             $product->update([
                 'sku' => $request->sku,
                 'category' => $request->category,
@@ -146,43 +149,36 @@ class ProductController extends Controller
                 'size' => $request->size,
                 'color' => $request->color,
                 'price' => $request->price,
+                'stock' => $request->stock,
                 'low_stock_threshold' => $request->low_stock_threshold,
+                'branch_id' => $request->branch_id,
             ]);
 
-            $existing = DB::table('branch_product')
-                ->where('product_id', $product->id)
-                ->where('branch_id', $product->branch_id)
-                ->first();
-
-            $oldStock = $existing ? $existing->stock : 0;
-            $newStock = $request->stock;
-            $diff = $newStock - $oldStock;
-
-            if ($existing) {
-                DB::table('branch_product')
-                    ->where('product_id', $product->id)
-                    ->where('branch_id', $product->branch_id)
-                    ->update([
-                        'stock' => $newStock,
-                        'updated_at' => now(),
-                    ]);
-            }
-
-            if ($diff != 0) {
-                StockMovement::create([
+            DB::table('branch_product')->updateOrInsert(
+                [
                     'product_id' => $product->id,
-                    'branch_id' => $product->branch_id,
-                    'type' => 'ADJUST',
-                    'quantity' => $diff,
-                    'reason' => 'Manual update',
-                ]);
-            }
+                    'branch_id' => $request->branch_id,
+                ],
+                [
+                    'stock' => $request->stock,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+
+            StockMovement::create([
+                'product_id' => $product->id,
+                'branch_id' => $request->branch_id,
+                'type' => 'ADJUST',
+                'quantity' => $request->stock,
+                'reason' => 'Product updated',
+            ]);
 
             DB::commit();
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error updating product');
+            return back()->with('error', $e->getMessage());
         }
 
         return redirect('/admin/products')->with('success', 'Product updated successfully');
@@ -200,7 +196,7 @@ class ProductController extends Controller
     }
 
     // =====================
-    // EXPORT CSV (UPDATED 🔥)
+    // EXPORT CSV
     // =====================
     public function export()
     {
@@ -216,7 +212,7 @@ class ProductController extends Controller
         $callback = function () use ($products) {
             $file = fopen('php://output', 'w');
 
-            fputcsv($file, ['Name','Branch','Price']);
+            fputcsv($file, ['Name', 'Branch', 'Price']);
 
             foreach ($products as $p) {
                 fputcsv($file, [
