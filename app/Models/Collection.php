@@ -18,6 +18,12 @@ class Collection extends Model
         'total_amount',
         'branch_id',
         'user_id',
+        'status',
+        'cancel_reason',
+    ];
+
+    protected $attributes = [
+        'status' => 'saved',
     ];
 
     public function items()
