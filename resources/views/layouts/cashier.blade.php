@@ -118,7 +118,7 @@
         ========================= */
         .content{
             flex:1;
-            padding:25px;
+            padding:20px;
             overflow-y:auto;
         }
 
@@ -129,6 +129,63 @@
         .content::-webkit-scrollbar-thumb{
             background:#94a3b8;
             border-radius:10px;
+        }
+
+        /* TOPBAR */
+        .topbar{
+            background:#ffffff;
+            border-radius:16px;
+            padding:18px 24px;
+            margin-bottom:20px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            box-shadow:0 6px 18px rgba(0,0,0,0.05);
+        }
+
+        .topbar-left h1{
+            margin:0;
+            font-size:18px;
+            font-weight:800;
+            color:#111827;
+        }
+
+        .topbar-left p{
+            margin:4px 0 0;
+            font-size:13px;
+            color:#6b7280;
+        }
+
+        .user-box{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            background:#f8fafc;
+            padding:8px 14px;
+            border-radius:14px;
+        }
+
+        .avatar{
+            width:38px;
+            height:38px;
+            border-radius:50%;
+            background:#2563eb;
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+        }
+
+        .user-info strong{
+            display:block;
+            font-size:14px;
+            color:#111827;
+        }
+
+        .user-info span{
+            font-size:12px;
+            color:#6b7280;
         }
 
         /* =========================
@@ -216,7 +273,27 @@
 
 <!-- CONTENT -->
 <div class="content">
+
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1>Cashier Workspace</h1>
+            <p>Manage collections, sales, inventory and transfers</p>
+        </div>
+
+        <div class="user-box">
+            <div class="avatar">
+                {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+            </div>
+
+            <div class="user-info">
+                <strong>{{ auth()->user()->name }}</strong>
+                <span>Cashier</span>
+            </div>
+        </div>
+    </div>
+
     @yield('content')
+
 </div>
 
 <!-- CART -->
