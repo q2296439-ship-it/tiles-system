@@ -1,273 +1,319 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Products ERP</title>
+@extends('layouts.admin')
 
-    <style>
-        body {
-            font-family: Arial;
-            background: #f1f5f9;
-            margin: 0;
-            padding: 30px;
-        }
+@section('content')
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+<style>
+.container{
+    max-width:1300px;
+    margin:auto;
+    font-family:'Segoe UI',Tahoma,sans-serif;
+}
 
-        h1 {
-            margin: 0;
-        }
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+}
 
-        .top-actions {
-            display: flex;
-            gap: 10px;
-        }
+.header h2{
+    margin:0;
+    font-size:24px;
+    font-weight:700;
+    color:#111827;
+}
 
-        .btn {
-            padding: 8px 14px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 13px;
-            color: white;
-            transition: 0.2s;
-            border: none;
-            cursor: pointer;
-        }
+.top-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
 
-        .btn:hover {
-            opacity: 0.85;
-        }
+.btn{
+    padding:11px 16px;
+    border-radius:10px;
+    text-decoration:none;
+    font-size:14px;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+    transition:.2s;
+    display:inline-block;
+}
 
-        .green { background: #22c55e; }
-        .gray { background: #64748b; }
-        .blue { background: #3b82f6; }
+.btn:hover{
+    opacity:.92;
+}
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+.green{ background:#16a34a; }
+.blue{ background:#3b82f6; }
+.gray{ background:#64748b; }
 
-        .stat {
-            background: white;
-            padding: 18px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:25px;
+}
 
-        .stat h4 {
-            margin: 0;
-            font-size: 12px;
-            color: #64748b;
-        }
+.stat{
+    background:#fff;
+    padding:22px;
+    border-radius:14px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.05);
+}
 
-        .stat h2 {
-            margin: 5px 0 0;
-        }
+.stat h4{
+    margin:0;
+    font-size:13px;
+    color:#6b7280;
+    font-weight:500;
+}
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
+.stat h2{
+    margin:8px 0 0;
+    font-size:24px;
+    font-weight:700;
+    color:#111827;
+}
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            align-items: center;
-        }
+.card{
+    background:#fff;
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    overflow-x:auto;
+}
 
-        .search {
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            width: 250px;
-        }
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+.search{
+    padding:11px 14px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    width:260px;
+    outline:none;
+}
 
-        th {
-            background: #f8fafc;
-            text-align: left;
-            font-weight: 600;
-        }
+.search:focus{
+    border-color:#3b82f6;
+    box-shadow:0 0 0 3px rgba(59,130,246,.10);
+}
 
-        th, td {
-            padding: 14px;
-            border-bottom: 1px solid #e2e8f0;
-        }
+table{
+    width:100%;
+    border-collapse:collapse;
+}
 
-        th.right, td.right { text-align: right; }
-        th.center, td.center { text-align: center; }
+th{
+    background:#f9fafb;
+    text-align:left;
+    font-weight:700;
+    font-size:13px;
+    color:#374151;
+    white-space:nowrap;
+}
 
-        tr:hover {
-            background: #f1f5f9;
-        }
+th,td{
+    padding:14px;
+    border-bottom:1px solid #e5e7eb;
+    font-size:14px;
+}
 
-        tr.low-row {
-            background: #fff1f2;
-        }
+th.right,td.right{ text-align:right; }
+th.center,td.center{ text-align:center; }
 
-        .actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
+tbody tr:hover{
+    background:#f9fafb;
+}
 
-        .actions a {
-            padding: 6px 10px;
-            border-radius: 5px;
-            color: white;
-            font-size: 12px;
-            text-decoration: none;
-        }
+.low-row{
+    background:#fff7ed;
+}
 
-        .edit { background: #3b82f6; }
-        .delete { background: #ef4444; }
+.actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+}
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 500;
-        }
+.actions a{
+    padding:7px 10px;
+    border-radius:8px;
+    color:#fff;
+    font-size:12px;
+    text-decoration:none;
+    font-weight:600;
+}
 
-        .low { background: #fee2e2; color: #dc2626; }
-        .ok { background: #dcfce7; color: #16a34a; }
+.edit{ background:#3b82f6; }
+.delete{ background:#dc2626; }
 
-        .empty {
-            text-align: center;
-            padding: 40px;
-            color: #94a3b8;
-        }
+.badge{
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    display:inline-block;
+}
 
-        .pagination {
-            margin-top: 20px;
-        }
+.low{
+    background:#fee2e2;
+    color:#dc2626;
+}
 
-        @media print {
-            .top-actions, .search {
-                display: none;
-            }
-        }
-    </style>
-</head>
+.ok{
+    background:#dcfce7;
+    color:#16a34a;
+}
 
-<body>
+.empty{
+    text-align:center;
+    padding:30px;
+    color:#6b7280;
+}
 
-<div class="header">
-    <h1>📦 Products</h1>
+.pagination{
+    margin-top:18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+}
 
-    <div class="top-actions">
-        <a href="/admin" class="btn gray">← Dashboard</a>
-        <a href="/admin/products/create" class="btn green">+ Add Product</a>
-        <a href="/admin/products/export" class="btn blue">Export CSV</a>
-        <button onclick="window.print()" class="btn gray">Print</button>
+.pagination svg{
+    width:18px !important;
+    height:18px !important;
+}
+
+svg{
+    max-width:18px;
+    max-height:18px;
+}
+</style>
+
+<div class="container">
+
+    <div class="header">
+        <h2>📦 Product Overview</h2>
+
+        <div class="top-actions">
+            <a href="/admin/products/create" class="btn green">+ Add Product</a>
+            <button onclick="window.print()" class="btn gray">🖨 Print</button>
+        </div>
     </div>
-</div>
 
-<div class="stats">
-    <div class="stat">
-        <h4>Total Products</h4>
-        <h2>{{ $products->total() }}</h2>
+    {{-- PRODUCT STATS ONLY --}}
+    <div class="stats">
+
+        <div class="stat">
+            <h4>Total Products</h4>
+            <h2>{{ $products->total() }}</h2>
+        </div>
+
+        <div class="stat">
+            <h4>Showing</h4>
+            <h2>{{ $products->count() }}</h2>
+        </div>
+
+        <div class="stat">
+            <h4>Low Stock Items</h4>
+            <h2>{{ $products->filter(fn($p) => $p->stock <= 10)->count() }}</h2>
+        </div>
+
+        <div class="stat">
+            <h4>Available Items</h4>
+            <h2>{{ $products->filter(fn($p) => $p->stock > 10)->count() }}</h2>
+        </div>
+
     </div>
 
-    <div class="stat">
-        <h4>Showing</h4>
-        <h2>{{ $products->count() }}</h2>
-    </div>
+    {{-- PRODUCT TABLE --}}
+    <div class="card">
 
-    <div class="stat">
-        <h4>Low Stock</h4>
-        <h2>{{ $products->filter(fn($p) => $p->stock <= 10)->count() }}</h2>
-    </div>
+        <div class="top-bar">
+            <input type="text" id="searchInput" class="search" placeholder="🔍 Search product...">
+        </div>
 
-    <div class="stat">
-        <h4>Total Value</h4>
-        <h2>₱{{ number_format($products->sum(fn($p) => $p->price * $p->stock), 2) }}</h2>
-    </div>
-</div>
+        <table id="productTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Branch</th>
+                    <th>Size</th>
+                    <th>Color</th>
+                    <th class="right">Price</th>
+                    <th class="center">Stock</th>
+                    <th class="center">Status</th>
+                    <th class="right">Action</th>
+                </tr>
+            </thead>
 
-<div class="card">
+            <tbody>
+            @forelse($products as $p)
+                <tr class="{{ $p->stock <= 10 ? 'low-row' : '' }}">
+                    <td><strong>{{ $p->name }}</strong></td>
+                    <td>{{ $p->branch->name ?? '-' }}</td>
+                    <td>{{ $p->size }}</td>
+                    <td>{{ $p->color }}</td>
+                    <td class="right">₱{{ number_format($p->price, 2) }}</td>
+                    <td class="center">{{ $p->stock }}</td>
 
-    <div class="top-bar">
-        <input type="text" id="searchInput" class="search" placeholder="🔍 Search product...">
-    </div>
+                    <td class="center">
+                        @if($p->stock <= 10)
+                            <span class="badge low">Low Stock</span>
+                        @else
+                            <span class="badge ok">Available</span>
+                        @endif
+                    </td>
 
-    <table id="productTable">
-        <tr>
-            <th>Name</th>
-            <th>Branch</th> <!-- 🔥 ADDED -->
-            <th>Size</th>
-            <th>Color</th>
-            <th class="right">Price</th>
-            <th class="center">Stock</th>
-            <th class="center">Status</th>
-            <th class="right">Action</th>
-        </tr>
+                    <td>
+                        <div class="actions">
+                            <a href="/admin/products/{{ $p->id }}/edit" class="edit">Edit</a>
+                            <a href="/admin/products/{{ $p->id }}/delete"
+                               class="delete"
+                               onclick="return confirm('Delete this product?')">
+                               Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="8" class="empty">No products found</td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
 
-        @forelse($products as $p)
-        <tr class="{{ $p->stock <= 10 ? 'low-row' : '' }}">
-            <td><strong>{{ $p->name }}</strong></td>
+        <div class="pagination">
+            {{ $products->links() }}
+        </div>
 
-            <!-- 🔥 FIX: SHOW BRANCH -->
-            <td>{{ $p->branch->name ?? '-' }}</td>
-
-            <td>{{ $p->size }}</td>
-            <td>{{ $p->color }}</td>
-            <td class="right">₱{{ number_format($p->price, 2) }}</td>
-            <td class="center">{{ $p->stock }}</td>
-
-            <td class="center">
-                @if($p->stock <= 10)
-                    <span class="badge low">⚠ Low</span>
-                @else
-                    <span class="badge ok">✔ OK</span>
-                @endif
-            </td>
-
-            <td>
-                <div class="actions">
-                    <!-- 🔥 FIXED ROUTES -->
-                    <a href="/admin/products/{{ $p->id }}/edit" class="edit">Edit</a>
-                    <a href="/admin/products/{{ $p->id }}/delete" class="delete">Delete</a>
-                </div>
-            </td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="8" class="empty">No products found</td>
-        </tr>
-        @endforelse
-    </table>
-
-    <div class="pagination">
-        {{ $products->links() }}
     </div>
 
 </div>
 
 <script>
-document.getElementById('searchInput').addEventListener('keyup', function() {
+document.getElementById('searchInput').addEventListener('keyup', function () {
     let value = this.value.toLowerCase();
-    let rows = document.querySelectorAll("#productTable tr");
+    let rows = document.querySelectorAll("#productTable tbody tr");
 
-    rows.forEach((row, index) => {
-        if(index === 0) return;
+    rows.forEach((row) => {
         row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
     });
 });
 </script>
 
-</body>
-</html>
+@endsection

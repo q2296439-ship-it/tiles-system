@@ -1,135 +1,258 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Product</title>
+@extends('layouts.admin')
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            margin: 0;
-            padding: 40px;
-        }
+@section('content')
 
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 500px;
-            margin: auto;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        }
+<style>
+.page-wrap{
+    max-width: 760px;
+    margin: auto;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
 
-        h2 {
-            margin-bottom: 20px;
-        }
+.top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+}
 
-        label {
-            font-size: 13px;
-            color: #475569;
-            display: block;
-            margin-bottom: 5px;
-        }
+.title{
+    font-size:26px;
+    font-weight:700;
+    color:#111827;
+    margin:0;
+}
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 14px;
-        }
+.back-btn{
+    text-decoration:none;
+    background:#e5e7eb;
+    color:#111827;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    transition:.2s;
+}
 
-        .btn {
-            background: #22c55e;
-            color: white;
-            padding: 10px;
-            border: none;
-            width: 100%;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+.back-btn:hover{
+    background:#d1d5db;
+}
 
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
+.card{
+    background:#ffffff;
+    border-radius:16px;
+    padding:28px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.06);
+}
 
-        .back {
-            display: inline-block;
-            margin-bottom: 15px;
-            font-size: 13px;
-            text-decoration: none;
-            color: #3b82f6;
-        }
-    </style>
-</head>
+.subtitle{
+    font-size:14px;
+    color:#6b7280;
+    margin-bottom:22px;
+}
 
-<body>
+.error-box{
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    padding:14px 16px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
 
-<div class="card">
+.error-box ul{
+    margin:0;
+    padding-left:18px;
+}
 
-    <!-- ✅ FIXED ROUTE -->
-    <a href="/admin/products" class="back">← Back to Products</a>
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
 
-    <h2>➕ Add Product</h2>
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
 
-    @if($errors->any())
-        <div class="error">
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+.full{
+    grid-column:1 / -1;
+}
+
+label{
+    font-size:13px;
+    font-weight:600;
+    color:#374151;
+    margin-bottom:7px;
+}
+
+input,
+select{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-size:14px;
+    outline:none;
+    transition:.2s;
+    box-sizing:border-box;
+    background:#fff;
+}
+
+input:focus,
+select:focus{
+    border-color:#3b82f6;
+    box-shadow:0 0 0 3px rgba(59,130,246,.10);
+}
+
+.actions{
+    margin-top:25px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    border:none;
+    padding:12px 18px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+    text-decoration:none;
+}
+
+.btn-save{
+    background:#16a34a;
+    color:#fff;
+}
+
+.btn-save:hover{
+    background:#15803d;
+}
+
+.btn-cancel{
+    background:#e5e7eb;
+    color:#111827;
+}
+
+.btn-cancel:hover{
+    background:#d1d5db;
+}
+
+.note{
+    margin-top:18px;
+    font-size:12px;
+    color:#6b7280;
+}
+
+@media (max-width: 768px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+
+<div class="page-wrap">
+
+    <div class="top-bar">
+        <h2 class="title">➕ Add Product</h2>
+        <a href="/admin/products" class="back-btn">← Back to Products</a>
+    </div>
+
+    <div class="card">
+
+        <div class="subtitle">
+            Fill in the product details below to add a new item to your inventory.
         </div>
-    @endif
 
-    <!-- ✅ FIXED FORM ACTION -->
-    <form method="POST" action="/admin/products">
-        @csrf
+        @if($errors->any())
+            <div class="error-box">
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <label>SKU</label>
-        <input type="text" name="sku" required>
+        <form method="POST" action="/admin/products">
+            @csrf
 
-        <label>Category</label>
-        <input type="text" name="category" required>
+            <div class="grid">
 
-        <label>Product Name</label>
-        <input type="text" name="name" required>
+                <div class="form-group">
+                    <label>SKU</label>
+                    <input type="text" name="sku" value="{{ old('sku') }}" required>
+                </div>
 
-        <label>Size</label>
-        <input type="text" name="size">
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" name="category" value="{{ old('category') }}" required>
+                </div>
 
-        <label>Color</label>
-        <input type="text" name="color">
+                <div class="form-group full">
+                    <label>Product Name</label>
+                    <input type="text" name="name" value="{{ old('name') }}" required>
+                </div>
 
-        <label>Price</label>
-        <input type="number" step="0.01" name="price" required>
+                <div class="form-group">
+                    <label>Size</label>
+                    <input type="text" name="size" value="{{ old('size') }}">
+                </div>
 
-        <label>Stock</label>
-        <input type="number" name="stock" required>
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="text" name="color" value="{{ old('color') }}">
+                </div>
 
-        <label>Low Stock Threshold</label>
-        <input type="number" name="low_stock_threshold" value="10">
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" step="0.01" name="price" value="{{ old('price') }}" required>
+                </div>
 
-        <!-- 🔥 NEW: BRANCH DROPDOWN -->
-        <label>Select Branch</label>
-        <select name="branch_id" required>
-            <option value="">-- Select Branch --</option>
-            @foreach($branches as $branch)
-                <option value="{{ $branch->id }}">
-                    {{ $branch->name }}
-                </option>
-            @endforeach
-        </select>
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" name="stock" value="{{ old('stock') }}" required>
+                </div>
 
-        <button type="submit" class="btn">Save Product</button>
-    </form>
+                <div class="form-group">
+                    <label>Low Stock Threshold</label>
+                    <input type="number" name="low_stock_threshold" value="{{ old('low_stock_threshold', 10) }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Select Branch</label>
+                    <select name="branch_id" required>
+                        <option value="">-- Select Branch --</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}"
+                                {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-save">💾 Save Product</button>
+                <a href="/admin/products" class="btn btn-cancel">Cancel</a>
+            </div>
+
+            <div class="note">
+                Tip: Make sure SKU is unique and branch is correctly assigned.
+            </div>
+
+        </form>
+
+    </div>
 
 </div>
 
-</body>
-</html>
+@endsection
