@@ -212,6 +212,7 @@ tbody tr:hover{
             </a>
 
             <a href="{{ url('/admin/inventory/export/pdf?search=' . request('search') . '&branch_id=' . request('branch_id')) }}"
+               target="_blank"
                class="btn btn-danger">
                🧾 PDF
             </a>
