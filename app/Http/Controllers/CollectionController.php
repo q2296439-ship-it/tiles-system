@@ -160,7 +160,7 @@ class CollectionController extends Controller
             ->where('branch_id', $branchId)
             ->get()
             ->map(function ($row) {
-                $row->record_type = $row->status ?? 'cancel';
+                $row->record_type = strtolower($row->status ?? 'saved');
                 return $row;
             });
 

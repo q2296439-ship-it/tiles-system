@@ -231,7 +231,7 @@ th{
             @forelse($collections as $row)
 
                 @php
-                    $status = $row->record_type ?? ($row->status ?? 'saved');
+                    $status = strtolower($row->record_type ?? $row->status ?? 'saved');
                 @endphp
 
                 <tr data-status="{{ strtolower($status) }}">
