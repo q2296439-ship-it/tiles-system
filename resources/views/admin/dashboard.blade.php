@@ -249,6 +249,7 @@ tr:hover{
                     <thead>
                         <tr>
                             <th>Product</th>
+                            <th>Branch</th>
                             <th>Stock</th>
                         </tr>
                     </thead>
@@ -257,13 +258,12 @@ tr:hover{
                     @forelse($lowStocks->take(6) as $item)
                         <tr>
                             <td>{{ $item->name }}</td>
-                            <td>
-                                <span class="low-badge">{{ $item->stock }}</span>
-                            </td>
+                            <td>{{ $item->branch_name }}</td>
+                            <td><span class="low-badge">{{ $item->stock }}</span></td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="2" class="empty">No low stock items</td>
+                            <td colspan="3" class="empty">No low stock items</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -283,6 +283,7 @@ tr:hover{
                 <thead>
                     <tr>
                         <th>Date</th>
+                        <th>Branch</th>
                         <th>Amount</th>
                     </tr>
                 </thead>
@@ -290,12 +291,13 @@ tr:hover{
                 <tbody>
                 @forelse($recentSales as $sale)
                     <tr>
-                        <td>{{ $sale->created_at }}</td>
+                        <td>{{ $sale->created_at->format('Y-m-d h:i A') }}</td>
+                        <td>{{ $sale->branch->name ?? '-' }}</td>
                         <td class="amount">₱{{ number_format($sale->total_amount, 2) }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="2" class="empty">No transactions found</td>
+                        <td colspan="3" class="empty">No transactions found</td>
                     </tr>
                 @endforelse
                 </tbody>
