@@ -71,7 +71,6 @@ th, td {
 
 .low { background: #fee2e2; color: #dc2626; }
 .ok { background: #dcfce7; color: #16a34a; }
-
 </style>
 
 <div class="container">
@@ -84,7 +83,7 @@ th, td {
     <div class="stats">
         <div class="stat">
             <small>Total Products</small>
-            <h2>{{ $products->total() }}</h2>
+            <h2>{{ $products->count() }}</h2>
         </div>
 
         <div class="stat">
@@ -141,8 +140,6 @@ th, td {
             </tr>
             @endforelse
         </table>
-
-        {{ $products->links() }}
 
     </div>
 
