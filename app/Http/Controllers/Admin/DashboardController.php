@@ -41,14 +41,14 @@ class DashboardController extends Controller
             )
             ->get();
 
-        // ✅ TODAY SALES (FIXED)
+        // ✅ TODAY SALES
         $todaySales = Sale::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
             ->whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
-        // ✅ TRANSACTIONS TODAY (FIXED)
+        // ✅ TRANSACTIONS TODAY
         $transactionsToday = Sale::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
@@ -73,15 +73,16 @@ class DashboardController extends Controller
             return [$date => $salesRaw[$date] ?? 0];
         });
 
-        // ✅ RECENT SALES
-        $recentSales = Sale::when($branchId, function ($q) use ($branchId) {
+        // ✅ RECENT SALES (10 rows + branch name)
+        $recentSales = Sale::with('branch')
+            ->when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
             ->latest()
-            ->take(5)
+            ->take(10)
             ->get();
 
-        // ✅ TOP BRANCHES (FIXED GROUPING)
+        // ✅ TOP BRANCHES
         $topBranches = Sale::join('branches', 'sales.branch_id', '=', 'branches.id')
             ->selectRaw('branches.id, branches.name as branch_name, SUM(total_amount) as total')
             ->groupBy('branches.id', 'branches.name')
