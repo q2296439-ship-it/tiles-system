@@ -156,9 +156,6 @@
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
     <a href="#">🏷 Per Model</a>
 
-    <!-- ❌ REMOVED DUPLICATE OVERVIEW STOCK (ADMIN) -->
-
-    <!-- INVENTORY -->
     <div class="menu-title">INVENTORY</div>
 
     <a href="/admin/inventory" 
@@ -179,16 +176,6 @@
     <a href="/admin/inventory/transfer-in"
        class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
         📥 Transfer In
-    </a>
-
-    <a href="/admin/inventory/movements"
-       class="{{ request()->is('admin/inventory/movements') ? 'active' : '' }}">
-        📜 Stock Movements
-    </a>
-
-    <a href="/admin/inventory/delivery-report"
-       class="{{ request()->is('admin/inventory/delivery-report') ? 'active' : '' }}">
-        📄 Delivery Report
     </a>
 
     <div class="menu-title">USER</div>
