@@ -38,6 +38,19 @@
     border-color: #3b82f6;
 }
 
+.btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #2563eb;
+}
+
 .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -115,23 +128,36 @@ tr:hover {
     <div class="header">
         <h2>📦 Overview Stock</h2>
 
-        <div class="filters">
-            <input type="text" id="searchInput" class="search" placeholder="🔍 Search product...">
+        {{-- ✅ CONNECTED FILTER FORM --}}
+        <form method="GET" class="filters">
 
-            <select class="select">
-                <option>All Branch</option>
+            <input 
+                type="text" 
+                name="search"
+                value="{{ request('search') }}"
+                placeholder="🔍 Search product..." 
+                class="search">
+
+            <select name="branch_id" class="select">
+                <option value="">All Branch</option>
                 @foreach($branches as $b)
-                    <option>{{ $b->name }}</option>
+                    <option value="{{ $b->id }}"
+                        {{ request('branch_id') == $b->id ? 'selected' : '' }}>
+                        {{ $b->name }}
+                    </option>
                 @endforeach
             </select>
-        </div>
+
+            <button type="submit" class="btn">Filter</button>
+
+        </form>
     </div>
 
     {{-- STATS --}}
     <div class="stats">
         <div class="stat">
             <small>Total Products</small>
-            <h2>{{ $products->count() }}</h2>
+            <h2>{{ $products->total() }}</h2>
         </div>
 
         <div class="stat">
@@ -153,7 +179,7 @@ tr:hover {
     {{-- TABLE --}}
     <div class="card">
 
-        <table id="productTable">
+        <table>
             <thead>
                 <tr>
                     <th>Product</th>
@@ -199,16 +225,5 @@ tr:hover {
     </div>
 
 </div>
-
-<script>
-document.getElementById('searchInput').addEventListener('keyup', function() {
-    let value = this.value.toLowerCase();
-    let rows = document.querySelectorAll("#productTable tbody tr");
-
-    rows.forEach((row) => {
-        row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
-    });
-});
-</script>
 
 @endsection
