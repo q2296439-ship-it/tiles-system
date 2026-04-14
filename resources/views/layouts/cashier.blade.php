@@ -229,6 +229,16 @@
             🧾 Add Collection Receipt
         </a>
 
+        <a href="{{ route('cashier.collection.cancel') }}"
+           class="{{ request()->is('cashier/collection-cancel*') ? 'active' : '' }}">
+            ❌ Cancel Receipt
+        </a>
+
+        <a href="{{ route('cashier.return.create') }}"
+           class="{{ request()->is('cashier/return-receipt*') ? 'active' : '' }}">
+            ↩ Return Receipt
+        </a>
+
         <a href="{{ url('/cashier/collection-today') }}"
            class="{{ request()->is('cashier/collection-today*') ? 'active' : '' }}">
             📊 Collection Today

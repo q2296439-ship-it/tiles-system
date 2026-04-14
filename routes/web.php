@@ -253,6 +253,18 @@ Route::prefix('cashier')->group(function () {
 
     Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])
         ->name('cashier.collection.export.excel');
+
+    Route::get('/collection-cancel', [CollectionController::class, 'cancelForm'])
+        ->name('cashier.collection.cancel');
+
+    Route::post('/collection-cancel', [CollectionController::class, 'cancelStore'])
+        ->name('cashier.collection.cancel.store');
+    
+    Route::get('/return-receipt', [CollectionController::class, 'returnForm'])
+        ->name('cashier.return.create');
+
+    Route::post('/return-receipt', [CollectionController::class, 'returnStore'])
+        ->name('cashier.return.store');
 });
 
 

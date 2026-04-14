@@ -8,6 +8,8 @@ use App\Models\CollectionItem;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\ReturnModel;
+use App\Models\ReturnItem;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -15,13 +17,140 @@ use App\Exports\CollectionExport;
 
 class CollectionController extends Controller
 {
-    // Show Add Collection Receipt Page
     public function create()
     {
         return view('cashier.collection.create');
     }
 
-    // Collection Report Page (Today + Previous Dates)
+    public function cancelForm()
+    {
+        return view('cashier.collection.cancel');
+    }
+
+    public function returnForm()
+    {
+        return view('cashier.collection.return');
+    }
+
+    // CANCEL = documentation only
+    public function cancelStore(Request $request)
+    {
+        $request->validate([
+            'receipt_no'    => 'required',
+            'receipt_date'  => 'required|date',
+            'customer_name' => 'nullable|string',
+            'cancel_reason' => 'required|string',
+        ]);
+
+        Collection::create([
+            'receipt_no'    => $request->receipt_no,
+            'receipt_date'  => $request->receipt_date,
+            'customer_name' => $request->customer_name ?? '',
+            'address'       => '',
+            'terms'         => '',
+            'total_amount'  => 0,
+            'branch_id'     => auth()->user()->branch_id,
+            'user_id'       => auth()->id(),
+            'status'        => 'cancelled',
+            'cancel_reason' => $request->cancel_reason,
+        ]);
+
+        return redirect()
+            ->route('cashier.collection.cancel')
+            ->with('success', 'Cancelled receipt saved!');
+    }
+
+    // RETURN = stock back + sales less
+    public function returnStore(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'return_no'   => 'required|unique:returns,return_no',
+                'return_date' => 'required|date',
+                'reason'      => 'required',
+                'items'       => 'required|array|min:1',
+            ]);
+
+            DB::transaction(function () use ($request) {
+
+                $branchId = auth()->user()->branch_id;
+                $userId   = auth()->id();
+
+                $return = ReturnModel::create([
+                    'return_no'     => $request->return_no,
+                    'receipt_no'    => $request->receipt_no,
+                    'return_date'   => $request->return_date,
+                    'customer_name' => $request->customer_name ?? '',
+                    'reason'        => $request->reason,
+                    'total_amount'  => $request->total_amount ?? 0,
+                    'branch_id'     => $branchId,
+                    'user_id'       => $userId,
+                ]);
+
+                // NEGATIVE SALE HEADER
+                $sale = Sale::create([
+                    'total_amount' => -1 * ($request->total_amount ?? 0),
+                    'branch_id'    => $branchId,
+                    'user_id'      => $userId,
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ]);
+
+                foreach ($request->items as $item) {
+
+                    if (empty($item['description'])) {
+                        continue;
+                    }
+
+                    $qty    = (int) ($item['qty'] ?? 0);
+                    $price  = (float) ($item['unit_price'] ?? 0);
+                    $amount = $qty * $price;
+                    $desc   = trim($item['description']);
+
+                    $product = Product::where('name', $desc)
+                        ->where('branch_id', $branchId)
+                        ->first();
+
+                    ReturnItem::create([
+                        'return_id'   => $return->id,
+                        'product_id'  => $product->id ?? null,
+                        'qty'         => $qty,
+                        'unit'        => $item['unit'] ?? '',
+                        'description' => $desc,
+                        'unit_price'  => $price,
+                        'amount'      => $amount,
+                    ]);
+
+                    // STOCK BACK
+                    if ($product) {
+                        $product->stock += $qty;
+                        $product->save();
+
+                        // NEGATIVE SALE ITEM
+                        SaleItem::create([
+                            'sale_id'    => $sale->id,
+                            'product_id' => $product->id,
+                            'quantity'   => -1 * $qty,
+                            'price'      => $price,
+                            'subtotal'   => -1 * $amount,
+                        ]);
+                    }
+                }
+            });
+
+            return redirect()
+                ->route('cashier.return.create')
+                ->with('success', 'Return receipt saved, stock restored, sales adjusted!');
+
+        } catch (\Throwable $e) {
+
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
+    }
+
     public function today(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
@@ -41,7 +170,6 @@ class CollectionController extends Controller
         ));
     }
 
-    // EXPORT PDF
     public function exportPdf(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
@@ -60,7 +188,6 @@ class CollectionController extends Controller
         return $pdf->stream('collection_report_'.$selectedDate.'.pdf');
     }
 
-    // EXPORT EXCEL
     public function exportExcel(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
@@ -71,7 +198,6 @@ class CollectionController extends Controller
         );
     }
 
-    // Save Collection Receipt + Deduct Stock + Reflect to Sales
     public function store(Request $request)
     {
         try {
@@ -87,7 +213,6 @@ class CollectionController extends Controller
                 $branchId = auth()->user()->branch_id;
                 $userId   = auth()->id();
 
-                // SAVE COLLECTION HEADER
                 $collection = Collection::create([
                     'receipt_no'    => $request->receipt_no,
                     'receipt_date'  => $request->receipt_date,
@@ -97,9 +222,10 @@ class CollectionController extends Controller
                     'total_amount'  => $request->total_amount ?? 0,
                     'branch_id'     => $branchId,
                     'user_id'       => $userId,
+                    'status'        => 'saved',
+                    'cancel_reason' => null,
                 ]);
 
-                // SAVE SALES HEADER
                 $sale = Sale::create([
                     'total_amount' => $request->total_amount ?? 0,
                     'branch_id'    => $branchId,
@@ -140,7 +266,7 @@ class CollectionController extends Controller
                         throw new \Exception('Not enough stock: ' . $desc);
                     }
 
-                    $product->stock = $product->stock - $qty;
+                    $product->stock -= $qty;
                     $product->save();
 
                     SaleItem::create([
