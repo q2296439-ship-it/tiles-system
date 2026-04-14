@@ -255,8 +255,6 @@ Route::get('/inventory-dashboard', function () {
 });
 
 
-<?php
-
 // =====================
 // FIX MANAGER PASSWORD
 // =====================
