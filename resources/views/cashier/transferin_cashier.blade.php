@@ -48,7 +48,7 @@
         <div style="margin-top:25px; background:white; padding:20px; border-radius:12px;">
             <h4>🛒 Request Cart</h4>
 
-            <!-- ✅ FIXED (ADD ID) -->
+            <!-- ✅ FIXED FORM -->
             <form id="transferForm" action="{{ route('cashier.transfer.in.store') }}" method="POST">
                 @csrf
 
@@ -148,7 +148,7 @@ document.querySelectorAll('.product-card').forEach(card => {
             cart.push({id, name, qty:1});
         }
 
-        console.log("CART:", cart); // 🔥 DEBUG
+        console.log("CART:", cart);
 
         renderCart();
     });
@@ -182,10 +182,13 @@ function removeItem(index){
     renderCart();
 }
 
-// 🔥 FIXED SUBMIT (IMPORTANT)
+// 🔥 CRITICAL FIX
 document.getElementById("transferForm").addEventListener("submit", function(e) {
 
-    console.log("SUBMIT:", cart);
+    // rebuild inputs before submit
+    renderCart();
+
+    console.log("FINAL SUBMIT:", cart);
 
     if (cart.length === 0) {
         e.preventDefault();
