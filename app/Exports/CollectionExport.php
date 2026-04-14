@@ -80,7 +80,7 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
     public function styles(Worksheet $sheet)
     {
         return [
-            4 => ['font' => ['bold' => true]],
+            5 => ['font' => ['bold' => true]],
         ];
     }
 
@@ -92,7 +92,9 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
                 $sheet = $event->sheet->getDelegate();
 
                 // TITLE
-                $sheet->insertNewRowBefore(1, 3);
+                $sheet->insertNewRowBefore(1, 4);
+
+                $branchName = auth()->user()->branch->name ?? 'Current Branch';
 
                 $sheet->setCellValue('A1', 'COLLECTION REPORT');
                 $sheet->mergeCells('A1:H1');
@@ -100,8 +102,11 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
                 $sheet->setCellValue('A2', 'Generated: ' . now()->format('Y-m-d H:i:s'));
                 $sheet->mergeCells('A2:H2');
 
-                $sheet->setCellValue('A3', 'Date: ' . ($this->date ?? 'All'));
+                $sheet->setCellValue('A3', 'Branch: ' . $branchName);
                 $sheet->mergeCells('A3:H3');
+
+                $sheet->setCellValue('A4', 'Date: ' . ($this->date ?? 'All'));
+                $sheet->mergeCells('A4:H4');
 
                 // STYLE TITLE
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
@@ -110,7 +115,7 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
                 // BORDERS
                 $lastRow = $sheet->getHighestRow();
 
-                $sheet->getStyle("A4:H{$lastRow}")
+                $sheet->getStyle("A5:H{$lastRow}")
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(
@@ -118,7 +123,7 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
                     );
 
                 // MONEY FORMAT
-                $sheet->getStyle("F5:F{$lastRow}")
+                $sheet->getStyle("F6:F{$lastRow}")
                     ->getNumberFormat()
                     ->setFormatCode('#,##0.00');
 
@@ -126,7 +131,7 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
                 $totalRow = $lastRow + 1;
 
                 $sheet->setCellValue("A{$totalRow}", 'TOTAL');
-                $sheet->setCellValue("F{$totalRow}", "=SUM(F5:F{$lastRow})");
+                $sheet->setCellValue("F{$totalRow}", "=SUM(F6:F{$lastRow})");
 
                 $sheet->getStyle("A{$totalRow}:H{$totalRow}")
                     ->getFont()

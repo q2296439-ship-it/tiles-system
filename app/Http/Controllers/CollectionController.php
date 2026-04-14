@@ -57,7 +57,7 @@ class CollectionController extends Controller
             'selectedDate'
         ))->setPaper('a4', 'landscape');
 
-        return $pdf->download('collection_report_'.$selectedDate.'.pdf');
+        return $pdf->stream('collection_report_'.$selectedDate.'.pdf');
     }
 
     // EXPORT EXCEL
