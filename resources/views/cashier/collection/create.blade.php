@@ -181,6 +181,24 @@ th{
     border-top:1px solid #111;
     margin-bottom:6px;
 }
+
+.alert-success{
+    background:#dcfce7;
+    color:#166534;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:15px;
+    font-weight:600;
+}
+
+.alert-error{
+    background:#fee2e2;
+    color:#991b1b;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:15px;
+    font-weight:600;
+}
 </style>
 
 <div class="page">
@@ -189,6 +207,26 @@ th{
 <form method="POST" action="{{ route('cashier.collection.store') }}">
 @csrf
 
+@if(session('success'))
+<div class="alert-success">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert-error">
+    {{ session('error') }}
+</div>
+@endif
+
+@if ($errors->any())
+<div class="alert-error">
+    @foreach ($errors->all() as $error)
+        <div>{{ $error }}</div>
+    @endforeach
+</div>
+@endif
+
 <div class="head-title">NMC HOME IMPROVEMENT CENTER</div>
 <div class="head-sub">Brgy. Virgen Delos Remedios, Angeles City, Pampanga</div>
 <div class="head-mini">NON-VAT REG TIN: 489-000-696-004</div>
@@ -196,7 +234,7 @@ th{
 <div class="invoice-row">
     <div class="label-box">SALES INVOICE</div>
 
-    <div style="display:flex; gap:10px; align-items:center;">
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <strong>No.</strong>
         <input type="text" name="receipt_no" class="input" style="width:140px;" required>
 
@@ -229,7 +267,7 @@ th{
 
 <tbody>
 <tr>
-    <td><input type="number" name="items[0][qty]" class="input qty" value="1"></td>
+    <td><input type="number" name="items[0][qty]" class="input qty" value="1" min="1"></td>
     <td><input type="text" name="items[0][unit]" class="input"></td>
     <td><input type="text" name="items[0][description]" class="input" required></td>
     <td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0"></td>
@@ -279,7 +317,9 @@ th{
 </div>
 
 <div class="actions" style="justify-content:flex-end;">
-    <button type="submit" class="btn btn-green">💾 Save Receipt</button>
+    <button type="submit" class="btn btn-green" style="min-width:180px;">
+        💾 Save Receipt
+    </button>
 </div>
 
 </form>
@@ -295,7 +335,7 @@ function addRow(){
 
     body.insertAdjacentHTML('beforeend', `
         <tr>
-            <td><input type="number" name="items[${rowIndex}][qty]" class="input qty" value="1"></td>
+            <td><input type="number" name="items[${rowIndex}][qty]" class="input qty" value="1" min="1"></td>
             <td><input type="text" name="items[${rowIndex}][unit]" class="input"></td>
             <td><input type="text" name="items[${rowIndex}][description]" class="input" required></td>
             <td><input type="number" step="0.01" name="items[${rowIndex}][unit_price]" class="input price" value="0"></td>
@@ -333,6 +373,10 @@ function computeAll(){
     document.getElementById('grandTotal').innerText = '₱' + total.toFixed(2);
     document.getElementById('totalAmount').value = total.toFixed(2);
 }
+
+document.querySelector('form').addEventListener('submit', function(){
+    console.log('Form submitting...');
+});
 
 computeAll();
 </script>
