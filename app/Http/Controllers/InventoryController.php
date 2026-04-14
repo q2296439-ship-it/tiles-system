@@ -115,12 +115,13 @@ class InventoryController extends Controller
     }
 
    // =====================
+// =====================
 // 🔥 STORE TRANSFER IN
 // =====================
 public function transferInStore(Request $request)
 {
-    // ✅ check kung may items
-    if (empty($request->items)) {
+    // 🔥 FIX: mas reliable check
+    if (!$request->has('items') || count($request->items) == 0) {
         return back()->with('error', 'No items selected');
     }
 
@@ -141,7 +142,7 @@ public function transferInStore(Request $request)
                 throw new \Exception('Invalid item data');
             }
 
-            StockMovement::create([
+            \App\Models\StockMovement::create([
                 'product_id' => $item['product_id'],
                 'branch_id' => auth()->user()->branch_id, // destination
                 'from_branch_id' => $request->from_branch_id, // source
@@ -149,7 +150,7 @@ public function transferInStore(Request $request)
                 'quantity' => $item['qty'],
                 'reason' => 'Transfer IN Request',
                 'status' => 'pending',
-                'requested_by' => auth()->id(), // 🔥 IMPORTANT
+                'requested_by' => auth()->id(), // 🔥 important
             ]);
         }
 
