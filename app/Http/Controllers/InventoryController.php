@@ -246,29 +246,46 @@ public function transferInStore(Request $request)
     }
 
     // =====================
-    // 🔥 MANAGER DASHBOARD (NEW)
-    // =====================
-    public function managerDashboard()
-    {
-        $requests = StockMovement::with(['product','branch','from_branch'])
-            ->where('type', 'IN_REQUEST')
-            ->where('status', 'pending')
-            ->latest()
-            ->get();
+// 🔥 MANAGER DASHBOARD (UPDATED - WITH BRANCH FILTER)
+// =====================
+public function managerDashboard(Request $request)
+{
+    $branchId = $request->branch_id;
 
-        $todaySales = 0;
-        $monthlySales = 0;
-        $totalOrders = 0;
-        $lowStockCount = Product::where('stock', '<=', 10)->count();
+    // 🔥 GET ALL BRANCHES (para sa dropdown)
+    $branches = \App\Models\Branch::all();
 
-        return view('manager.dashboard', compact(
-            'requests',
-            'todaySales',
-            'monthlySales',
-            'totalOrders',
-            'lowStockCount'
-        ));
-    }
+    // 🔥 REQUESTS (FILTERABLE)
+    $requests = \App\Models\StockMovement::with(['product','branch','from_branch'])
+        ->where('type', 'IN_REQUEST')
+        ->where('status', 'pending')
+        ->when($branchId, function ($query) use ($branchId) {
+            $query->where('branch_id', $branchId);
+        })
+        ->latest()
+        ->get();
+
+    // 🔥 KPI (FILTERABLE)
+    $todaySales = 0;
+    $monthlySales = 0;
+    $totalOrders = 0;
+
+    $lowStockCount = \App\Models\Product::when($branchId, function ($query) use ($branchId) {
+            $query->where('branch_id', $branchId);
+        })
+        ->where('stock', '<=', 10)
+        ->count();
+
+    return view('manager.dashboard', compact(
+        'requests',
+        'todaySales',
+        'monthlySales',
+        'totalOrders',
+        'lowStockCount',
+        'branches',
+        'branchId'
+    ));
+}
 
     // =====================
     // 🔥 APPROVAL PAGE (UPDATED FLOW)

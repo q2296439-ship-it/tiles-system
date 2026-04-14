@@ -115,11 +115,32 @@
         color: red;
         font-weight: bold;
     }
+
+    .branch-filter {
+        margin-top: 15px;
+    }
+
+    .branch-filter select {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
 </style>
 
 <div class="header">
     <h2>📊 Manager Dashboard</h2>
     <p>Welcome, {{ auth()->user()->name }}</p>
+
+    {{-- 🔥 NEW: BRANCH DROPDOWN --}}
+    <div class="branch-filter">
+        <label><strong>Select Branch:</strong></label>
+        <select>
+            <option value="">All Branches</option>
+            @foreach($branches as $branch)
+                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+            @endforeach
+        </select>
+    </div>
 </div>
 
 {{-- KPI --}}
