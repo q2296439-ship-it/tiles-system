@@ -117,8 +117,34 @@ th{
 <div class="page">
 
 <div class="header-card">
-    <div class="title">📊 Collection Report</div>
-    <div class="sub">View today or previous collection receipts</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;">
+
+        <div>
+            <div class="title">📊 Collection Report</div>
+            <div class="sub">View today or previous collection receipts</div>
+        </div>
+
+        <div class="right-tools">
+
+            <form method="GET" action="" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <input type="date"
+                       name="date"
+                       class="date-input"
+                       value="{{ request('date', date('Y-m-d')) }}">
+
+                <button class="btn btn-blue">Filter</button>
+            </form>
+
+            <input type="text" id="searchInput" class="search"
+                   placeholder="🔍 Search customer / receipt no...">
+
+            <button class="btn btn-green" onclick="exportExcel()">📗 Excel</button>
+
+            <button class="btn btn-red" onclick="window.print()">📄 PDF</button>
+
+        </div>
+
+    </div>
 </div>
 
 <div class="stats">
@@ -137,27 +163,6 @@ th{
 
     <div class="topbar">
         <h3 style="margin:0;">Receipt List</h3>
-
-        <div class="right-tools">
-
-            <form method="GET" action="" style="display:flex; gap:10px; flex-wrap:wrap;">
-                <input type="date"
-                       name="date"
-                       class="date-input"
-                       value="{{ request('date', date('Y-m-d')) }}">
-
-                <button class="btn btn-blue">
-                    Filter
-                </button>
-            </form>
-
-            <input type="text" id="searchInput" class="search" placeholder="🔍 Search customer / receipt no...">
-
-            <button class="btn btn-green" onclick="exportExcel()">📗 Excel</button>
-
-            <button class="btn btn-red" onclick="window.print()">📄 PDF</button>
-
-        </div>
     </div>
 
     <div style="overflow:auto;">
