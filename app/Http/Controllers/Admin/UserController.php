@@ -32,7 +32,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        // 🔥 VALIDATION
+        // 🔥 VALIDATION (UPDATED)
         $request->validate([
             'username' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -40,8 +40,15 @@ class UserController extends Controller
             'employee_name' => 'required|string|max:255',
             'employee_id' => 'required|string|max:255',
             'role' => 'required',
-            'branch_id' => 'required|exists:branches,id',
+            'branch_id' => 'nullable|exists:branches,id', // 🔥 FIXED
         ]);
+
+        // 🔥 FIX: HANDLE ALL BRANCHES (MANAGER)
+        $branchId = $request->branch_id;
+
+        if ($request->role == 'manager' && empty($branchId)) {
+            $branchId = null; // 🔥 GLOBAL MANAGER
+        }
 
         // 🔥 CREATE USER
         User::create([
@@ -52,7 +59,7 @@ class UserController extends Controller
             'employee_name' => $request->employee_name,
             'employee_id' => $request->employee_id,
             'role' => $request->role,
-            'branch_id' => $request->branch_id,
+            'branch_id' => $branchId,
         ]);
 
         return redirect('/admin/users')->with('success', 'User added successfully!');
@@ -67,13 +74,19 @@ class UserController extends Controller
             'username' => 'required|string|max:255',
             'email' => 'required|email',
             'role' => 'required',
-            'branch_id' => 'required|exists:branches,id',
+            'branch_id' => 'nullable|exists:branches,id', // 🔥 FIXED
         ]);
+
+        $branchId = $request->branch_id;
+
+        if ($request->role == 'manager' && empty($branchId)) {
+            $branchId = null;
+        }
 
         $user->username = $request->username;
         $user->email = $request->email;
         $user->role = $request->role;
-        $user->branch_id = $request->branch_id;
+        $user->branch_id = $branchId;
 
         // 🔥 OPTIONAL PASSWORD RESET
         if ($request->password) {
