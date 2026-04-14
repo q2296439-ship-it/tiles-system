@@ -705,21 +705,58 @@ public function approvals()
     }
 
     // =====================
-    // 🔥 RECEIVE STOCK
-    // =====================
-    public function receive($id)
-    {
+// 🔥 RECEIVE STOCK
+// =====================
+public function receive($id)
+{
+    DB::transaction(function () use ($id) {
+
         $movement = StockMovement::findOrFail($id);
 
-        $product = Product::find($movement->product_id);
-        $product->stock += $movement->quantity;
-        $product->save();
+        // 🔥 Source Product (pinanggalingan ng stock)
+        $sourceProduct = Product::findOrFail($movement->product_id);
 
+        // ✅ Check kung sapat stock
+        if ($sourceProduct->stock < $movement->quantity) {
+            throw new \Exception('Insufficient stock to transfer.');
+        }
+
+        // 🔻 Bawas sa source branch
+        $sourceProduct->stock -= $movement->quantity;
+        $sourceProduct->save();
+
+        // 🔥 Hanapin product sa destination branch
+        $destinationProduct = Product::where('name', $sourceProduct->name)
+            ->where('size', $sourceProduct->size)
+            ->where('branch_id', $movement->branch_id)
+            ->first();
+
+        if ($destinationProduct) {
+
+            // ➕ Dagdag stock kung existing na
+            $destinationProduct->stock += $movement->quantity;
+            $destinationProduct->save();
+
+        } else {
+
+            // 🆕 Create bagong product row sa destination branch
+            Product::create([
+                'name'      => $sourceProduct->name,
+                'size'      => $sourceProduct->size,
+                'price'     => $sourceProduct->price,
+                'color'     => $sourceProduct->color,
+                'stock'     => $movement->quantity,
+                'branch_id' => $movement->branch_id,
+            ]);
+        }
+
+        // ✅ Update transfer status
         $movement->status = 'completed';
         $movement->received_by = auth()->id();
         $movement->received_at = now();
         $movement->save();
+    });
 
-        return back()->with('success', 'Stock received!');
-    }
+    return back()->with('success', 'Stock received!');
+}
 }
