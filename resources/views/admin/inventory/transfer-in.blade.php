@@ -58,6 +58,7 @@
     font-weight:600;
     text-decoration:none;
     display:inline-block;
+    transition:.2s;
 }
 
 .btn:hover{
@@ -170,6 +171,22 @@
 
 .pagination{
     margin-top:18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+/* FIX LARGE PAGINATION ICONS */
+.pagination svg{
+    width:18px !important;
+    height:18px !important;
+}
+
+svg{
+    max-width:18px;
+    max-height:18px;
 }
 </style>
 
@@ -263,8 +280,8 @@
             @forelse($transfers as $t)
                 <tr>
                     <td><strong>{{ $t->product->name ?? '-' }}</strong></td>
-                    <td>{{ $t->from_branch_name ?? 'N/A' }}</td>
-                    <td>{{ $t->to_branch_name ?? 'N/A' }}</td>
+                    <td>{{ $t->from_branch->name ?? 'N/A' }}</td>
+                    <td>{{ $t->branch->name ?? 'N/A' }}</td>
                     <td>{{ $t->quantity }}</td>
 
                     <td>
