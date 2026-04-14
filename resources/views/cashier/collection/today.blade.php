@@ -236,7 +236,7 @@ th{
 
                 <tr data-status="{{ strtolower($status) }}">
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $row->receipt_no }}</td>
+                    <td>{{ $row->display_receipt_no ?? $row->receipt_no }}</td>
                     <td>{{ \Carbon\Carbon::parse($row->receipt_date)->format('M d, Y') }}</td>
                     <td>{{ $row->customer_name }}</td>
 

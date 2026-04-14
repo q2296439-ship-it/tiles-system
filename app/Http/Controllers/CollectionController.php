@@ -164,15 +164,16 @@ class CollectionController extends Controller
             });
 
         $returns = ReturnModel::with(['user', 'items'])
-            ->whereDate('return_date', $selectedDate)
-            ->where('branch_id', $branchId)
-            ->get()
-            ->map(function ($row) {
-                $row->receipt_date = $row->return_date;
-                $row->status = 'returned';
-                $row->record_type = 'returned';
-                return $row;
-            });
+    ->whereDate('return_date', $selectedDate)
+    ->where('branch_id', $branchId)
+    ->get()
+    ->map(function ($row) {
+        $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
+        $row->receipt_date = $row->return_date;
+        $row->status = 'returned';
+        $row->record_type = 'returned';
+        return $row;
+    });
 
         $records = $collections->concat($returns);
 
