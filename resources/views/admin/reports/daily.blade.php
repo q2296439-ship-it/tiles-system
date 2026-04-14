@@ -2,166 +2,337 @@
 
 @section('content')
 
-<div class="content">
+<style>
+.page-wrap{
+    max-width:1280px;
+    margin:auto;
+    font-family:'Segoe UI',Tahoma,sans-serif;
+}
 
-    <!-- 🔥 HEADER -->
-    <div style="margin-bottom:25px;">
+.page-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+}
 
-        <!-- TITLE -->
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="margin:0;">📊 Sales Dashboard <span style="color:green;">● Live</span></h2>
+.page-title{
+    font-size:34px;
+    font-weight:800;
+    margin:0;
+    color:#111827;
+}
 
-            <!-- ✅ FIXED -->
-            <small id="lastUpdate" style="color:#64748b;">
-                Last updated: {{ now()->format('h:i:s A') }}
-            </small>
+.page-sub{
+    color:#6b7280;
+    font-size:14px;
+    margin-top:6px;
+}
+
+.live{
+    color:#16a34a;
+    font-weight:700;
+}
+
+.last-updated{
+    background:#fff;
+    padding:10px 14px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05);
+    color:#475569;
+    font-size:13px;
+}
+
+.card{
+    background:#fff;
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.05);
+}
+
+.filter-card{
+    margin-bottom:22px;
+}
+
+.filters{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+input[type="date"],
+select{
+    padding:11px 14px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-size:14px;
+    background:#fff;
+    min-width:160px;
+    outline:none;
+}
+
+.btn{
+    border:none;
+    text-decoration:none;
+    padding:11px 16px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:14px;
+    display:inline-block;
+    transition:.2s;
+    cursor:pointer;
+}
+
+.btn-green{
+    background:#16a34a;
+    color:#fff;
+}
+
+.btn-green:hover{
+    background:#15803d;
+}
+
+.btn-gray{
+    background:#e5e7eb;
+    color:#111827;
+}
+
+.btn-gray:hover{
+    background:#d1d5db;
+}
+
+.alert-box{
+    background:#fff7ed;
+    border-left:5px solid #f59e0b;
+    color:#92400e;
+    margin-bottom:22px;
+}
+
+.alert-box ul{
+    margin:10px 0 0 18px;
+}
+
+.kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:22px;
+}
+
+.kpi{
+    border-radius:18px;
+    padding:22px;
+    color:#fff;
+}
+
+.kpi small{
+    display:block;
+    opacity:.9;
+    font-size:14px;
+    margin-bottom:10px;
+}
+
+.kpi h2{
+    margin:0;
+    font-size:32px;
+    font-weight:800;
+}
+
+.blue{background:linear-gradient(135deg,#3b82f6,#2563eb);}
+.green{background:linear-gradient(135deg,#22c55e,#16a34a);}
+.orange{background:linear-gradient(135deg,#f59e0b,#d97706);}
+
+.card-title{
+    font-size:22px;
+    font-weight:800;
+    color:#111827;
+    margin-bottom:16px;
+}
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#f9fafb;
+    text-align:left;
+    font-size:13px;
+    color:#374151;
+    font-weight:700;
+}
+
+th,td{
+    padding:13px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+tr:hover{
+    background:#f9fafb;
+}
+
+.right{
+    text-align:right;
+}
+
+.amount{
+    font-weight:700;
+    color:#16a34a;
+}
+
+.empty{
+    text-align:center;
+    color:#6b7280;
+}
+
+@media (max-width:1100px){
+    .kpi-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media (max-width:700px){
+    .page-title{
+        font-size:28px;
+    }
+}
+</style>
+
+<div class="page-wrap">
+
+    <!-- HEADER -->
+    <div class="page-head">
+
+        <div>
+            <h1 class="page-title">📊 Daily Sales <span class="live">● Live</span></h1>
+            <div class="page-sub">
+                Monitor real-time sales transactions, trends, and performance.
+            </div>
         </div>
 
-        <!-- RANGE -->
-        <div style="margin-top:15px;">
-            <form method="GET">
-                <select name="range" onchange="this.form.submit()"
-                    style="padding:6px 10px;">
-                    <option value="daily" {{ $range=='daily'?'selected':'' }}>Today</option>
-                    <option value="week" {{ $range=='week'?'selected':'' }}>This Week</option>
-                    <option value="month" {{ $range=='month'?'selected':'' }}>This Month</option>
-                </select>
-            </form>
+        <div class="last-updated" id="lastUpdate">
+            Last updated: {{ now()->format('h:i:s A') }}
         </div>
 
-        <!-- 🔥 FILTER + EXPORT -->
-        <div style="margin-top:15px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    </div>
 
-            <form method="GET" style="display:flex; gap:10px; align-items:center;">
+    <!-- FILTERS -->
+    <div class="card filter-card">
+        <form method="GET" class="filters">
 
-                <input type="hidden" name="range" value="{{ $range }}">
+            <select name="range" onchange="this.form.submit()">
+                <option value="daily" {{ $range=='daily'?'selected':'' }}>Today</option>
+                <option value="week" {{ $range=='week'?'selected':'' }}>This Week</option>
+                <option value="month" {{ $range=='month'?'selected':'' }}>This Month</option>
+            </select>
 
-                <input type="date" name="start_date"
-                    value="{{ request('start_date') }}"
-                    onchange="this.form.submit()"
-                    style="padding:6px;">
+            <input type="date" name="start_date"
+                value="{{ request('start_date') }}">
 
-                <span>To:</span>
+            <input type="date" name="end_date"
+                value="{{ request('end_date') }}">
 
-                <input type="date" name="end_date"
-                    value="{{ request('end_date') }}"
-                    onchange="this.form.submit()"
-                    style="padding:6px;">
+            <select name="branch_id">
+                <option value="">All Branches</option>
+                @foreach($branchList as $b)
+                    <option value="{{ $b->id }}"
+                        {{ request('branch_id') == $b->id ? 'selected' : '' }}>
+                        {{ $b->name }}
+                    </option>
+                @endforeach
+            </select>
 
-                <select name="branch_id"
-                    onchange="this.form.submit()"
-                    style="padding:6px;">
-                    <option value="">All Branch</option>
+            <button class="btn btn-green" type="submit">Filter</button>
 
-                    @foreach($branchList as $b)
-                        <option value="{{ $b->id }}"
-                            {{ request('branch_id') == $b->id ? 'selected' : '' }}>
-                            {{ $b->name }}
-                        </option>
-                    @endforeach
-                </select>
-
-            </form>
-
-            <a href="/admin/sales/daily/excel?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}">
-                <button style="padding:6px 12px; background:green; color:white;">
-                    📊 Export Excel
-                </button>
+            <a href="/admin/sales/daily/excel?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}"
+               class="btn btn-green">
+               📊 Excel
             </a>
 
-            <a href="/admin/sales/daily/pdf?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}" target="_blank">
-                <button style="padding:6px 12px;">
-                    📄 Export PDF
-                </button>
+            <a href="/admin/sales/daily/pdf?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}"
+               target="_blank"
+               class="btn btn-gray">
+               📄 PDF
             </a>
 
-        </div>
-
+        </form>
     </div>
 
     @if(isset($alerts) && count($alerts) > 0)
-    <div class="card" style="background:#fff3cd; margin-bottom:25px; padding:15px; border-radius:8px;">
-        <strong>⚠ Alerts</strong>
-        <ul style="margin-top:10px; padding-left:18px;">
-            @foreach($alerts as $alert)
-                <li>{{ $alert }}</li>
-            @endforeach
-        </ul>
-    </div>
+        <div class="card alert-box">
+            <strong>⚠ Alerts</strong>
+            <ul>
+                @foreach($alerts as $alert)
+                    <li>{{ $alert }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <!-- KPI -->
-    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px;">
+    <div class="kpi-grid">
 
-        <div class="card">
-            <p style="margin:0; color:#64748b; font-size:13px;">Total Sales</p>
-            <h2 style="margin-top:10px;">₱{{ number_format($total, 2) }}</h2>
+        <div class="kpi blue">
+            <small>Total Sales</small>
+            <h2>₱{{ number_format($total, 2) }}</h2>
         </div>
 
-        <div class="card">
-            <p style="margin:0; color:#64748b; font-size:13px;">Transactions</p>
-            <h2 style="margin-top:10px;">{{ $transactionCount }}</h2>
+        <div class="kpi green">
+            <small>Transactions</small>
+            <h2>{{ $transactionCount }}</h2>
         </div>
 
-        <div class="card">
-            <p style="margin:0; color:#64748b; font-size:13px;">Average Sale</p>
-            <h2 style="margin-top:10px;">₱{{ number_format($average, 2) }}</h2>
+        <div class="kpi orange">
+            <small>Average Sale</small>
+            <h2>₱{{ number_format($average, 2) }}</h2>
         </div>
 
     </div>
 
     <!-- CHART -->
-    <div class="card" style="padding:20px; margin-bottom:30px;">
-        <div style="font-weight:bold; margin-bottom:15px;">
-            📈 Sales Trend
-        </div>
+    <div class="card" style="margin-bottom:22px;">
+        <div class="card-title">📈 Sales Trend</div>
         <canvas id="trendChart" height="90"></canvas>
     </div>
 
     <!-- TABLE -->
-    <div class="card" style="padding:20px;">
+    <div class="card">
+        <div class="card-title">🧾 Transactions (Real-time)</div>
 
-        <div style="font-weight:bold; margin-bottom:15px;">
-            🧾 Transactions (Real-time)
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Branch</th>
+                        <th>Cashier</th>
+                        <th class="right">Amount</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse($sales as $sale)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('M d, Y h:i:s A') }}</td>
+                        <td>{{ $sale->branch->name ?? 'N/A' }}</td>
+                        <td>{{ $sale->user->name ?? 'N/A' }}</td>
+                        <td class="right amount">₱{{ number_format($sale->total_amount, 2) }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="empty">No sales found</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
-        <table style="width:100%; border-collapse:collapse; font-size:14px;">
-
-            <thead>
-                <tr style="background:#f9fafb; border-bottom:1px solid #e5e7eb;">
-                    <th style="text-align:left; padding:12px;">Date & Time</th>
-                    <th style="text-align:left; padding:12px;">Branch</th>
-                    <th style="text-align:left; padding:12px;">Cashier</th>
-                    <th style="text-align:right; padding:12px;">Amount</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @forelse($sales as $sale)
-                <tr style="border-bottom:1px solid #e5e7eb;">
-                    <td style="padding:12px;">
-                        {{ \Carbon\Carbon::parse($sale->created_at)->format('M d, Y h:i:s A') }}
-                    </td>
-                    <td style="padding:12px;">
-                        {{ $sale->branch->name ?? 'N/A' }}
-                    </td>
-                    <td style="padding:12px;">
-                        {{ $sale->user->name ?? 'N/A' }}
-                    </td>
-                    <td style="padding:12px; text-align:right; font-weight:600;">
-                        ₱{{ number_format($sale->total_amount, 2) }}
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="4" style="padding:12px; text-align:center;">
-                        No sales found
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-
-        </table>
 
     </div>
 
@@ -177,28 +348,31 @@ new Chart(document.getElementById('trendChart'), {
         datasets: [{
             label: 'Sales',
             data: @json($data),
-            borderWidth: 2,
-            tension: 0.3
+            fill: true,
+            borderWidth: 3,
+            tension: .35,
+            pointRadius: 4
         }]
     },
     options: {
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
+        responsive:true,
+        plugins:{ legend:{ display:false } },
+        scales:{ y:{ beginAtZero:true } }
     }
 });
 
-// AUTO REFRESH
+// auto refresh
 setInterval(() => {
     location.reload();
 }, 5000);
 
-// ✅ FIXED CLOCK (proper format)
-function updateTime() {
+// live clock
+function updateTime(){
     const now = new Date();
     document.getElementById('lastUpdate').innerText =
         "Last updated: " + now.toLocaleTimeString();
 }
-setInterval(updateTime, 1000);
+setInterval(updateTime,1000);
 </script>
 
 @endsection
