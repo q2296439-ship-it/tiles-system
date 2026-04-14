@@ -74,8 +74,8 @@
             <th>Action</th>
         </tr>
 
-        {{-- ✅ RECEIVER SIDE --}}
-        @forelse($requests->where('type','IN_REQUEST')->where('status','pending') as $req)
+        {{-- ✅ UPDATED --}}
+        @forelse($transferInRequests as $req)
         <tr>
             <td>{{ $req->product->name ?? '-' }}</td>
             <td>{{ $req->from_branch->name ?? '-' }} → {{ $req->branch->name ?? '-' }}</td>
@@ -125,8 +125,8 @@
             <th>Action</th>
         </tr>
 
-        {{-- ✅ SENDER SIDE --}}
-        @forelse($requests->where('type','IN_REQUEST')->where('status','approved_receiver') as $req)
+        {{-- ✅ UPDATED --}}
+        @forelse($transferOutRequests as $req)
         <tr>
             <td>{{ $req->product->name ?? '-' }}</td>
             <td>{{ $req->from_branch->name ?? '-' }} → {{ $req->branch->name ?? '-' }}</td>
