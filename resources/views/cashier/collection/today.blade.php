@@ -231,16 +231,24 @@ th{
             @forelse($collections as $row)
 
                 @php
-                    $status = strtolower($row->record_type ?? $row->status ?? 'saved');
-                @endphp
+    $status = strtolower($row->record_type ?? $row->status ?? 'saved');
+@endphp
 
-                <tr data-status="{{ strtolower($status) }}">
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $row->display_receipt_no ?? $row->receipt_no }}</td>
-                    <td>{{ \Carbon\Carbon::parse($row->receipt_date)->format('M d, Y') }}</td>
-                    <td>{{ $row->customer_name }}</td>
+<tr data-status="{{ strtolower($status) }}">
+    <td>{{ $loop->iteration }}</td>
 
-                    <td>
+    <td>
+        @if($status == 'returned')
+            {{ $row->return_no ?? $row->receipt_no }}
+        @else
+            {{ $row->display_receipt_no ?? $row->receipt_no }}
+        @endif
+    </td>
+
+    <td>{{ \Carbon\Carbon::parse($row->receipt_date)->format('M d, Y') }}</td>
+    <td>{{ $row->customer_name }}</td>
+
+    <td>
                         @foreach($row->items as $item)
                             <div class="item-line">{{ $item->description }}</div>
                         @endforeach
