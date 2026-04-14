@@ -30,6 +30,18 @@ class ProductController extends Controller
     }
 
     // =====================
+    // 🔥 ADMIN OVERVIEW STOCK (NEW)
+    // =====================
+    public function overviewStock()
+    {
+        $products = Product::with('branch')
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.overview-stock', compact('products'));
+    }
+
+    // =====================
     // CREATE FORM
     // =====================
     public function create()
@@ -58,7 +70,6 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            // ✅ create product (NO STOCK HERE)
             $product = Product::create([
                 'sku' => $request->sku,
                 'category' => $request->category,
@@ -70,7 +81,6 @@ class ProductController extends Controller
                 'branch_id' => $request->branch_id,
             ]);
 
-            // ✅ insert sa branch_product
             DB::table('branch_product')->insert([
                 'product_id' => $product->id,
                 'branch_id' => $request->branch_id,
@@ -79,7 +89,6 @@ class ProductController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // ✅ movement log
             StockMovement::create([
                 'product_id' => $product->id,
                 'branch_id' => $request->branch_id,
@@ -130,7 +139,6 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            // update product info
             $product->update([
                 'sku' => $request->sku,
                 'category' => $request->category,
@@ -141,7 +149,6 @@ class ProductController extends Controller
                 'low_stock_threshold' => $request->low_stock_threshold,
             ]);
 
-            // 🔥 update branch stock
             $existing = DB::table('branch_product')
                 ->where('product_id', $product->id)
                 ->where('branch_id', $product->branch_id)
@@ -161,7 +168,6 @@ class ProductController extends Controller
                     ]);
             }
 
-            // 🔥 movement log
             if ($diff != 0) {
                 StockMovement::create([
                     'product_id' => $product->id,

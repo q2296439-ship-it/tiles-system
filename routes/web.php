@@ -144,6 +144,9 @@ Route::prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
+    // 🔥 NEW OVERVIEW STOCK ROUTE
+    Route::get('/overview-stock', [ProductController::class, 'overviewStock']);
+
     Route::get('/pos', function () {
         return view('admin.pos');
     });
@@ -206,7 +209,6 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/sales/brand', [SalesReportController::class, 'perBrand']);
 
-    // 🔥 FIXED HERE
     Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])
         ->name('report.brand.pdf');
 
