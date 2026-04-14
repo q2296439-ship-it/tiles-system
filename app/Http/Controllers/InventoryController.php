@@ -310,32 +310,29 @@ return view('manager.dashboard', compact(
 }
 
     // =====================
-    // 🔥 APPROVAL PAGE (UPDATED FLOW)
-    // =====================
-    public function approvals()
-    {
-        $branchId = auth()->user()->branch_id;
+// 🔥 APPROVAL PAGE (SIMPLIFIED FOR GLOBAL MANAGER)
+// =====================
+public function approvals()
+{
+    // 🔥 TOP: TRANSFER IN REQUESTS (PENDING)
+    $transferInRequests = StockMovement::with(['product','branch','from_branch'])
+        ->where('type', 'IN_REQUEST')
+        ->where('status', 'pending')
+        ->latest()
+        ->get();
 
-        $requests = StockMovement::with(['product','branch','from_branch'])
-            ->where('type', 'IN_REQUEST')
-            ->where(function($query) use ($branchId) {
+    // 🔥 BOTTOM: TRANSFER OUT REQUESTS (READY FOR RELEASE)
+    $transferOutRequests = StockMovement::with(['product','branch','from_branch'])
+        ->where('type', 'IN_REQUEST')
+        ->where('status', 'approved_receiver')
+        ->latest()
+        ->get();
 
-                $query->where(function($q) use ($branchId) {
-                    $q->where('branch_id', $branchId)
-                      ->where('status', 'pending');
-                });
-
-                $query->orWhere(function($q) use ($branchId) {
-                    $q->where('from_branch_id', $branchId)
-                      ->where('status', 'approved_receiver');
-                });
-
-            })
-            ->latest()
-            ->get();
-
-        return view('manager.approvals', compact('requests'));
-    }
+    return view('manager.approvals', compact(
+        'transferInRequests',
+        'transferOutRequests'
+    ));
+}
 
     // =====================
     // 🔥 APPROVE (DUAL FLOW)
