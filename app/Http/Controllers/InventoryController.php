@@ -192,7 +192,7 @@ class InventoryController extends Controller
 
         $pdf = Pdf::loadView('admin.inventory.pdf', compact('products'));
 
-        return $pdf->download('inventory-report.pdf');
+        return $pdf->stream('inventory-report.pdf');
     }
 
     // =====================
