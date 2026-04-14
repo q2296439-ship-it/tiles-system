@@ -8,6 +8,7 @@ use App\Models\StockMovement;
 use App\Models\Branch;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventoryController extends Controller
 {
