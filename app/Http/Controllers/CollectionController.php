@@ -117,7 +117,9 @@ class CollectionController extends Controller
                 }
             });
 
-            return back()->with('success', 'Receipt saved and reflected to sales!');
+            return redirect()
+                ->route('cashier.collection.create')
+                ->with('success', 'Receipt saved and reflected to sales!');
 
         } catch (\Throwable $e) {
 
