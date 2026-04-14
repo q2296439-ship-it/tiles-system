@@ -94,20 +94,31 @@ class InventoryController extends Controller
         return back()->with('success', 'Saved successfully!');
     }
 
-    // =====================
-    // 🔥 OVERVIEW STOCK
-    // =====================
-    public function overviewStock()
-    {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $products = Product::with('branch')->get();
-        $branches = Branch::all();
-
-        return view('admin.overview-stock', compact('products', 'branches'));
+    public function overviewStock(Request $request)
+{
+    if (!Auth::check()) {
+        return redirect('/login');
     }
+
+    $query = Product::with('branch');
+
+    // 🔍 SEARCH
+    if ($request->search) {
+        $query->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    // 🏬 FILTER BY BRANCH
+    if ($request->branch_id) {
+        $query->where('branch_id', $request->branch_id);
+    }
+
+    // 📄 PAGINATION (10 per page)
+    $products = $query->paginate(10)->withQueryString();
+
+    $branches = Branch::all();
+
+    return view('admin.overview-stock', compact('products', 'branches'));
+}
 
     // =====================
     // 🔥 CASHIER: TRANSFER IN FORM
