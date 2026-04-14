@@ -27,6 +27,7 @@
             flex-direction:column;
             height:100vh;
             box-shadow:4px 0 18px rgba(0,0,0,0.08);
+            flex-shrink:0;
         }
 
         .sidebar-menu{
@@ -120,6 +121,7 @@
             flex:1;
             padding:20px;
             overflow-y:auto;
+            min-width:0;
         }
 
         .content::-webkit-scrollbar{
@@ -141,6 +143,8 @@
             justify-content:space-between;
             align-items:center;
             box-shadow:0 6px 18px rgba(0,0,0,0.05);
+            gap:15px;
+            flex-wrap:wrap;
         }
 
         .topbar-left h1{
@@ -199,6 +203,7 @@
             display:flex;
             flex-direction:column;
             overflow-y:auto;
+            flex-shrink:0;
         }
 
         .cart h2{
@@ -234,13 +239,29 @@
 
         <!-- SALES -->
         <p>Sales</p>
-        <a href="#">🧾 Add Collection Receipt</a>
-        <a href="#">📊 Collection Today</a>
-        <a href="#">💰 DCCR</a>
-        <a href="#">🏦 Deposit</a>
+        <a href="{{ url('/cashier/collection-receipt') }}"
+           class="{{ request()->is('cashier/collection-receipt*') ? 'active' : '' }}">
+            🧾 Add Collection Receipt
+        </a>
+
+        <a href="{{ url('/cashier/collection-today') }}"
+           class="{{ request()->is('cashier/collection-today*') ? 'active' : '' }}">
+            📊 Collection Today
+        </a>
+
+        <a href="{{ url('/cashier/dccr') }}"
+           class="{{ request()->is('cashier/dccr*') ? 'active' : '' }}">
+            💰 DCCR
+        </a>
+
+        <a href="{{ url('/cashier/deposit') }}"
+           class="{{ request()->is('cashier/deposit*') ? 'active' : '' }}">
+            🏦 Deposit
+        </a>
 
         <!-- INVENTORY -->
         <p>Inventory</p>
+
         <a href="{{ route('cashier.inventory.stock') }}"
            class="{{ request()->is('cashier/inventory-stock') ? 'active' : '' }}">
             📦 Inventory Stock
@@ -299,10 +320,11 @@
 
 </div>
 
-<!-- CART -->
+@if(View::hasSection('cart'))
 <div class="cart">
     @yield('cart')
 </div>
+@endif
 
 <!-- SCRIPTS -->
 @yield('scripts')
