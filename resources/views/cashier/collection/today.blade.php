@@ -139,30 +139,48 @@ th{
         <div class="right-tools">
 
             <form method="GET" action="" style="display:flex; gap:10px; flex-wrap:wrap;">
+                
                 <input type="date"
                        name="date"
                        class="date-input"
                        value="{{ request('date', date('Y-m-d')) }}">
 
-                <select id="statusFilter" class="select-filter">
-                    <option value="all">All Status</option>
-                    <option value="saved">Saved</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="returned">Returned</option>
+                <select name="status" id="statusFilter" class="select-filter">
+                    <option value="all" {{ request('status') == 'all' || request('status') == null ? 'selected' : '' }}>
+                        All Status
+                    </option>
+
+                    <option value="saved" {{ request('status') == 'saved' ? 'selected' : '' }}>
+                        Saved
+                    </option>
+
+                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
+                        Cancelled
+                    </option>
+
+                    <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>
+                        Returned
+                    </option>
                 </select>
 
-                <button class="btn btn-blue">Filter</button>
+                <button type="submit" class="btn btn-blue">Filter</button>
             </form>
 
             <input type="text" id="searchInput" class="search"
                    placeholder="🔍 Search customer / receipt no...">
 
-            <a href="{{ route('cashier.collection.export.excel', ['date' => request('date')]) }}"
+            <a href="{{ route('cashier.collection.export.excel', [
+                'date' => request('date'),
+                'status' => request('status')
+            ]) }}"
                class="btn btn-green">
                📗 Excel
             </a>
 
-            <a href="{{ route('cashier.collection.export.pdf', ['date' => request('date')]) }}"
+            <a href="{{ route('cashier.collection.export.pdf', [
+                'date' => request('date'),
+                'status' => request('status')
+            ]) }}"
                target="_blank"
                rel="noopener noreferrer"
                class="btn btn-red">
@@ -213,7 +231,7 @@ th{
             @forelse($collections as $row)
 
                 @php
-                    $status = $row->status ?? 'saved';
+                    $status = $row->record_type ?? ($row->status ?? 'saved');
                 @endphp
 
                 <tr data-status="{{ strtolower($status) }}">
@@ -266,25 +284,17 @@ th{
 
 <script>
 const searchInput = document.getElementById('searchInput');
-const statusFilter = document.getElementById('statusFilter');
 
-function filterTable() {
-    let search = searchInput.value.toLowerCase();
-    let status = statusFilter.value;
+searchInput.addEventListener('keyup', function () {
+    let search = this.value.toLowerCase();
     let rows = document.querySelectorAll('#collectionTable tbody tr');
 
     rows.forEach(row => {
-        let textMatch = row.innerText.toLowerCase().includes(search);
-        let rowStatus = row.getAttribute('data-status');
-
-        let statusMatch = (status === 'all') || (rowStatus === status);
-
-        row.style.display = (textMatch && statusMatch) ? '' : 'none';
+        row.style.display = row.innerText.toLowerCase().includes(search)
+            ? ''
+            : 'none';
     });
-}
-
-searchInput.addEventListener('keyup', filterTable);
-statusFilter.addEventListener('change', filterTable);
+});
 </script>
 
 @endsection
