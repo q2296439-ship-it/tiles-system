@@ -170,6 +170,12 @@ select:focus{
             Update the product details below and save your changes.
         </div>
 
+        @if(session('error'))
+            <div class="error-box">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if($errors->any())
             <div class="error-box">
                 <ul>
@@ -180,9 +186,9 @@ select:focus{
             </div>
         @endif
 
-        <form method="POST" action="/admin/products/{{ $product->id }}">
+        {{-- FIXED FORM --}}
+        <form method="POST" action="/admin/products/update/{{ $product->id }}">
             @csrf
-            @method('PUT')
 
             <div class="grid">
 
@@ -250,7 +256,7 @@ select:focus{
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn btn-update">💾 Update Product</button>
+                <button type="submit" class="btn btn-update">Update Product</button>
                 <a href="/admin/products" class="btn btn-cancel">Cancel</a>
             </div>
 
