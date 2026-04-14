@@ -7,7 +7,6 @@
     max-width:1200px;
     margin:auto;
 }
-
 .receipt-card{
     background:#f8d7df;
     border:2px solid #d8aab4;
@@ -15,7 +14,6 @@
     padding:25px;
     box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
-
 .head-title{
     text-align:center;
     font-size:28px;
@@ -24,21 +22,18 @@
     color:#3b2430;
     margin-bottom:2px;
 }
-
 .head-sub{
     text-align:center;
     font-size:12px;
     color:#4b5563;
     margin-bottom:2px;
 }
-
 .head-mini{
     text-align:center;
     font-size:11px;
     color:#4b5563;
     margin-bottom:15px;
 }
-
 .invoice-row{
     display:flex;
     justify-content:space-between;
@@ -46,7 +41,6 @@
     flex-wrap:wrap;
     margin-bottom:15px;
 }
-
 .label-box{
     border:1px solid #333;
     padding:6px 10px;
@@ -54,14 +48,12 @@
     background:#fff;
     display:inline-block;
 }
-
 .form-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
     gap:12px;
     margin-bottom:15px;
 }
-
 .input{
     width:100%;
     padding:10px 12px;
@@ -70,37 +62,27 @@
     border-radius:6px;
     font-size:14px;
 }
-
 .table-wrap{
     overflow:auto;
     margin-top:10px;
 }
-
 table{
     width:100%;
     border-collapse:collapse;
     background:#fff;
 }
-
 th,td{
     border:1px solid #333;
     padding:8px;
     font-size:14px;
     text-align:left;
 }
-
 th{
     background:#f3f4f6;
     font-weight:700;
 }
-
-.center{
-    text-align:center;
-}
-
-.right{
-    text-align:right;
-}
+.center{ text-align:center; }
+.right{ text-align:right; }
 
 .btn{
     border:none;
@@ -109,21 +91,9 @@ th{
     cursor:pointer;
     font-weight:700;
 }
-
-.btn-blue{
-    background:#2563eb;
-    color:#fff;
-}
-
-.btn-green{
-    background:#16a34a;
-    color:#fff;
-}
-
-.btn-red{
-    background:#dc2626;
-    color:#fff;
-}
+.btn-blue{ background:#2563eb; color:#fff; }
+.btn-green{ background:#16a34a; color:#fff; }
+.btn-red{ background:#dc2626; color:#fff; }
 
 .actions{
     display:flex;
@@ -131,57 +101,50 @@ th{
     margin-top:15px;
     flex-wrap:wrap;
 }
-
 .footer-box{
     margin-top:15px;
     display:grid;
-    grid-template-columns:1fr 280px;
+    grid-template-columns:1fr 320px;
     gap:15px;
 }
-
 .note-box{
     border:1px solid #333;
     min-height:120px;
     background:#fff;
     padding:10px;
 }
-
 .total-box{
     border:1px solid #333;
     background:#fff;
 }
-
 .total-line{
     display:flex;
     justify-content:space-between;
     padding:10px 12px;
     border-bottom:1px solid #ddd;
     font-size:14px;
+    gap:10px;
+    align-items:center;
 }
-
 .total-final{
     font-size:22px;
     font-weight:900;
     color:#111827;
 }
-
 .signature{
     margin-top:18px;
     display:flex;
     justify-content:flex-end;
 }
-
 .sign-box{
     width:280px;
     text-align:center;
     font-size:13px;
 }
-
 .line{
     border-top:1px solid #111;
     margin-bottom:6px;
 }
-
 .alert-success{
     background:#dcfce7;
     color:#166534;
@@ -190,7 +153,6 @@ th{
     margin-bottom:15px;
     font-weight:600;
 }
-
 .alert-error{
     background:#fee2e2;
     color:#991b1b;
@@ -198,6 +160,12 @@ th{
     border-radius:8px;
     margin-bottom:15px;
     font-weight:600;
+}
+.small-input{
+    width:110px;
+    padding:6px 8px;
+    border:1px solid #ccc;
+    border-radius:6px;
 }
 </style>
 
@@ -208,15 +176,11 @@ th{
 @csrf
 
 @if(session('success'))
-<div class="alert-success">
-    {{ session('success') }}
-</div>
+<div class="alert-success">{{ session('success') }}</div>
 @endif
 
 @if(session('error'))
-<div class="alert-error">
-    {{ session('error') }}
-</div>
+<div class="alert-error">{{ session('error') }}</div>
 @endif
 
 @if ($errors->any())
@@ -264,7 +228,6 @@ th{
     <th></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
     <td><input type="number" name="items[0][qty]" class="input qty" value="1" min="1"></td>
@@ -287,7 +250,20 @@ th{
 <div class="footer-box">
 
     <div class="note-box">
-        <strong>C.O.D</strong>
+        <strong>C.O.D</strong><br><br>
+
+        <label><strong>Discount Type</strong></label><br>
+        <select id="discountType" class="small-input">
+            <option value="none">None</option>
+            <option value="senior">Senior (20%)</option>
+            <option value="pwd">PWD (20%)</option>
+            <option value="custom">Custom</option>
+        </select>
+
+        <br><br>
+
+        <label><strong>Custom Discount</strong></label><br>
+        <input type="number" id="discountValue" class="small-input" value="0" min="0" step="0.01">
     </div>
 
     <div class="total-box">
@@ -298,7 +274,7 @@ th{
 
         <div class="total-line">
             <span>Less SC/PWD Discount</span>
-            <span>₱0.00</span>
+            <span id="discountAmount">₱0.00</span>
         </div>
 
         <div class="total-line total-final">
@@ -353,14 +329,22 @@ function removeRow(btn){
 }
 
 document.addEventListener('input', function(e){
-    if(e.target.classList.contains('qty') || e.target.classList.contains('price')){
+    if(
+        e.target.classList.contains('qty') ||
+        e.target.classList.contains('price') ||
+        e.target.id === 'discountValue'
+    ){
         let row = e.target.closest('tr');
-        let qty = parseFloat(row.querySelector('.qty').value) || 0;
-        let price = parseFloat(row.querySelector('.price').value) || 0;
-        row.querySelector('.amount').value = (qty * price).toFixed(2);
+        if(row){
+            let qty = parseFloat(row.querySelector('.qty').value) || 0;
+            let price = parseFloat(row.querySelector('.price').value) || 0;
+            row.querySelector('.amount').value = (qty * price).toFixed(2);
+        }
         computeAll();
     }
 });
+
+document.getElementById('discountType').addEventListener('change', computeAll);
 
 function computeAll(){
     let total = 0;
@@ -369,9 +353,28 @@ function computeAll(){
         total += parseFloat(item.value) || 0;
     });
 
+    let discount = 0;
+    let type = document.getElementById('discountType').value;
+    let custom = parseFloat(document.getElementById('discountValue').value) || 0;
+
+    if(type === 'senior' || type === 'pwd'){
+        discount = total * 0.20;
+    }
+
+    if(type === 'custom'){
+        discount = custom;
+    }
+
+    if(discount > total){
+        discount = total;
+    }
+
+    let grand = total - discount;
+
     document.getElementById('salesAmount').innerText = '₱' + total.toFixed(2);
-    document.getElementById('grandTotal').innerText = '₱' + total.toFixed(2);
-    document.getElementById('totalAmount').value = total.toFixed(2);
+    document.getElementById('discountAmount').innerText = '₱' + discount.toFixed(2);
+    document.getElementById('grandTotal').innerText = '₱' + grand.toFixed(2);
+    document.getElementById('totalAmount').value = grand.toFixed(2);
 }
 
 document.querySelector('form').addEventListener('submit', function(){
