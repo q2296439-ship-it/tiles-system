@@ -156,13 +156,9 @@
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
     <a href="#">🏷 Per Model</a>
 
-    <!-- 🔥 ADDED (WALANG BINAWAS) -->
-    <a href="/admin/overview-stock" 
-       class="{{ request()->is('admin/overview-stock') ? 'active' : '' }}">
-        📊 Overview Stock (Admin)
-    </a>
+    <!-- ❌ REMOVED DUPLICATE OVERVIEW STOCK (ADMIN) -->
 
-    <!-- 🔥 FIXED INVENTORY LINKS -->
+    <!-- INVENTORY -->
     <div class="menu-title">INVENTORY</div>
 
     <a href="/admin/inventory" 
