@@ -18,18 +18,24 @@ class CollectionController extends Controller
         return view('cashier.collection.create');
     }
 
-    // Collection Today Page
-    public function today()
+    // Collection Report Page (Today + Previous Dates)
+    public function today(Request $request)
     {
-        $collections = Collection::with('user')
-            ->whereDate('created_at', today())
+        $selectedDate = $request->date ?? date('Y-m-d');
+
+        $collections = Collection::with(['user', 'items'])
+            ->whereDate('created_at', $selectedDate)
             ->where('branch_id', auth()->user()->branch_id)
             ->latest()
             ->get();
 
         $total = $collections->sum('total_amount');
 
-        return view('cashier.collection.today', compact('collections', 'total'));
+        return view('cashier.collection.today', compact(
+            'collections',
+            'total',
+            'selectedDate'
+        ));
     }
 
     // Save Collection Receipt + Deduct Stock + Reflect to Sales
@@ -49,7 +55,7 @@ class CollectionController extends Controller
                 $userId   = auth()->id();
 
                 // =====================
-                // ✅ SAVE COLLECTION HEADER
+                // SAVE COLLECTION HEADER
                 // =====================
                 $collection = Collection::create([
                     'receipt_no'    => $request->receipt_no,
@@ -63,7 +69,7 @@ class CollectionController extends Controller
                 ]);
 
                 // =====================
-                // ✅ SAVE SALES HEADER
+                // SAVE SALES HEADER
                 // =====================
                 $sale = Sale::create([
                     'total_amount' => $request->total_amount ?? 0,
@@ -75,7 +81,6 @@ class CollectionController extends Controller
 
                 foreach ($request->items as $item) {
 
-                    // Skip empty row
                     if (empty($item['description'])) {
                         continue;
                     }
@@ -86,7 +91,7 @@ class CollectionController extends Controller
                     $desc   = trim($item['description']);
 
                     // =====================
-                    // ✅ SAVE COLLECTION ITEM
+                    // SAVE COLLECTION ITEM
                     // =====================
                     CollectionItem::create([
                         'collection_id' => $collection->id,
@@ -98,7 +103,7 @@ class CollectionController extends Controller
                     ]);
 
                     // =====================
-                    // ✅ FIND PRODUCT
+                    // FIND PRODUCT
                     // =====================
                     $product = Product::where('name', $desc)
                         ->where('branch_id', $branchId)
@@ -113,13 +118,13 @@ class CollectionController extends Controller
                     }
 
                     // =====================
-                    // ✅ DEDUCT STOCK
+                    // DEDUCT STOCK
                     // =====================
                     $product->stock = $product->stock - $qty;
                     $product->save();
 
                     // =====================
-                    // ✅ SAVE SALE ITEM
+                    // SAVE SALE ITEM
                     // =====================
                     SaleItem::create([
                         'sale_id'    => $sale->id,
