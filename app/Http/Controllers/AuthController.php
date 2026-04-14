@@ -49,27 +49,30 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
+            // 🔥 CLEAN ROLE
+            $role = strtolower(trim($user->role));
+
             // =====================
             // ROLE BASED REDIRECT
             // =====================
 
             // ADMIN
-            if (strtolower(trim($user->role)) === 'admin') {
+            if ($role === 'admin') {
                 return redirect('/admin');
             }
 
             // CASHIER
-            if (strtolower(trim($user->role)) === 'cashier') {
+            if ($role === 'cashier') {
                 return redirect('/cashier');
             }
 
             // INVENTORY
-            if (strtolower(trim($user->role)) === 'inventory') {
+            if ($role === 'inventory') {
                 return redirect('/inventory-dashboard');
             }
 
-            // 🔥 MANAGER
-            if (strtolower(trim($user->role)) === 'branch_manager') {
+            // 🔥 MANAGER (SUPPORT BOTH)
+            if ($role === 'manager' || $role === 'branch_manager') {
                 return redirect('/manager');
             }
 
