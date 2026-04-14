@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends(request()->is('cashier/*') ? 'layouts.cashier' : 'layouts.admin')
 
 @section('content')
 
@@ -179,7 +179,6 @@ tbody tr:hover{
     flex-wrap:wrap;
 }
 
-/* FIX LARGE PAGINATION ICONS */
 .pagination svg{
     width:18px !important;
     height:18px !important;
@@ -223,12 +222,18 @@ svg{
 
             <button type="submit" class="btn">Filter</button>
 
-            <a href="{{ url('/admin/inventory/export/excel?search=' . request('search') . '&branch_id=' . request('branch_id')) }}"
+            @php
+                $baseUrl = request()->is('cashier/*')
+                    ? '/admin/inventory/export'
+                    : '/admin/inventory/export';
+            @endphp
+
+            <a href="{{ url($baseUrl . '/excel?search=' . request('search') . '&branch_id=' . request('branch_id')) }}"
                class="btn btn-success">
                📊 Excel
             </a>
 
-            <a href="{{ url('/admin/inventory/export/pdf?search=' . request('search') . '&branch_id=' . request('branch_id')) }}"
+            <a href="{{ url($baseUrl . '/pdf?search=' . request('search') . '&branch_id=' . request('branch_id')) }}"
                target="_blank"
                class="btn btn-danger">
                🧾 PDF
@@ -237,7 +242,6 @@ svg{
         </form>
     </div>
 
-    {{-- STATS --}}
     <div class="stats">
 
         <div class="stat">
@@ -262,7 +266,6 @@ svg{
 
     </div>
 
-    {{-- TABLE --}}
     <div class="card">
 
         <div class="table-top">
