@@ -186,15 +186,13 @@ function removeItem(index){
     renderCart();
 }
 
-// 🔥 FIXED SUBMIT (ETO TALAGA SOLUTION)
+// 🔥 ONLY CHANGE HERE (FIX)
 document.getElementById("transferForm").addEventListener("submit", function(e) {
 
-    let container = document.getElementById('cart-items');
+    let form = document.getElementById('transferForm'); // ✅ FIX
 
-    // REMOVE OLD
     document.querySelectorAll('.hidden-input').forEach(el => el.remove());
 
-    // ADD HIDDEN INPUTS
     cart.forEach((item, index) => {
 
         let input1 = document.createElement('input');
@@ -209,8 +207,8 @@ document.getElementById("transferForm").addEventListener("submit", function(e) {
         input2.value = item.qty;
         input2.classList.add('hidden-input');
 
-        container.appendChild(input1);
-        container.appendChild(input2);
+        form.appendChild(input1); // ✅ FIX
+        form.appendChild(input2); // ✅ FIX
     });
 
     console.log("FINAL SUBMIT:", cart);
