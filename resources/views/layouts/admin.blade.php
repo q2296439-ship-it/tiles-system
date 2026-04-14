@@ -224,7 +224,7 @@
     <a href="/admin/dashboard" class="{{ request()->is('admin') || request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
 
     <div class="menu-title">POS / Sales</div>
-    <a href="/admin/pos" class="{{ request()->is('admin/pos') ? 'active' : '' }}">💰 POS</a>
+    <a href="/admin/pos" class="{{ request()->is('admin/pos') ? 'active' : '' }}">💰 Collection</a>
     <a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">📈 Per Brand</a>
     <a href="/admin/sales/branch" class="{{ request()->is('admin/sales/branch') ? 'active' : '' }}">🏬 Per Branch</a>
     <a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
