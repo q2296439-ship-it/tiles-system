@@ -169,7 +169,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/export', [ProductController::class, 'export']);
     });
 
-    Route::get('/inventory', [InventoryController::class, 'index']);
+    Route::get('/inventory', [InventoryController::class, 'overview']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);
