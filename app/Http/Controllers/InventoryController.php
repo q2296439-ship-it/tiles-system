@@ -9,6 +9,8 @@ use App\Models\Branch;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\InventoryExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InventoryController extends Controller
 {
@@ -121,57 +123,18 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // EXPORT EXCEL
-    // =====================
-    public function exportExcel(Request $request)
-    {
-        $query = Product::with('branch');
-
-        if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->branch_id) {
-            $query->where('branch_id', $request->branch_id);
-        }
-
-        $products = $query->get();
-
-        $filename = 'inventory_' . date('Y-m-d') . '.csv';
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=$filename",
-        ];
-
-        $callback = function () use ($products) {
-            $file = fopen('php://output', 'w');
-
-            fputcsv($file, [
-                'Product',
-                'Branch',
-                'Size',
-                'Color',
-                'Price',
-                'Stock'
-            ]);
-
-            foreach ($products as $p) {
-                fputcsv($file, [
-                    $p->name,
-                    optional($p->branch)->name,
-                    $p->size,
-                    $p->color,
-                    $p->price,
-                    $p->stock
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
+// EXPORT EXCEL
+// =====================
+public function exportExcel(Request $request)
+{
+    return Excel::download(
+        new InventoryExport(
+            $request->search,
+            $request->branch_id
+        ),
+        'inventory-report.xlsx'
+    );
+}
 
     // =====================
     // EXPORT PDF
