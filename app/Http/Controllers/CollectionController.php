@@ -158,7 +158,13 @@ class CollectionController extends Controller
             ->latest()
             ->get();
 
-        $total = $collections->sum('total_amount');
+        $status = $request->status;
+
+        if ($status && $status != 'all') {
+            $collections = $collections->where('status', $status)->values();
+        }
+
+        $total = $collections->where('status', 'saved')->sum('total_amount');
 
         return view('cashier.collection.today', compact(
             'collections',

@@ -55,7 +55,7 @@
     flex-wrap:wrap;
     align-items:center;
 }
-.search,.date-input{
+.search,.date-input,.select-filter{
     padding:10px 14px;
     border:1px solid #cbd5e1;
     border-radius:10px;
@@ -92,12 +92,22 @@ th{
     background:#f8fafc;
 }
 .badge{
-    background:#dcfce7;
-    color:#166534;
     padding:6px 10px;
     border-radius:999px;
     font-size:12px;
     font-weight:700;
+}
+.badge-saved{
+    background:#dcfce7;
+    color:#166534;
+}
+.badge-cancel{
+    background:#fee2e2;
+    color:#991b1b;
+}
+.badge-return{
+    background:#dbeafe;
+    color:#1d4ed8;
 }
 .empty{
     text-align:center;
@@ -134,6 +144,13 @@ th{
                        class="date-input"
                        value="{{ request('date', date('Y-m-d')) }}">
 
+                <select id="statusFilter" class="select-filter">
+                    <option value="all">All Status</option>
+                    <option value="saved">Saved</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="returned">Returned</option>
+                </select>
+
                 <button class="btn btn-blue">Filter</button>
             </form>
 
@@ -146,11 +163,11 @@ th{
             </a>
 
             <a href="{{ route('cashier.collection.export.pdf', ['date' => request('date')]) }}"
-   target="_blank"
-   rel="noopener noreferrer"
-   class="btn btn-red">
-   📄 PDF
-</a>
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn btn-red">
+               📄 PDF
+            </a>
 
         </div>
 
@@ -194,7 +211,12 @@ th{
 
             <tbody>
             @forelse($collections as $row)
-                <tr>
+
+                @php
+                    $status = $row->status ?? 'saved';
+                @endphp
+
+                <tr data-status="{{ strtolower($status) }}">
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $row->receipt_no }}</td>
                     <td>{{ \Carbon\Carbon::parse($row->receipt_date)->format('M d, Y') }}</td>
@@ -217,8 +239,18 @@ th{
                     <td>₱{{ number_format($row->total_amount, 2) }}</td>
                     <td>{{ $row->user->name ?? 'Cashier' }}</td>
                     <td>{{ $row->created_at->format('h:i A') }}</td>
-                    <td><span class="badge">Saved</span></td>
+
+                    <td>
+                        @if($status == 'cancelled')
+                            <span class="badge badge-cancel">Cancelled</span>
+                        @elseif($status == 'returned')
+                            <span class="badge badge-return">Returned</span>
+                        @else
+                            <span class="badge badge-saved">Saved</span>
+                        @endif
+                    </td>
                 </tr>
+
             @empty
                 <tr>
                     <td colspan="10" class="empty">No collection found.</td>
@@ -233,14 +265,26 @@ th{
 </div>
 
 <script>
-document.getElementById('searchInput').addEventListener('keyup', function () {
-    let value = this.value.toLowerCase();
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+
+function filterTable() {
+    let search = searchInput.value.toLowerCase();
+    let status = statusFilter.value;
     let rows = document.querySelectorAll('#collectionTable tbody tr');
 
     rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+        let textMatch = row.innerText.toLowerCase().includes(search);
+        let rowStatus = row.getAttribute('data-status');
+
+        let statusMatch = (status === 'all') || (rowStatus === status);
+
+        row.style.display = (textMatch && statusMatch) ? '' : 'none';
     });
-});
+}
+
+searchInput.addEventListener('keyup', filterTable);
+statusFilter.addEventListener('change', filterTable);
 </script>
 
 @endsection
