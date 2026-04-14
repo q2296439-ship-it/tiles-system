@@ -265,26 +265,48 @@ public function managerDashboard(Request $request)
         ->latest()
         ->get();
 
-    // 🔥 KPI (FILTERABLE)
-    $todaySales = 0;
-    $monthlySales = 0;
-    $totalOrders = 0;
+    // 🔥 KPI (REAL DATA + FILTERED)
 
-    $lowStockCount = \App\Models\Product::when($branchId, function ($query) use ($branchId) {
-            $query->where('branch_id', $branchId);
-        })
-        ->where('stock', '<=', 10)
-        ->count();
+// TODAY SALES
+$todaySales = \DB::table('sales')
+    ->when($branchId, function ($query) use ($branchId) {
+        $query->where('branch_id', $branchId);
+    })
+    ->whereDate('created_at', now()->toDateString())
+    ->sum('total_amount');
 
-    return view('manager.dashboard', compact(
-        'requests',
-        'todaySales',
-        'monthlySales',
-        'totalOrders',
-        'lowStockCount',
-        'branches',
-        'branchId'
-    ));
+// MONTHLY SALES
+$monthlySales = \DB::table('sales')
+    ->when($branchId, function ($query) use ($branchId) {
+        $query->where('branch_id', $branchId);
+    })
+    ->whereMonth('created_at', now()->month)
+    ->whereYear('created_at', now()->year)
+    ->sum('total_amount');
+
+// TOTAL ORDERS
+$totalOrders = \DB::table('sales')
+    ->when($branchId, function ($query) use ($branchId) {
+        $query->where('branch_id', $branchId);
+    })
+    ->count();
+
+// 🔥 LOW STOCK (FILTERED)
+$lowStockCount = \App\Models\Product::when($branchId, function ($query) use ($branchId) {
+        $query->where('branch_id', $branchId);
+    })
+    ->where('stock', '<=', 10)
+    ->count();
+
+return view('manager.dashboard', compact(
+    'requests',
+    'todaySales',
+    'monthlySales',
+    'totalOrders',
+    'lowStockCount',
+    'branches',
+    'branchId'
+));
 }
 
     // =====================
