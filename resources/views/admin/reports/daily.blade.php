@@ -252,13 +252,13 @@ tr:hover{
             <button class="btn btn-green" type="submit">Filter</button>
 
             <a href="/admin/sales/daily/excel?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}"
-               class="btn btn-green">
+               class="btn btn-green export-btn">
                📊 Excel
             </a>
 
             <a href="/admin/sales/daily/pdf?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}"
                target="_blank"
-               class="btn btn-gray">
+               class="btn btn-gray export-btn">
                📄 PDF
             </a>
 
@@ -281,17 +281,17 @@ tr:hover{
 
         <div class="kpi blue">
             <small>Total Sales</small>
-            <h2>₱{{ number_format($total, 2) }}</h2>
+            <h2 id="totalSales">₱{{ number_format($total, 2) }}</h2>
         </div>
 
         <div class="kpi green">
             <small>Transactions</small>
-            <h2>{{ $transactionCount }}</h2>
+            <h2 id="transactionCount">{{ $transactionCount }}</h2>
         </div>
 
         <div class="kpi orange">
             <small>Average Sale</small>
-            <h2>₱{{ number_format($average, 2) }}</h2>
+            <h2 id="averageSale">₱{{ number_format($average, 2) }}</h2>
         </div>
 
     </div>
@@ -317,7 +317,7 @@ tr:hover{
                     </tr>
                 </thead>
 
-                <tbody>
+                <tbody id="salesTable">
                     @forelse($sales as $sale)
                     <tr>
                         <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('M d, Y h:i:s A') }}</td>
@@ -341,7 +341,15 @@ tr:hover{
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-new Chart(document.getElementById('trendChart'), {
+let isDownloading = false;
+
+document.querySelectorAll('.export-btn').forEach(link => {
+    link.addEventListener('click', () => {
+        isDownloading = true;
+    });
+});
+
+let trendChart = new Chart(document.getElementById('trendChart'), {
     type: 'line',
     data: {
         labels: @json($labels),
@@ -361,18 +369,47 @@ new Chart(document.getElementById('trendChart'), {
     }
 });
 
-// auto refresh
-setInterval(() => {
-    location.reload();
-}, 5000);
-
 // live clock
 function updateTime(){
     const now = new Date();
     document.getElementById('lastUpdate').innerText =
         "Last updated: " + now.toLocaleTimeString();
 }
+updateTime();
 setInterval(updateTime,1000);
+
+// silent update
+setInterval(() => {
+
+    if(isDownloading) return;
+
+    fetch(window.location.href, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.text())
+    .then(html => {
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // KPI
+        const freshTotal = doc.getElementById('totalSales');
+        const freshCount = doc.getElementById('transactionCount');
+        const freshAvg   = doc.getElementById('averageSale');
+
+        if(freshTotal) document.getElementById('totalSales').innerHTML = freshTotal.innerHTML;
+        if(freshCount) document.getElementById('transactionCount').innerHTML = freshCount.innerHTML;
+        if(freshAvg)   document.getElementById('averageSale').innerHTML = freshAvg.innerHTML;
+
+        // TABLE
+        const freshTable = doc.getElementById('salesTable');
+        if(freshTable){
+            document.getElementById('salesTable').innerHTML = freshTable.innerHTML;
+        }
+
+    });
+
+}, 5000);
 </script>
 
 @endsection

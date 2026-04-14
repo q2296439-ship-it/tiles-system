@@ -259,13 +259,13 @@ tr:hover{
             <button class="btn btn-green" type="submit">Filter</button>
 
             <a href="/admin/sales/branch/excel?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}"
-               class="btn btn-green">
+               class="btn btn-green export-btn">
                📊 Excel
             </a>
 
             <a href="/admin/sales/branch/pdf?range={{ $range }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}&branch_id={{ request('branch_id') }}"
                target="_blank"
-               class="btn btn-gray">
+               class="btn btn-gray export-btn">
                📄 PDF
             </a>
 
@@ -299,17 +299,17 @@ tr:hover{
 
         <div class="kpi orange">
             <small>Average Sale</small>
-            <h2>₱{{ number_format($average, 2) }}</h2>
+            <h2 id="averageSale">₱{{ number_format($average, 2) }}</h2>
         </div>
 
         <div class="kpi purple">
             <small>Top Branch</small>
-            <h2>{{ $topBranch->branch_name ?? '-' }}</h2>
+            <h2 id="topBranch">{{ $topBranch->branch_name ?? '-' }}</h2>
         </div>
 
         <div class="kpi red">
             <small>Lowest Branch</small>
-            <h2>{{ $lowestBranch->branch_name ?? '-' }}</h2>
+            <h2 id="lowestBranch">{{ $lowestBranch->branch_name ?? '-' }}</h2>
         </div>
 
     </div>
@@ -357,6 +357,7 @@ tr:hover{
                     </tr>
                     @endforelse
                 </tbody>
+
             </table>
         </div>
 
@@ -367,6 +368,14 @@ tr:hover{
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+let isDownloading = false;
+
+document.querySelectorAll('.export-btn').forEach(link => {
+    link.addEventListener('click', () => {
+        isDownloading = true;
+    });
+});
+
 let branchChart = new Chart(document.getElementById('branchChart'), {
     type: 'bar',
     data: {
@@ -405,42 +414,85 @@ let trendChart = new Chart(document.getElementById('trendChart'), {
     }
 });
 
-document.getElementById('lastUpdated').innerText =
-    "Last updated: " + new Date().toLocaleTimeString();
+function updateClock(){
+    document.getElementById('lastUpdated').innerText =
+        "Last updated: " + new Date().toLocaleTimeString();
+}
 
+updateClock();
+setInterval(updateClock,1000);
+
+/* SILENT UPDATE DATA */
 setInterval(() => {
-    fetch(`/admin/sales/branch/data?range={{ $range }}&branch_id={{ request('branch_id') }}`)
+
+    if (isDownloading) return;
+
+    fetch(`/admin/sales/branch/data?range={{ $range }}&branch_id={{ request('branch_id') }}&start_date={{ request('start_date') }}&end_date={{ request('end_date') }}`)
         .then(res => res.json())
         .then(data => {
 
+            // KPI
             document.getElementById('grandTotal').innerText =
                 '₱' + Number(data.grandTotal).toLocaleString();
 
             document.getElementById('totalTransactions').innerText =
                 data.totalTransactions;
 
+            if(data.average){
+                document.getElementById('averageSale').innerText =
+                    '₱' + Number(data.average).toLocaleString();
+            }
+
+            if(data.topBranch){
+                document.getElementById('topBranch').innerText =
+                    data.topBranch;
+            }
+
+            if(data.lowestBranch){
+                document.getElementById('lowestBranch').innerText =
+                    data.lowestBranch;
+            }
+
+            // TABLE
             let table = document.getElementById('branchTable');
             table.innerHTML = '';
 
-            data.branches.forEach((b, i) => {
-                table.innerHTML += `
-                    <tr class="${i === 0 ? 'top-row' : ''}">
-                        <td>${i + 1}</td>
-                        <td>${b.branch_name}</td>
-                        <td class="right">₱${Number(b.total_sales).toLocaleString()}</td>
-                        <td class="right">${b.percentage}%</td>
-                        <td class="right">${b.transactions}</td>
+            if(data.branches.length > 0){
+
+                data.branches.forEach((b, i) => {
+                    table.innerHTML += `
+                        <tr class="${i === 0 ? 'top-row' : ''}">
+                            <td>${i + 1}</td>
+                            <td>${b.branch_name}</td>
+                            <td class="right">₱${Number(b.total_sales).toLocaleString()}</td>
+                            <td class="right">${b.percentage}%</td>
+                            <td class="right">${b.transactions}</td>
+                        </tr>
+                    `;
+                });
+
+            }else{
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty">No branch data found.</td>
                     </tr>
                 `;
-            });
+            }
 
+            // BAR CHART
             branchChart.data.labels = data.chartLabels;
             branchChart.data.datasets[0].data = data.chartData;
             branchChart.update();
 
-            document.getElementById('lastUpdated').innerText =
-                "Last updated: " + new Date().toLocaleTimeString();
+            // TREND CHART
+            if(data.trendLabels && data.trendData){
+                trendChart.data.labels = data.trendLabels;
+                trendChart.data.datasets[0].data = data.trendData;
+                trendChart.update();
+            }
+
         });
+
 }, 5000);
 </script>
 

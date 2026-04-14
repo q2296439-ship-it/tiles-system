@@ -360,7 +360,22 @@ document.querySelectorAll('.export-btn').forEach(link => {
 
 setInterval(() => {
     if (!isDownloading) {
-        location.reload();
+        fetch(window.location.href, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const newTable = doc.querySelector('tbody');
+            if (newTable) {
+                document.querySelector('tbody').innerHTML = newTable.innerHTML;
+            }
+
+            document.getElementById('lastUpdated').innerText =
+                "Last updated: " + new Date().toLocaleTimeString();
+        });
     }
 }, 5000);
 </script>
