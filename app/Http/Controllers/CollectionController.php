@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Collection;
 use App\Models\CollectionItem;
 use App\Models\Product;
+use App\Models\Sale;
+use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 
 class CollectionController extends Controller
@@ -16,7 +18,7 @@ class CollectionController extends Controller
         return view('cashier.collection.create');
     }
 
-    // Save Collection Receipt + Deduct Stock
+    // Save Collection Receipt + Deduct Stock + Reflect to Sales
     public function store(Request $request)
     {
         try {
@@ -30,8 +32,11 @@ class CollectionController extends Controller
             DB::transaction(function () use ($request) {
 
                 $branchId = auth()->user()->branch_id;
+                $userId   = auth()->id();
 
-                // ✅ Save Header
+                // =====================
+                // ✅ SAVE COLLECTION HEADER
+                // =====================
                 $collection = Collection::create([
                     'receipt_no'    => $request->receipt_no,
                     'receipt_date'  => $request->receipt_date,
@@ -40,7 +45,18 @@ class CollectionController extends Controller
                     'terms'         => $request->terms ?? '',
                     'total_amount'  => $request->total_amount ?? 0,
                     'branch_id'     => $branchId,
-                    'user_id'       => auth()->id(),
+                    'user_id'       => $userId,
+                ]);
+
+                // =====================
+                // ✅ SAVE SALES HEADER
+                // =====================
+                $sale = Sale::create([
+                    'total'     => $request->total_amount ?? 0,
+                    'branch_id' => $branchId,
+                    'user_id'   => $userId,
+                    'created_at'=> now(),
+                    'updated_at'=> now(),
                 ]);
 
                 foreach ($request->items as $item) {
@@ -50,40 +66,58 @@ class CollectionController extends Controller
                         continue;
                     }
 
-                    $qty   = (int) ($item['qty'] ?? 0);
-                    $price = (float) ($item['unit_price'] ?? 0);
+                    $qty    = (int) ($item['qty'] ?? 0);
+                    $price  = (float) ($item['unit_price'] ?? 0);
                     $amount = $qty * $price;
+                    $desc   = trim($item['description']);
 
-                    // ✅ Save Item
+                    // =====================
+                    // ✅ SAVE COLLECTION ITEM
+                    // =====================
                     CollectionItem::create([
                         'collection_id' => $collection->id,
                         'qty'           => $qty,
                         'unit'          => $item['unit'] ?? '',
-                        'description'   => trim($item['description']),
+                        'description'   => $desc,
                         'unit_price'    => $price,
                         'amount'        => $amount,
                     ]);
 
-                    // ✅ Find Product (branch based)
-                    $product = Product::where('name', trim($item['description']))
+                    // =====================
+                    // ✅ FIND PRODUCT
+                    // =====================
+                    $product = Product::where('name', $desc)
                         ->where('branch_id', $branchId)
                         ->first();
 
                     if (!$product) {
-                        throw new \Exception('Product not found: ' . $item['description']);
+                        throw new \Exception('Product not found: ' . $desc);
                     }
 
                     if ($product->stock < $qty) {
-                        throw new \Exception('Not enough stock: ' . $item['description']);
+                        throw new \Exception('Not enough stock: ' . $desc);
                     }
 
-                    // ✅ Deduct stock
+                    // =====================
+                    // ✅ DEDUCT STOCK
+                    // =====================
                     $product->stock = $product->stock - $qty;
                     $product->save();
+
+                    // =====================
+                    // ✅ SAVE SALE ITEM
+                    // =====================
+                    SaleItem::create([
+                        'sale_id'    => $sale->id,
+                        'product_id' => $product->id,
+                        'quantity'   => $qty,
+                        'price'      => $price,
+                        'subtotal'   => $amount,
+                    ]);
                 }
             });
 
-            return back()->with('success', 'Receipt saved successfully!');
+            return back()->with('success', 'Receipt saved and reflected to sales!');
 
         } catch (\Throwable $e) {
 
