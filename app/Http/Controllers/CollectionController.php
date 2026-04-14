@@ -18,6 +18,20 @@ class CollectionController extends Controller
         return view('cashier.collection.create');
     }
 
+    // Collection Today Page
+    public function today()
+    {
+        $collections = Collection::with('user')
+            ->whereDate('created_at', today())
+            ->where('branch_id', auth()->user()->branch_id)
+            ->latest()
+            ->get();
+
+        $total = $collections->sum('total_amount');
+
+        return view('cashier.collection.today', compact('collections', 'total'));
+    }
+
     // Save Collection Receipt + Deduct Stock + Reflect to Sales
     public function store(Request $request)
     {

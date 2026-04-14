@@ -244,6 +244,8 @@ Route::prefix('cashier')->group(function () {
 
     Route::get('/incoming', [InventoryController::class, 'incoming']);
     Route::post('/receive/{id}', [InventoryController::class, 'receive']);
+    Route::get('/collection-today', [CollectionController::class, 'today'])
+    ->name('cashier.collection.today');
 });
 
 
