@@ -154,7 +154,6 @@ class CollectionController extends Controller
         $status = $request->status ?? 'all';
         $branchId = auth()->user()->branch_id;
 
-        // SAVED + CANCELLED from collections
         $collections = Collection::with(['user', 'items'])
             ->whereDate('receipt_date', $selectedDate)
             ->where('branch_id', $branchId)
@@ -164,31 +163,25 @@ class CollectionController extends Controller
                 return $row;
             });
 
-        // RETURNS from returns table
         $returns = ReturnModel::with(['user', 'items'])
             ->whereDate('return_date', $selectedDate)
             ->where('branch_id', $branchId)
             ->get()
             ->map(function ($row) {
                 $row->receipt_date = $row->return_date;
-                $row->created_at   = $row->created_at;
-                $row->status       = 'returned';
-                $row->record_type  = 'returned';
+                $row->status = 'returned';
+                $row->record_type = 'returned';
                 return $row;
             });
 
-        // Merge all
         $records = $collections->concat($returns);
 
-        // Filter dropdown
         if ($status != 'all') {
             $records = $records->where('record_type', $status);
         }
 
-        // Sort latest
         $collections = $records->sortByDesc('created_at')->values();
 
-        // Total saved only
         $total = $collections
             ->where('record_type', 'saved')
             ->sum('total_amount');
@@ -203,12 +196,36 @@ class CollectionController extends Controller
     public function exportPdf(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
+        $status = $request->status ?? 'all';
+        $branchId = auth()->user()->branch_id;
 
         $collections = Collection::with(['user', 'items'])
             ->whereDate('receipt_date', $selectedDate)
-            ->where('branch_id', auth()->user()->branch_id)
-            ->latest()
-            ->get();
+            ->where('branch_id', $branchId)
+            ->get()
+            ->map(function ($row) {
+                $row->record_type = strtolower($row->status ?? 'saved');
+                return $row;
+            });
+
+        $returns = ReturnModel::with(['user', 'items'])
+            ->whereDate('return_date', $selectedDate)
+            ->where('branch_id', $branchId)
+            ->get()
+            ->map(function ($row) {
+                $row->receipt_date = $row->return_date;
+                $row->status = 'returned';
+                $row->record_type = 'returned';
+                return $row;
+            });
+
+        $records = $collections->concat($returns);
+
+        if ($status != 'all') {
+            $records = $records->where('record_type', $status);
+        }
+
+        $collections = $records->sortByDesc('created_at')->values();
 
         $pdf = Pdf::loadView('cashier.collection.pdf', compact(
             'collections',
@@ -221,9 +238,14 @@ class CollectionController extends Controller
     public function exportExcel(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
+        $status = $request->status ?? 'all';
 
         return Excel::download(
-            new CollectionExport($selectedDate, auth()->user()->branch_id),
+            new CollectionExport(
+                $selectedDate,
+                auth()->user()->branch_id,
+                $status
+            ),
             'collection_report_'.$selectedDate.'.xlsx'
         );
     }

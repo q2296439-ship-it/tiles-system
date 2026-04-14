@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Collection;
+use App\Models\ReturnModel;
 use Maatwebsite\Excel\Concerns\{
     FromCollection,
     WithHeadings,
@@ -17,17 +18,20 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
 {
     protected $date;
     protected $branchId;
+    protected $status;
 
-    public function __construct($date = null, $branchId = null)
+    public function __construct($date = null, $branchId = null, $status = 'all')
     {
         $this->date = $date;
         $this->branchId = $branchId;
+        $this->status = $status;
     }
 
     public function collection()
     {
         $rows = [];
 
+        // collections (saved/cancelled)
         $collections = Collection::with(['user', 'items'])
             ->when($this->date, function ($query) {
                 $query->whereDate('receipt_date', $this->date);
@@ -35,10 +39,36 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
             ->when($this->branchId, function ($query) {
                 $query->where('branch_id', $this->branchId);
             })
-            ->latest()
-            ->get();
+            ->get()
+            ->map(function ($row) {
+                $row->record_type = strtolower($row->status ?? 'saved');
+                return $row;
+            });
 
-        foreach ($collections as $row) {
+        // returns
+        $returns = ReturnModel::with(['user', 'items'])
+            ->when($this->date, function ($query) {
+                $query->whereDate('return_date', $this->date);
+            })
+            ->when($this->branchId, function ($query) {
+                $query->where('branch_id', $this->branchId);
+            })
+            ->get()
+            ->map(function ($row) {
+                $row->receipt_date = $row->return_date;
+                $row->record_type = 'returned';
+                return $row;
+            });
+
+        $records = $collections->concat($returns);
+
+        if ($this->status != 'all') {
+            $records = $records->where('record_type', $this->status);
+        }
+
+        $records = $records->sortByDesc('created_at')->values();
+
+        foreach ($records as $row) {
 
             $products = [];
             $qtys = [];
@@ -57,6 +87,7 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
                 'Total'      => $row->total_amount,
                 'Cashier'    => $row->user->name ?? 'Cashier',
                 'Time'       => $row->created_at->format('h:i A'),
+                'Status'     => ucfirst($row->record_type),
             ];
         }
 
@@ -73,7 +104,8 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
             'Qty',
             'Total Amount (₱)',
             'Cashier',
-            'Time'
+            'Time',
+            'Status'
         ];
     }
 
@@ -91,49 +123,48 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
 
                 $sheet = $event->sheet->getDelegate();
 
-                // TITLE
                 $sheet->insertNewRowBefore(1, 4);
 
                 $branchName = auth()->user()->branch->name ?? 'Current Branch';
 
                 $sheet->setCellValue('A1', 'COLLECTION REPORT');
-                $sheet->mergeCells('A1:H1');
+                $sheet->mergeCells('A1:I1');
 
                 $sheet->setCellValue('A2', 'Generated: ' . now()->format('Y-m-d H:i:s'));
-                $sheet->mergeCells('A2:H2');
+                $sheet->mergeCells('A2:I2');
 
                 $sheet->setCellValue('A3', 'Branch: ' . $branchName);
-                $sheet->mergeCells('A3:H3');
+                $sheet->mergeCells('A3:I3');
 
-                $sheet->setCellValue('A4', 'Date: ' . ($this->date ?? 'All'));
-                $sheet->mergeCells('A4:H4');
+                $sheet->setCellValue(
+                    'A4',
+                    'Date: ' . ($this->date ?? 'All') .
+                    ' | Status: ' . ucfirst($this->status)
+                );
+                $sheet->mergeCells('A4:I4');
 
-                // STYLE TITLE
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-                $sheet->getStyle('A1:H1')->getAlignment()->setHorizontal('center');
+                $sheet->getStyle('A1:I1')->getAlignment()->setHorizontal('center');
 
-                // BORDERS
                 $lastRow = $sheet->getHighestRow();
 
-                $sheet->getStyle("A5:H{$lastRow}")
+                $sheet->getStyle("A5:I{$lastRow}")
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(
                         \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
                     );
 
-                // MONEY FORMAT
                 $sheet->getStyle("F6:F{$lastRow}")
                     ->getNumberFormat()
                     ->setFormatCode('#,##0.00');
 
-                // TOTAL ROW
                 $totalRow = $lastRow + 1;
 
                 $sheet->setCellValue("A{$totalRow}", 'TOTAL');
                 $sheet->setCellValue("F{$totalRow}", "=SUM(F6:F{$lastRow})");
 
-                $sheet->getStyle("A{$totalRow}:H{$totalRow}")
+                $sheet->getStyle("A{$totalRow}:I{$totalRow}")
                     ->getFont()
                     ->setBold(true);
             }
