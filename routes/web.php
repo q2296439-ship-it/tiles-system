@@ -144,8 +144,12 @@ Route::prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // 🔥 NEW OVERVIEW STOCK ROUTE
-    Route::get('/overview-stock', [ProductController::class, 'overviewStock']);
+    // 🔥 OVERVIEW STOCK
+    Route::get('/inventory', [InventoryController::class, 'overviewStock']);
+
+    // 🔥 EXPORT (NEW)
+    Route::get('/inventory/export/excel', [InventoryController::class, 'exportExcel']);
+    Route::get('/inventory/export/pdf', [InventoryController::class, 'exportPdf']);
 
     Route::get('/pos', function () {
         return view('admin.pos');
@@ -169,7 +173,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/export', [ProductController::class, 'export']);
     });
 
-    Route::get('/inventory', [InventoryController::class, 'overviewStock']);
     Route::get('/inventory/export', [InventoryController::class, 'export']);
     Route::get('/movements/export', [InventoryController::class, 'exportMovements']);
     Route::post('/transfer', [InventoryController::class, 'transfer']);

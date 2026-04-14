@@ -94,30 +94,123 @@ class InventoryController extends Controller
         return back()->with('success', 'Saved successfully!');
     }
 
+    // =====================
+    // OVERVIEW STOCK
+    // =====================
     public function overviewStock(Request $request)
-{
-    if (!Auth::check()) {
-        return redirect('/login');
+    {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        $query = Product::with('branch');
+
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->branch_id) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        $products = $query->paginate(10)->withQueryString();
+        $branches = Branch::all();
+
+        return view('admin.overview-stock', compact('products', 'branches'));
     }
 
-    $query = Product::with('branch');
+    // =====================
+    // EXPORT EXCEL
+    // =====================
+    public function exportExcel(Request $request)
+    {
+        $query = Product::with('branch');
 
-    // 🔍 SEARCH
-    if ($request->search) {
-        $query->where('name', 'like', '%' . $request->search . '%');
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->branch_id) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        $products = $query->get();
+
+        $filename = 'inventory_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+        ];
+
+        $callback = function () use ($products) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'Product',
+                'Branch',
+                'Size',
+                'Color',
+                'Price',
+                'Stock'
+            ]);
+
+            foreach ($products as $p) {
+                fputcsv($file, [
+                    $p->name,
+                    optional($p->branch)->name,
+                    $p->size,
+                    $p->color,
+                    $p->price,
+                    $p->stock
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
-    // 🏬 FILTER BY BRANCH
-    if ($request->branch_id) {
-        $query->where('branch_id', $request->branch_id);
+    // =====================
+    // EXPORT PDF
+    // =====================
+    public function exportPdf(Request $request)
+    {
+        $query = Product::with('branch');
+
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->branch_id) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        $products = $query->get();
+
+        $pdf = Pdf::loadView('admin.inventory.pdf', compact('products'));
+
+        return $pdf->download('inventory-report.pdf');
     }
 
-    // 📄 PAGINATION (10 per page)
-    $products = $query->paginate(10)->withQueryString();
+    // =====================
+    // CASHIER: TRANSFER IN FORM
+    // =====================
+    public function transferInForm()
+    {
+        $products = Product::where('branch_id', '!=', auth()->user()->branch_id)->get();
+        $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
 
-    $branches = Branch::all();
+        $requests = StockMovement::with(['product','branch','from_branch'])
+            ->where('type', 'IN_REQUEST')
+            ->where('branch_id', auth()->user()->branch_id)
+            ->whereIn('status', ['pending', 'approved_receiver'])
+            ->latest()
+            ->get();
 
-    return view('admin.overview-stock', compact('products', 'branches'));
+        return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
+    }
 }
 
     // =====================
