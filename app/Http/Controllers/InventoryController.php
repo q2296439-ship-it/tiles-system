@@ -108,7 +108,6 @@ class InventoryController extends Controller
 
         return view('admin.overview-stock', compact('products', 'branches'));
     }
-}
 
     // =====================
     // 🔥 CASHIER: TRANSFER IN FORM
