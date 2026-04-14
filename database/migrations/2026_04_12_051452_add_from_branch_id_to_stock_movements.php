@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('stock_movements', function (Blueprint $table) {
-            $table->unsignedBigInteger('from_branch_id')->nullable()->after('branch_id');
-        });
+        if (!Schema::hasColumn('stock_movements', 'from_branch_id')) {
+            Schema::table('stock_movements', function (Blueprint $table) {
+                $table->unsignedBigInteger('from_branch_id')->nullable();
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('stock_movements', function (Blueprint $table) {
-            $table->dropColumn('from_branch_id');
-        });
+        if (Schema::hasColumn('stock_movements', 'from_branch_id')) {
+            Schema::table('stock_movements', function (Blueprint $table) {
+                $table->dropColumn('from_branch_id');
+            });
+        }
     }
 };
