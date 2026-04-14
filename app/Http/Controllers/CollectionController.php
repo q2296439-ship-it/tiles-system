@@ -88,7 +88,6 @@ class CollectionController extends Controller
                     'user_id'       => $userId,
                 ]);
 
-                // NEGATIVE SALE HEADER
                 $sale = Sale::create([
                     'total_amount' => -1 * ($request->total_amount ?? 0),
                     'branch_id'    => $branchId,
@@ -122,12 +121,10 @@ class CollectionController extends Controller
                         'amount'      => $amount,
                     ]);
 
-                    // STOCK BACK
                     if ($product) {
                         $product->stock += $qty;
                         $product->save();
 
-                        // NEGATIVE SALE ITEM
                         SaleItem::create([
                             'sale_id'    => $sale->id,
                             'product_id' => $product->id,
@@ -156,7 +153,7 @@ class CollectionController extends Controller
         $selectedDate = $request->date ?? date('Y-m-d');
 
         $collections = Collection::with(['user', 'items'])
-            ->whereDate('created_at', $selectedDate)
+            ->whereDate('receipt_date', $selectedDate)
             ->where('branch_id', auth()->user()->branch_id)
             ->latest()
             ->get();
@@ -175,7 +172,7 @@ class CollectionController extends Controller
         $selectedDate = $request->date ?? date('Y-m-d');
 
         $collections = Collection::with(['user', 'items'])
-            ->whereDate('created_at', $selectedDate)
+            ->whereDate('receipt_date', $selectedDate)
             ->where('branch_id', auth()->user()->branch_id)
             ->latest()
             ->get();

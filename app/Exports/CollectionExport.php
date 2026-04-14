@@ -30,7 +30,7 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
 
         $collections = Collection::with(['user', 'items'])
             ->when($this->date, function ($query) {
-                $query->whereDate('created_at', $this->date);
+                $query->whereDate('receipt_date', $this->date);
             })
             ->when($this->branchId, function ($query) {
                 $query->where('branch_id', $this->branchId);
