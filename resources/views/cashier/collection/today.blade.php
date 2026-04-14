@@ -146,9 +146,11 @@ th{
             </a>
 
             <a href="{{ route('cashier.collection.export.pdf', ['date' => request('date')]) }}"
-               class="btn btn-red">
-               📄 PDF
-            </a>
+   target="_blank"
+   rel="noopener noreferrer"
+   class="btn btn-red">
+   📄 PDF
+</a>
 
         </div>
 
