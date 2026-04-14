@@ -212,25 +212,6 @@ class InventoryController extends Controller
         return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
     }
 
-    // =====================
-    // 🔥 CASHIER: TRANSFER IN FORM
-    // =====================
-    public function transferInForm()
-    {
-        $products = Product::where('branch_id', '!=', auth()->user()->branch_id)->get(); // ✅ FIX
-
-        $branches = Branch::where('id', '!=', auth()->user()->branch_id)->get();
-
-        $requests = StockMovement::with(['product','branch','from_branch'])
-            ->where('type', 'IN_REQUEST')
-            ->where('branch_id', auth()->user()->branch_id)
-            ->whereIn('status', ['pending', 'approved_receiver'])
-            ->latest()
-            ->get();
-
-        return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
-    }
-
    // =====================
 // =====================
 // 🔥 STORE TRANSFER IN
