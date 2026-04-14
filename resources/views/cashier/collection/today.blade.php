@@ -69,6 +69,8 @@
     color:#fff;
     font-weight:700;
     cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
 }
 .btn-blue{ background:#2563eb; }
 .btn-green{ background:#16a34a; }
@@ -138,9 +140,15 @@ th{
             <input type="text" id="searchInput" class="search"
                    placeholder="🔍 Search customer / receipt no...">
 
-            <button class="btn btn-green" onclick="exportExcel()">📗 Excel</button>
+            <a href="{{ route('cashier.collection.export.excel', ['date' => request('date')]) }}"
+               class="btn btn-green">
+               📗 Excel
+            </a>
 
-            <button class="btn btn-red" onclick="window.print()">📄 PDF</button>
+            <a href="{{ route('cashier.collection.export.pdf', ['date' => request('date')]) }}"
+               class="btn btn-red">
+               📄 PDF
+            </a>
 
         </div>
 
@@ -231,15 +239,6 @@ document.getElementById('searchInput').addEventListener('keyup', function () {
         row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
     });
 });
-
-function exportExcel(){
-    let table = document.getElementById("collectionTable").outerHTML;
-    let data = "data:application/vnd.ms-excel," + encodeURIComponent(table);
-    let link = document.createElement('a');
-    link.href = data;
-    link.download = "collection_report.xls";
-    link.click();
-}
 </script>
 
 @endsection

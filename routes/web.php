@@ -244,8 +244,15 @@ Route::prefix('cashier')->group(function () {
 
     Route::get('/incoming', [InventoryController::class, 'incoming']);
     Route::post('/receive/{id}', [InventoryController::class, 'receive']);
+
     Route::get('/collection-today', [CollectionController::class, 'today'])
-    ->name('cashier.collection.today');
+        ->name('cashier.collection.today');
+
+    Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])
+        ->name('cashier.collection.export.pdf');
+
+    Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])
+        ->name('cashier.collection.export.excel');
 });
 
 

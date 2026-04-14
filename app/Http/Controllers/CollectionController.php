@@ -9,6 +9,9 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\CollectionExport;
 
 class CollectionController extends Controller
 {
@@ -38,6 +41,36 @@ class CollectionController extends Controller
         ));
     }
 
+    // EXPORT PDF
+    public function exportPdf(Request $request)
+    {
+        $selectedDate = $request->date ?? date('Y-m-d');
+
+        $collections = Collection::with(['user', 'items'])
+            ->whereDate('created_at', $selectedDate)
+            ->where('branch_id', auth()->user()->branch_id)
+            ->latest()
+            ->get();
+
+        $pdf = Pdf::loadView('cashier.collection.pdf', compact(
+            'collections',
+            'selectedDate'
+        ))->setPaper('a4', 'landscape');
+
+        return $pdf->download('collection_report_'.$selectedDate.'.pdf');
+    }
+
+    // EXPORT EXCEL
+    public function exportExcel(Request $request)
+    {
+        $selectedDate = $request->date ?? date('Y-m-d');
+
+        return Excel::download(
+            new CollectionExport($selectedDate, auth()->user()->branch_id),
+            'collection_report_'.$selectedDate.'.xlsx'
+        );
+    }
+
     // Save Collection Receipt + Deduct Stock + Reflect to Sales
     public function store(Request $request)
     {
@@ -54,9 +87,7 @@ class CollectionController extends Controller
                 $branchId = auth()->user()->branch_id;
                 $userId   = auth()->id();
 
-                // =====================
                 // SAVE COLLECTION HEADER
-                // =====================
                 $collection = Collection::create([
                     'receipt_no'    => $request->receipt_no,
                     'receipt_date'  => $request->receipt_date,
@@ -68,9 +99,7 @@ class CollectionController extends Controller
                     'user_id'       => $userId,
                 ]);
 
-                // =====================
                 // SAVE SALES HEADER
-                // =====================
                 $sale = Sale::create([
                     'total_amount' => $request->total_amount ?? 0,
                     'branch_id'    => $branchId,
@@ -90,9 +119,6 @@ class CollectionController extends Controller
                     $amount = $qty * $price;
                     $desc   = trim($item['description']);
 
-                    // =====================
-                    // SAVE COLLECTION ITEM
-                    // =====================
                     CollectionItem::create([
                         'collection_id' => $collection->id,
                         'qty'           => $qty,
@@ -102,9 +128,6 @@ class CollectionController extends Controller
                         'amount'        => $amount,
                     ]);
 
-                    // =====================
-                    // FIND PRODUCT
-                    // =====================
                     $product = Product::where('name', $desc)
                         ->where('branch_id', $branchId)
                         ->first();
@@ -117,15 +140,9 @@ class CollectionController extends Controller
                         throw new \Exception('Not enough stock: ' . $desc);
                     }
 
-                    // =====================
-                    // DEDUCT STOCK
-                    // =====================
                     $product->stock = $product->stock - $qty;
                     $product->save();
 
-                    // =====================
-                    // SAVE SALE ITEM
-                    // =====================
                     SaleItem::create([
                         'sale_id'    => $sale->id,
                         'product_id' => $product->id,
