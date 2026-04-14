@@ -151,20 +151,47 @@ class CollectionController extends Controller
     public function today(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
+        $status = $request->status ?? 'all';
+        $branchId = auth()->user()->branch_id;
 
+        // SAVED + CANCELLED from collections
         $collections = Collection::with(['user', 'items'])
             ->whereDate('receipt_date', $selectedDate)
-            ->where('branch_id', auth()->user()->branch_id)
-            ->latest()
-            ->get();
+            ->where('branch_id', $branchId)
+            ->get()
+            ->map(function ($row) {
+                $row->record_type = $row->status ?? 'saved';
+                return $row;
+            });
 
-        $status = $request->status;
+        // RETURNS from returns table
+        $returns = ReturnModel::with(['user', 'items'])
+            ->whereDate('return_date', $selectedDate)
+            ->where('branch_id', $branchId)
+            ->get()
+            ->map(function ($row) {
+                $row->receipt_date = $row->return_date;
+                $row->created_at   = $row->created_at;
+                $row->status       = 'returned';
+                $row->record_type  = 'returned';
+                return $row;
+            });
 
-        if ($status && $status != 'all') {
-            $collections = $collections->where('status', $status)->values();
+        // Merge all
+        $records = $collections->concat($returns);
+
+        // Filter dropdown
+        if ($status != 'all') {
+            $records = $records->where('record_type', $status);
         }
 
-        $total = $collections->where('status', 'saved')->sum('total_amount');
+        // Sort latest
+        $collections = $records->sortByDesc('created_at')->values();
+
+        // Total saved only
+        $total = $collections
+            ->where('record_type', 'saved')
+            ->sum('total_amount');
 
         return view('cashier.collection.today', compact(
             'collections',
