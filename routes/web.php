@@ -275,6 +275,16 @@ Route::get('/fix-manager-pass', function () {
 // RUN LIVE MIGRATION
 // =====================
 Route::get('/run-migrate', function () {
-    \Artisan::call('migrate', ['--force' => true]);
-    return nl2br(\Artisan::output());
+
+    Artisan::call('migrate', [
+        '--path' => 'database/migrations/2026_04_14_120115_create_collections_table.php',
+        '--force' => true
+    ]);
+
+    Artisan::call('migrate', [
+        '--path' => 'database/migrations/2026_04_14_120213_create_collection_items_table.php',
+        '--force' => true
+    ]);
+
+    return nl2br(Artisan::output());
 });
