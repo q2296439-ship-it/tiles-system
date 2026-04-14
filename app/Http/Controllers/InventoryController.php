@@ -95,7 +95,7 @@ class InventoryController extends Controller
     }
 
     // =====================
-    // 🔥 OVERVIEW STOCK (ETO YUNG IDINAGDAG)
+    // 🔥 OVERVIEW STOCK
     // =====================
     public function overviewStock()
     {
@@ -108,9 +108,6 @@ class InventoryController extends Controller
 
         return view('admin.overview-stock', compact('products', 'branches'));
     }
-}
-
-    return back()->with('success', 'Saved successfully!');
 }
 
     // =====================
