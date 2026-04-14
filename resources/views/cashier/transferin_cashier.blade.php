@@ -48,7 +48,6 @@
         <div style="margin-top:25px; background:white; padding:20px; border-radius:12px;">
             <h4>🛒 Request Cart</h4>
 
-            <!-- ✅ FIXED FORM -->
             <form id="transferForm" action="{{ route('cashier.transfer.in.store') }}" method="POST">
                 @csrf
 
@@ -95,7 +94,6 @@
 @endsection
 
 
-{{-- RIGHT PANEL --}}
 @section('cart')
 
 <h3>📋 Requests</h3>
@@ -154,7 +152,7 @@ document.querySelectorAll('.product-card').forEach(card => {
     });
 });
 
-// RENDER CART
+// RENDER CART (UI ONLY)
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
@@ -167,13 +165,19 @@ function renderCart() {
 
         div.innerHTML = `
             <strong>${item.name}</strong>
-            <input type="hidden" name="items[${index}][product_id]" value="${item.id}">
-            <input type="number" name="items[${index}][qty]" value="${item.qty}" min="1" style="width:60px; margin-left:10px;">
+            <input type="number" value="${item.qty}" min="1"
+                   onchange="updateQty(${index}, this.value)"
+                   style="width:60px; margin-left:10px;">
             <button type="button" onclick="removeItem(${index})">❌</button>
         `;
 
         container.appendChild(div);
     });
+}
+
+// UPDATE QTY
+function updateQty(index, value){
+    cart[index].qty = parseInt(value) || 1;
 }
 
 // REMOVE
@@ -182,11 +186,32 @@ function removeItem(index){
     renderCart();
 }
 
-// 🔥 CRITICAL FIX
+// 🔥 FIXED SUBMIT (ETO TALAGA SOLUTION)
 document.getElementById("transferForm").addEventListener("submit", function(e) {
 
-    // rebuild inputs before submit
-    renderCart();
+    let container = document.getElementById('cart-items');
+
+    // REMOVE OLD
+    document.querySelectorAll('.hidden-input').forEach(el => el.remove());
+
+    // ADD HIDDEN INPUTS
+    cart.forEach((item, index) => {
+
+        let input1 = document.createElement('input');
+        input1.type = 'hidden';
+        input1.name = `items[${index}][product_id]`;
+        input1.value = item.id;
+        input1.classList.add('hidden-input');
+
+        let input2 = document.createElement('input');
+        input2.type = 'hidden';
+        input2.name = `items[${index}][qty]`;
+        input2.value = item.qty;
+        input2.classList.add('hidden-input');
+
+        container.appendChild(input1);
+        container.appendChild(input2);
+    });
 
     console.log("FINAL SUBMIT:", cart);
 
