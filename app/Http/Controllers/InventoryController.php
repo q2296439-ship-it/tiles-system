@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\InventoryExport;
+use App\Exports\TransferInExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class InventoryController extends Controller
@@ -241,18 +242,56 @@ public function transferInStore(Request $request)
         return view('admin.inventory.transfer-out', compact('transfers'));
     }
 
-    // =====================
-    // 🔥 ADMIN TRANSFER IN
-    // =====================
-    public function transferInAdmin()
-    {
-        $transfers = StockMovement::with(['product','branch','requester','approver'])
-            ->where('type', 'IN_REQUEST')
-            ->latest()
-            ->get();
+   // =====================
+// 🔥 ADMIN TRANSFER IN
+// =====================
+public function transferInAdmin(Request $request)
+{
+    $query = StockMovement::with([
+            'product',
+            'branch',
+            'requester',
+            'approver'
+        ])
+        ->where('type', 'IN_REQUEST');
 
-        return view('admin.inventory.transfer-in', compact('transfers'));
+    // 🔍 SEARCH PRODUCT
+    if ($request->search) {
+        $query->whereHas('product', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
     }
+
+    // 📌 STATUS FILTER
+    if ($request->status) {
+        $query->where('status', $request->status);
+    }
+
+    // 📄 EXPORT EXCEL
+    if ($request->export == 'excel') {
+        return Excel::download(
+            new TransferInExport($request->search, $request->status),
+            'transfer-in-report.xlsx'
+        );
+    }
+
+    // 📄 EXPORT PDF
+    if ($request->export == 'pdf') {
+        $transfers = $query->latest()->get();
+
+        $pdf = Pdf::loadView(
+            'admin.inventory.transfer-in-pdf',
+            compact('transfers')
+        );
+
+        return $pdf->stream('transfer-in-report.pdf');
+    }
+
+    // 📃 NORMAL VIEW
+    $transfers = $query->latest()->paginate(10)->withQueryString();
+
+    return view('admin.inventory.transfer-in', compact('transfers'));
+}
 
     // =====================
     // 🔥 TRANSFER OUT FORM
