@@ -172,7 +172,7 @@ th{
 <div class="page">
 <div class="receipt-card">
 
-<form method="POST" action="{{ route('cashier.collection.store') }}">
+<form method="POST" action="{{ route('cashier.collection.store') }}" autocomplete="off">
 @csrf
 
 @if(session('success'))
