@@ -16,9 +16,6 @@
             background:#f1f5f9;
         }
 
-        /* =========================
-           SIDEBAR
-        ========================= */
         .sidebar{
             width:240px;
             background:linear-gradient(180deg,#0f172a,#111827,#020617);
@@ -90,9 +87,6 @@
             border-radius:10px;
         }
 
-        /* =========================
-           LOGOUT
-        ========================= */
         .logout{
             padding:14px 16px;
         }
@@ -114,9 +108,6 @@
             background:#dc2626;
         }
 
-        /* =========================
-           CONTENT
-        ========================= */
         .content{
             flex:1;
             padding:20px;
@@ -133,7 +124,6 @@
             border-radius:10px;
         }
 
-        /* TOPBAR */
         .topbar{
             background:#ffffff;
             border-radius:16px;
@@ -192,9 +182,6 @@
             color:#6b7280;
         }
 
-        /* =========================
-           CART
-        ========================= */
         .cart{
             width:320px;
             background:linear-gradient(180deg,#1e293b,#020617);
@@ -223,23 +210,21 @@
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 
     <div class="sidebar-menu">
 
         <h2>💰 Cashier Panel</h2>
 
-        <!-- MAIN -->
         <p>Main</p>
         <a href="{{ url('/cashier') }}"
            class="{{ request()->is('cashier') ? 'active' : '' }}">
             🧾 New Sale
         </a>
 
-        <!-- SALES -->
         <p>Sales</p>
-        <a href="{{ url('/cashier/collection-receipt') }}"
+
+        <a href="{{ route('cashier.collection.create') }}"
            class="{{ request()->is('cashier/collection-receipt*') ? 'active' : '' }}">
             🧾 Add Collection Receipt
         </a>
@@ -259,7 +244,6 @@
             🏦 Deposit
         </a>
 
-        <!-- INVENTORY -->
         <p>Inventory</p>
 
         <a href="{{ route('cashier.inventory.stock') }}"
@@ -279,13 +263,11 @@
 
         <hr>
 
-        <!-- ACCOUNT -->
         <p>Account</p>
         <a href="#">🔑 Change Password</a>
 
     </div>
 
-    <!-- LOGOUT -->
     <div class="logout">
         <form method="POST" action="{{ url('/logout') }}">
             @csrf
@@ -295,7 +277,6 @@
 
 </div>
 
-<!-- CONTENT -->
 <div class="content">
 
     <div class="topbar">
@@ -326,7 +307,6 @@
 </div>
 @endif
 
-<!-- SCRIPTS -->
 @yield('scripts')
 
 </body>

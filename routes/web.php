@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\SalesReportController;
+use App\Http\Controllers\CollectionController;
 
 
 // =====================
@@ -144,10 +145,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // 🔥 OVERVIEW STOCK
     Route::get('/inventory', [InventoryController::class, 'overviewStock']);
 
-    // 🔥 EXPORT (NEW)
     Route::get('/inventory/export/excel', [InventoryController::class, 'exportExcel']);
     Route::get('/inventory/export/pdf', [InventoryController::class, 'exportPdf']);
 
@@ -228,9 +227,14 @@ Route::prefix('cashier')->group(function () {
     Route::get('/', [CashierController::class, 'index']);
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
-    // 🔥 INVENTORY STOCK
     Route::get('/inventory-stock', [InventoryController::class, 'overviewStock'])
         ->name('cashier.inventory.stock');
+
+    Route::get('/collection-receipt', [CollectionController::class, 'create'])
+        ->name('cashier.collection.create');
+
+    Route::post('/collection-receipt', [CollectionController::class, 'store'])
+        ->name('cashier.collection.store');
 
     Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])
         ->name('cashier.transfer.in');
