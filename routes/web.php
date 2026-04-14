@@ -167,7 +167,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/', [ProductController::class, 'store']);
 
         Route::get('/{id}/edit', [ProductController::class, 'edit']);
-        Route::put('/{id}', [ProductController::class, 'update']);
+        Route::post('/update/{id}', [ProductController::class, 'update']);
         Route::get('/{id}/delete', [ProductController::class, 'delete']);
 
         Route::get('/export', [ProductController::class, 'export']);

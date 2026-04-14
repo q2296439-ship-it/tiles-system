@@ -154,7 +154,6 @@
 
     <div class="menu-title">PRODUCT</div>
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
-    <a href="#">🏷 Per Model</a>
 
     <div class="menu-title">INVENTORY</div>
 
