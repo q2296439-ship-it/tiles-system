@@ -40,17 +40,21 @@
             display: block;
             color: #cbd5e1;
             text-decoration: none;
-            padding: 6px 0;
+            padding: 8px 10px;
             font-size: 14px;
+            border-radius: 8px;
+            margin-bottom: 4px;
         }
 
         .sidebar a:hover {
             color: white;
+            background: rgba(255,255,255,0.08);
         }
 
         .sidebar a.active {
             color: white;
             font-weight: bold;
+            background: #2563eb;
         }
 
         .logout-btn {
@@ -59,23 +63,26 @@
             color: #cbd5e1;
             cursor: pointer;
             text-align: left;
-            padding: 0;
+            padding: 8px 10px;
             font-size: 14px;
-            margin-top: 6px;
+            width: 100%;
+            border-radius: 8px;
         }
 
         .logout-btn:hover {
             color: white;
+            background: rgba(255,255,255,0.08);
         }
 
         .main {
             margin-left: 240px;
             width: calc(100% - 240px);
+            min-height: 100vh;
         }
 
         .topbar {
             background: white;
-            padding: 15px;
+            padding: 15px 20px;
             border-bottom: 1px solid #ddd;
             display: flex;
             justify-content: space-between;
@@ -140,7 +147,7 @@
     <h2>Admin Panel</h2>
 
     <div class="menu-title">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
+    <a href="/admin/dashboard" class="{{ request()->is('admin') || request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
 
     <div class="menu-title">POS / SALES</div>
     <a href="/admin/pos" class="{{ request()->is('admin/pos') ? 'active' : '' }}">💰 POS</a>
@@ -157,29 +164,25 @@
 
     <div class="menu-title">INVENTORY</div>
 
-    <a href="/admin/inventory" 
-       class="{{ request()->is('admin/inventory') ? 'active' : '' }}">
+    <a href="/admin/inventory" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">
         📦 Overview Stock
     </a>
 
-    <a href="{{ route('inventory.create') }}" 
-       class="{{ request()->is('admin/inventory/add-stock') ? 'active' : '' }}">
+    <a href="{{ route('inventory.create') }}" class="{{ request()->is('admin/inventory/add-stock') ? 'active' : '' }}">
         ➕ Add New Stock
     </a>
 
-    <a href="/admin/inventory/transfer-out"
-       class="{{ request()->is('admin/inventory/transfer-out') ? 'active' : '' }}">
+    <a href="/admin/inventory/transfer-out" class="{{ request()->is('admin/inventory/transfer-out') ? 'active' : '' }}">
         🔄 Transfer Out
     </a>
 
-    <a href="/admin/inventory/transfer-in"
-       class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
+    <a href="/admin/inventory/transfer-in" class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">
         📥 Transfer In
     </a>
 
     <div class="menu-title">USER</div>
 
-    <a href="/admin/users">➕ Add User</a>
+    <a href="/admin/users" class="{{ request()->is('admin/users') ? 'active' : '' }}">➕ Add User</a>
     <a href="/admin/manage" class="{{ request()->is('admin/manage') ? 'active' : '' }}">👥 Manage Account</a>
     <a href="/admin/branches" class="{{ request()->is('admin/branches') ? 'active' : '' }}">🏬 Add Branch</a>
 
@@ -192,10 +195,13 @@
 
 <div class="main">
 
+    {{-- HIDE TOPBAR SA DASHBOARD LANG --}}
+    @if(!request()->is('admin') && !request()->is('admin/dashboard'))
     <div class="topbar">
         <strong>Admin Panel</strong>
         <span>👤 {{ auth()->user()->name ?? 'Admin' }}</span>
     </div>
+    @endif
 
     <div class="content">
         @yield('content')
