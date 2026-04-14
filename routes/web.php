@@ -255,6 +255,8 @@ Route::get('/inventory-dashboard', function () {
 });
 
 
+<?php
+
 // =====================
 // FIX MANAGER PASSWORD
 // =====================
@@ -268,4 +270,13 @@ Route::get('/fix-manager-pass', function () {
     }
 
     return 'Manager password fixed!';
+});
+
+
+// =====================
+// RUN LIVE MIGRATION
+// =====================
+Route::get('/run-migrate', function () {
+    \Artisan::call('migrate', ['--force' => true]);
+    return nl2br(\Artisan::output());
 });
