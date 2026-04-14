@@ -211,7 +211,6 @@ class InventoryController extends Controller
 
         return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
     }
-}
 
     // =====================
     // 🔥 CASHIER: TRANSFER IN FORM
