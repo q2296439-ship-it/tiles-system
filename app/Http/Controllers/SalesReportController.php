@@ -256,37 +256,67 @@ class SalesReportController extends Controller
     }
 
     public function perBrand(Request $request)
-    {
-        $start = $request->start_date 
-            ? $request->start_date . ' 00:00:00' 
-            : now()->startOfDay();
+{
+    $range = $request->range ?? 'today';
 
-        $end = $request->end_date 
-            ? $request->end_date . ' 23:59:59' 
-            : now()->endOfDay();
-
-        $data = DB::table('sales')
-            ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
-            ->join('products', 'sale_items.product_id', '=', 'products.id')
-            ->select(
-                'products.name as brand',
-                DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
-            )
-            ->whereBetween('sales.created_at', [$start, $end])
-            ->when($request->branch_id, function($q) use ($request){
-                $q->where('sales.branch_id', $request->branch_id);
-            })
-            ->groupBy('products.name')
-            ->orderByDesc('total')
-            ->get();
-
-        $labels = $data->pluck('brand');
-        $totals = $data->pluck('total');
-
-        $branches = DB::table('branches')->get();
-
-        return view('admin.reports.brand', compact('data','labels','totals','branches'));
+    if ($request->start_date && $request->end_date) {
+        $start = $request->start_date . ' 00:00:00';
+        $end   = $request->end_date . ' 23:59:59';
+    } else {
+        [$start, $end] = $this->getDateRange($range);
     }
+
+    $query = DB::table('sales')
+        ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+        ->join('products', 'sale_items.product_id', '=', 'products.id')
+        ->select(
+            'products.name as brand',
+            DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
+        )
+        ->whereBetween('sales.created_at', [$start, $end]);
+
+    if ($request->branch_id) {
+        $query->where('sales.branch_id', $request->branch_id);
+    }
+
+    $data = $query
+        ->groupBy('products.name')
+        ->orderByDesc('total')
+        ->get();
+
+    $labels = $data->pluck('brand');
+    $totals = $data->pluck('total');
+
+    $branches = DB::table('branches')->get();
+
+    $totalSales  = $data->sum('total');
+    $totalBrands = $data->count();
+    $average     = $totalBrands > 0 ? $totalSales / $totalBrands : 0;
+    $topBrand    = $data->first()->brand ?? '-';
+
+    $alerts = [];
+
+    if ($totalSales <= 0) {
+        $alerts[] = 'No sales data found.';
+    }
+
+    if ($topBrand != '-') {
+        $alerts[] = 'Top Brand: ' . $topBrand;
+    }
+
+    return view('admin.reports.brand', compact(
+        'data',
+        'labels',
+        'totals',
+        'branches',
+        'totalSales',
+        'totalBrands',
+        'average',
+        'topBrand',
+        'range',
+        'alerts'
+    ));
+}
 
     public function brandPdf(Request $request)
     {
