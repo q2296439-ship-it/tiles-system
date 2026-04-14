@@ -131,15 +131,20 @@
     <h2>📊 Manager Dashboard</h2>
     <p>Welcome, {{ auth()->user()->name }}</p>
 
-    {{-- 🔥 NEW: BRANCH DROPDOWN --}}
+    {{-- 🔥 UPDATED: WORKING DROPDOWN --}}
     <div class="branch-filter">
-        <label><strong>Select Branch:</strong></label>
-        <select>
-            <option value="">All Branches</option>
-            @foreach($branches as $branch)
-                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-            @endforeach
-        </select>
+        <form method="GET" action="/manager">
+            <label><strong>Select Branch:</strong></label>
+            <select name="branch_id" onchange="this.form.submit()">
+                <option value="">All Branches</option>
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}"
+                        {{ (isset($branchId) && $branchId == $branch->id) ? 'selected' : '' }}>
+                        {{ $branch->name }}
+                    </option>
+                @endforeach
+            </select>
+        </form>
     </div>
 </div>
 
