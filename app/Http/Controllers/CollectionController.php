@@ -52,11 +52,11 @@ class CollectionController extends Controller
                 // ✅ SAVE SALES HEADER
                 // =====================
                 $sale = Sale::create([
-                    'total'     => $request->total_amount ?? 0,
-                    'branch_id' => $branchId,
-                    'user_id'   => $userId,
-                    'created_at'=> now(),
-                    'updated_at'=> now(),
+                    'total_amount' => $request->total_amount ?? 0,
+                    'branch_id'    => $branchId,
+                    'user_id'      => $userId,
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
                 ]);
 
                 foreach ($request->items as $item) {
