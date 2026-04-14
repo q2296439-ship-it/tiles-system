@@ -4,127 +4,157 @@
     <title>Cashier POS</title>
 
     <style>
-        * {
-            box-sizing: border-box;
+        *{
+            box-sizing:border-box;
         }
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            height: 100vh;
-            background: #f1f5f9;
+        body{
+            margin:0;
+            font-family:'Segoe UI',sans-serif;
+            display:flex;
+            height:100vh;
+            background:#f1f5f9;
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 240px;
-            background: linear-gradient(180deg, #0f172a, #020617);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        /* =========================
+           SIDEBAR
+        ========================= */
+        .sidebar{
+            width:240px;
+            background:linear-gradient(180deg,#0f172a,#111827,#020617);
+            color:#fff;
+            display:flex;
+            flex-direction:column;
+            height:100vh;
+            box-shadow:4px 0 18px rgba(0,0,0,0.08);
         }
 
-        .sidebar-menu {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
+        .sidebar-menu{
+            flex:1;
+            overflow-y:auto;
+            padding:18px 16px;
         }
 
-        .sidebar h2 {
-            margin-bottom: 20px;
-            font-size: 20px;
+        .sidebar h2{
+            margin:8px 8px 22px;
+            font-size:16px;
+            font-weight:800;
+            letter-spacing:.3px;
         }
 
-        .sidebar p {
-            font-size: 11px;
-            color: #94a3b8;
-            margin: 18px 0 6px;
-            letter-spacing: 1px;
+        .sidebar p{
+            font-size:11px;
+            color:#94a3b8;
+            margin:18px 8px 8px;
+            letter-spacing:1.2px;
+            text-transform:uppercase;
         }
 
-        .sidebar a {
-            display: block;
-            padding: 12px;
-            color: #cbd5f5;
-            text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 6px;
-            transition: 0.2s;
-            font-size: 14px;
+        .sidebar a{
+            display:block;
+            padding:12px 14px;
+            margin-bottom:8px;
+            border-radius:12px;
+            color:#e5e7eb;
+            text-decoration:none;
+            font-size:14px;
+            transition:all .2s ease;
         }
 
-        .sidebar a:hover {
-            background: #1e293b;
-            color: white;
+        .sidebar a:hover{
+            background:rgba(59,130,246,.12);
+            color:#fff;
+            transform:translateX(2px);
         }
 
-        .active {
-            background: #22c55e;
-            color: white !important;
-            font-weight: bold;
+        .sidebar a.active{
+            background:linear-gradient(90deg,#2563eb,#3b82f6);
+            color:#fff !important;
+            font-weight:700;
+            box-shadow:0 8px 18px rgba(37,99,235,.25);
         }
 
-        hr {
-            border: none;
-            border-top: 1px solid #334155;
-            margin: 15px 0;
+        hr{
+            border:none;
+            border-top:1px solid rgba(148,163,184,.18);
+            margin:14px 8px;
         }
 
-        .logout {
-            padding: 15px;
+        .sidebar-menu::-webkit-scrollbar{
+            width:6px;
         }
 
-        .logout button {
-            width: 100%;
-            padding: 12px;
-            background: #ef4444;
-            border: none;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
+        .sidebar-menu::-webkit-scrollbar-thumb{
+            background:#475569;
+            border-radius:10px;
         }
 
-        .sidebar-menu::-webkit-scrollbar {
-            width: 6px;
+        /* =========================
+           LOGOUT
+        ========================= */
+        .logout{
+            padding:14px 16px;
         }
 
-        .sidebar-menu::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
+        .logout button{
+            width:100%;
+            border:none;
+            padding:12px;
+            border-radius:12px;
+            background:#ef4444;
+            color:#fff;
+            font-size:14px;
+            font-weight:700;
+            cursor:pointer;
+            transition:.2s;
         }
 
-        /* CONTENT */
-        .content {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
+        .logout button:hover{
+            background:#dc2626;
         }
 
-        /* CART */
-        .cart {
-            width: 320px;
-            background: linear-gradient(180deg, #1e293b, #020617);
-            color: white;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
+        /* =========================
+           CONTENT
+        ========================= */
+        .content{
+            flex:1;
+            padding:25px;
+            overflow-y:auto;
         }
 
-        .cart h2 {
-            margin-bottom: 15px;
+        .content::-webkit-scrollbar{
+            width:6px;
         }
 
-        .content::-webkit-scrollbar,
-        .cart::-webkit-scrollbar {
-            width: 6px;
+        .content::-webkit-scrollbar-thumb{
+            background:#94a3b8;
+            border-radius:10px;
         }
 
-        .content::-webkit-scrollbar-thumb,
-        .cart::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 10px;
+        /* =========================
+           CART
+        ========================= */
+        .cart{
+            width:320px;
+            background:linear-gradient(180deg,#1e293b,#020617);
+            color:#fff;
+            padding:20px;
+            display:flex;
+            flex-direction:column;
+            overflow-y:auto;
+        }
+
+        .cart h2{
+            margin-bottom:15px;
+        }
+
+        .cart::-webkit-scrollbar{
+            width:6px;
+        }
+
+        .cart::-webkit-scrollbar-thumb{
+            background:#64748b;
+            border-radius:10px;
         }
     </style>
 </head>
@@ -136,34 +166,32 @@
 
     <div class="sidebar-menu">
 
-        <h2>💰 POS</h2>
+        <h2>💰 Cashier Panel</h2>
 
         <!-- MAIN -->
-        <p>MAIN</p>
-        <a href="{{ url('/cashier') }}" 
+        <p>Main</p>
+        <a href="{{ url('/cashier') }}"
            class="{{ request()->is('cashier') ? 'active' : '' }}">
             🧾 New Sale
         </a>
 
         <!-- SALES -->
-        <p>SALES</p>
+        <p>Sales</p>
         <a href="#">🧾 Add Collection Receipt</a>
         <a href="#">📊 Collection Today</a>
         <a href="#">💰 DCCR</a>
         <a href="#">🏦 Deposit</a>
 
         <!-- INVENTORY -->
-        <p>INVENTORY</p>
+        <p>Inventory</p>
         <a href="#">📦 Inventory Stock</a>
 
-        <!-- TRANSFER -->
-        <a href="{{ route('cashier.transfer.in') }}" 
+        <a href="{{ route('cashier.transfer.in') }}"
            class="{{ request()->is('cashier/transfer-in*') ? 'active' : '' }}">
             ⬇ Transfer In
         </a>
 
-        <!-- ✅ FIXED INCOMING -->
-        <a href="{{ url('/cashier/incoming') }}" 
+        <a href="{{ url('/cashier/incoming') }}"
            class="{{ request()->is('cashier/incoming*') ? 'active' : '' }}">
             📦 Incoming Transfer Stock
         </a>
@@ -171,7 +199,7 @@
         <hr>
 
         <!-- ACCOUNT -->
-        <p>ACCOUNT</p>
+        <p>Account</p>
         <a href="#">🔑 Change Password</a>
 
     </div>
