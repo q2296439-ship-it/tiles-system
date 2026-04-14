@@ -242,7 +242,7 @@ public function transferOutAdmin(Request $request)
             'requester',
             'approver'
         ])
-        ->where('type', 'OUT');
+        ->where('type', 'OUT_REQUEST');
 
     // 🔍 SEARCH PRODUCT
     if ($request->search) {
