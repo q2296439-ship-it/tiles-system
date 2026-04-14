@@ -173,26 +173,42 @@ class CollectionController extends Controller
         $row->status = 'returned';
         $row->record_type = 'returned';
         return $row;
-    });
+   });
 
-        $records = $collections->concat($returns);
+$records = $collections->concat($returns);
 
-        if ($status != 'all') {
-            $records = $records->where('record_type', $status);
-        }
+if ($status != 'all') {
+    $records = $records->where('record_type', $status);
+}
 
-        $collections = $records->sortByDesc('created_at')->values();
+$collections = $records->sortByDesc('created_at')->values();
 
-        $total = $collections
-            ->where('record_type', 'saved')
-            ->sum('total_amount');
+if ($status == 'returned') {
 
-        return view('cashier.collection.today', compact(
-            'collections',
-            'total',
-            'selectedDate'
-        ));
-    }
+    $total = -1 * $collections->sum('total_amount');
+
+} elseif ($status == 'cancelled') {
+
+    $total = 0;
+
+} elseif ($status == 'saved') {
+
+    $total = $collections->sum('total_amount');
+
+} else {
+
+    $savedTotal  = $collections->where('record_type', 'saved')->sum('total_amount');
+    $returnTotal = $collections->where('record_type', 'returned')->sum('total_amount');
+
+    $total = $savedTotal - $returnTotal;
+}
+
+return view('cashier.collection.today', compact(
+    'collections',
+    'total',
+    'selectedDate'
+));
+}
 
     public function exportPdf(Request $request)
     {
