@@ -144,6 +144,9 @@ Route::get('/manager/sales-report', [SalesReportController::class, 'perBranch'])
 // ✅ BRANCH STOCK MANAGER
 Route::get('/manager/inventory', [ProductController::class, 'index'])->middleware('auth')->name('manager.inventory');
 
+// ✅ INVENTORY REPORT MANAGER
+Route::get('/manager/inventory-report', [InventoryController::class, 'overviewStock'])->middleware('auth')->name('manager.inventory.report');
+
 
 // =====================
 // ADMIN GROUP
