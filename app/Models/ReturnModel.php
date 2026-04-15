@@ -31,4 +31,9 @@ class ReturnModel extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
 }
