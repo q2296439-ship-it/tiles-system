@@ -300,73 +300,71 @@ class CollectionController extends Controller
 }
 
     public function exportPdf(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $status = $request->status ?? 'all';
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status = $request->status ?? 'all';
 
-        $user = auth()->user();
-        $isAdmin = strtolower($user->role) === 'admin';
-        $branchId = $user->branch_id;
+    $user = auth()->user();
+    $role = strtolower($user->role);
 
-        $collections = Collection::with(['user', 'items', 'branch'])
-            ->whereDate('receipt_date', $selectedDate);
+    $isAdmin = $role === 'admin';
+    $branchId = $user->branch_id ?: 1;
 
-        if (!$isAdmin) {
-            $collections->where('branch_id', $branchId);
-        }
+    $collections = Collection::with(['user', 'items', 'branch'])
+        ->whereDate('receipt_date', $selectedDate);
 
-        $collections = $collections
-            ->get()
-            ->map(function ($row) {
-                $row->record_type = strtolower($row->status ?? 'saved');
-                return $row;
-            });
+    if (!$isAdmin) {
+        $collections->where('branch_id', $branchId);
+    }
 
-        $returns = ReturnModel::with(['user', 'items', 'branch'])
-            ->whereDate('return_date', $selectedDate);
+    $collections = $collections->get()->map(function ($row) {
+        $row->record_type = strtolower($row->status ?? 'saved');
+        return $row;
+    });
 
-        if (!$isAdmin) {
-            $returns->where('branch_id', $branchId);
-        }
+    $returns = ReturnModel::with(['user', 'items', 'branch'])
+        ->whereDate('return_date', $selectedDate);
 
-        $returns = $returns
-            ->get()
-            ->map(function ($row) {
-                $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
-                $row->receipt_date = $row->return_date;
-                $row->status = 'returned';
-                $row->record_type = 'returned';
-                return $row;
-            });
+    if (!$isAdmin) {
+        $returns->where('branch_id', $branchId);
+    }
 
-        $records = $collections->concat($returns);
+    $returns = $returns->get()->map(function ($row) {
+        $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
+        $row->receipt_date = $row->return_date;
+        $row->status = 'returned';
+        $row->record_type = 'returned';
+        return $row;
+    });
 
-        if ($status != 'all') {
-            $records = $records->where('record_type', $status);
-        }
+    $records = $collections->concat($returns);
 
-       $collections = $records->sortByDesc('created_at')->values();
+    if ($status != 'all') {
+        $records = $records->where('record_type', $status);
+    }
 
-if ($status == 'returned') {
-    $total = -1 * $collections->sum('total_amount');
-} elseif ($status == 'cancelled') {
-    $total = 0;
-} elseif ($status == 'saved') {
-    $total = $collections->sum('total_amount');
-} else {
-    $savedTotal  = $collections->where('record_type', 'saved')->sum('total_amount');
-    $returnTotal = $collections->where('record_type', 'returned')->sum('total_amount');
-    $total = $savedTotal - $returnTotal;
-}
+    $collections = $records->sortByDesc('created_at')->values();
 
-$pdf = Pdf::loadView('cashier.collection.pdf', compact(
-    'collections',
-    'selectedDate',
-    'status',
-    'total'
-))->setPaper('a4', 'landscape');
+    if ($status == 'returned') {
+        $total = -1 * $collections->sum('total_amount');
+    } elseif ($status == 'cancelled') {
+        $total = 0;
+    } elseif ($status == 'saved') {
+        $total = $collections->sum('total_amount');
+    } else {
+        $savedTotal  = $collections->where('record_type', 'saved')->sum('total_amount');
+        $returnTotal = $collections->where('record_type', 'returned')->sum('total_amount');
+        $total = $savedTotal - $returnTotal;
+    }
 
-return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
+    $pdf = Pdf::loadView('cashier.collection.pdf', compact(
+        'collections',
+        'selectedDate',
+        'status',
+        'total'
+    ))->setPaper('a4', 'landscape');
+
+    return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
 }
 
     public function exportExcel(Request $request)
