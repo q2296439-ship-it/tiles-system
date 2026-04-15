@@ -185,6 +185,23 @@ Route::get('/manager/deposit', [CollectionController::class, 'deposit'])
 Route::post('/manager/deposit', [CollectionController::class, 'depositStore'])
     ->middleware('auth');
 
+// ✅ DEPOSIT EXPORT
+Route::get('/cashier/deposit/excel', [CollectionController::class, 'depositExcel'])
+    ->middleware('auth')
+    ->name('cashier.deposit.excel');
+
+Route::get('/cashier/deposit/pdf', [CollectionController::class, 'depositPdf'])
+    ->middleware('auth')
+    ->name('cashier.deposit.pdf');
+
+Route::get('/manager/deposit/excel', [CollectionController::class, 'depositExcel'])
+    ->middleware('auth')
+    ->name('manager.deposit.excel');
+
+Route::get('/manager/deposit/pdf', [CollectionController::class, 'depositPdf'])
+    ->middleware('auth')
+    ->name('manager.deposit.pdf');
+
 
 // =====================
 // ADMIN GROUP

@@ -15,6 +15,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\CollectionExport;
+use App\Exports\DepositExport;
 
 class CollectionController extends Controller
 {
