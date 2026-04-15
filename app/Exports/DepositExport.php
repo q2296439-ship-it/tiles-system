@@ -30,7 +30,15 @@ class DepositExport implements FromCollection, WithHeadings, ShouldAutoSize
             ->select(
                 'branches.name as branch',
                 'deposits.deposit_date',
-                'deposits.net_amount',
+                'deposits.denom_1000',
+                'deposits.denom_500',
+                'deposits.denom_200',
+                'deposits.denom_100',
+                'deposits.denom_50',
+                'deposits.denom_20',
+                'deposits.coin_10',
+                'deposits.coin_5',
+                'deposits.coin_1',
                 'deposits.actual_amount',
                 'deposits.variance'
             )
@@ -50,7 +58,15 @@ class DepositExport implements FromCollection, WithHeadings, ShouldAutoSize
         return [
             'Branch',
             'Date',
-            'Expected Deposit',
+            '1000',
+            '500',
+            '200',
+            '100',
+            '50',
+            '20',
+            '10 Coin',
+            '5 Coin',
+            '1 Coin',
             'Actual Deposit',
             'Variance'
         ];
