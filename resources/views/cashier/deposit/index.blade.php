@@ -53,6 +53,7 @@
 .btn-blue{background:#2563eb;}
 .btn-green{background:#16a34a;}
 .btn-red{background:#dc2626;}
+.btn-dark{background:#0f172a;}
 
 .stats{
     display:grid;
@@ -107,6 +108,11 @@ textarea{
     text-align:center;
     color:#475569;
 }
+#depositPanel{
+    display:none;
+    margin-top:20px;
+}
+.right{text-align:right;}
 </style>
 
 <div class="page">
@@ -129,6 +135,10 @@ textarea{
 
             <a href="#" class="btn btn-green">📗 Excel</a>
             <a href="#" class="btn btn-red">📄 PDF</a>
+
+            <button type="button" class="btn btn-dark" onclick="toggleDeposit()">
+                ➕ Deposit
+            </button>
         </form>
 
     </div>
@@ -153,17 +163,60 @@ textarea{
 
     <div class="card">
         <div class="label">Actual Deposit</div>
-        <div class="value">₱{{ number_format($actual ?? 0,2) }}</div>
+        <div class="value" id="actualText">₱0.00</div>
     </div>
 
     <div class="card">
         <div class="label">Variance</div>
-        <div class="value {{ ($variance ?? 0) < 0 ? 'red' : 'green' }}">
-            ₱{{ number_format($variance ?? 0,2) }}
+        <div class="value {{ ($variance ?? 0) < 0 ? 'red' : 'green' }}" id="varianceText">
+            ₱{{ number_format(0 - ($net ?? 0),2) }}
         </div>
     </div>
 
 </div>
+
+<form method="POST" action="{{ route('cashier.deposit.store') }}">
+@csrf
+
+<input type="hidden" name="deposit_date" value="{{ request('date', date('Y-m-d')) }}">
+<input type="hidden" name="expected_amount" value="{{ $net ?? 0 }}">
+<input type="hidden" name="actual_amount" id="actualAmount" value="0">
+<input type="hidden" name="variance" id="varianceInput" value="{{ 0 - ($net ?? 0) }}">
+
+<div class="table-card" id="depositPanel">
+
+    <h3 style="margin-top:0;">Cash Denomination</h3>
+
+    <table>
+        <tr>
+            <th>Bill</th>
+            <th>Qty</th>
+            <th>Total</th>
+        </tr>
+
+        <tr><td>1000</td><td><input type="number" name="denom_1000" class="input denom" data-val="1000" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>500</td><td><input type="number" name="denom_500" class="input denom" data-val="500" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>200</td><td><input type="number" name="denom_200" class="input denom" data-val="200" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>100</td><td><input type="number" name="denom_100" class="input denom" data-val="100" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>50</td><td><input type="number" name="denom_50" class="input denom" data-val="50" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>20</td><td><input type="number" name="denom_20" class="input denom" data-val="20" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>10 Coin</td><td><input type="number" name="coin_10" class="input denom" data-val="10" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>5 Coin</td><td><input type="number" name="coin_5" class="input denom" data-val="5" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr><td>1 Coin</td><td><input type="number" name="coin_1" class="input denom" data-val="1" value="0"></td><td class="right lineTotal">0.00</td></tr>
+    </table>
+
+    <div style="margin-top:20px;">
+        <label class="label">Remarks</label>
+        <textarea name="remarks" placeholder="Enter remarks..."></textarea>
+    </div>
+
+    <div style="margin-top:15px;text-align:right;">
+        <button class="btn btn-green">💾 Save Deposit</button>
+    </div>
+
+</div>
+
+</form>
 
 <div class="table-card">
 
@@ -188,18 +241,13 @@ textarea{
         </tr>
         <tr>
             <td>Actual Cash Deposited</td>
-            <td>₱{{ number_format($actual ?? 0,2) }}</td>
+            <td id="actualTable">₱0.00</td>
         </tr>
         <tr>
             <td><strong>Variance</strong></td>
-            <td><strong>₱{{ number_format($variance ?? 0,2) }}</strong></td>
+            <td><strong id="varianceTable">₱{{ number_format(0 - ($net ?? 0),2) }}</strong></td>
         </tr>
     </table>
-
-    <div style="margin-top:20px;">
-        <label class="label">Remarks</label>
-        <textarea placeholder="Enter remarks..."></textarea>
-    </div>
 
     <div class="sign-grid">
         <div class="sign-box">Prepared by (Cashier)</div>
@@ -210,5 +258,45 @@ textarea{
 </div>
 
 </div>
+
+<script>
+function toggleDeposit(){
+    let panel = document.getElementById('depositPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function computeDeposit(){
+    let total = 0;
+
+    document.querySelectorAll('.denom').forEach(input=>{
+        let qty = parseFloat(input.value) || 0;
+        let val = parseFloat(input.dataset.val) || 0;
+        let line = qty * val;
+
+        input.closest('tr').querySelector('.lineTotal').innerText = line.toFixed(2);
+        total += line;
+    });
+
+    let expected = parseFloat('{{ $net ?? 0 }}');
+    let variance = total - expected;
+
+    document.getElementById('actualText').innerText = '₱' + total.toFixed(2);
+    document.getElementById('varianceText').innerText = '₱' + variance.toFixed(2);
+
+    document.getElementById('actualTable').innerText = '₱' + total.toFixed(2);
+    document.getElementById('varianceTable').innerText = '₱' + variance.toFixed(2);
+
+    document.getElementById('actualAmount').value = total.toFixed(2);
+    document.getElementById('varianceInput').value = variance.toFixed(2);
+}
+
+document.addEventListener('input', function(e){
+    if(e.target.classList.contains('denom')){
+        computeDeposit();
+    }
+});
+
+computeDeposit();
+</script>
 
 @endsection
