@@ -495,4 +495,43 @@ public function openTransaction(Request $request)
         ->route('manager.request.access')
         ->with('success', 'Transaction reopened successfully.');
 }
+
+public function depositStore(Request $request)
+{
+    $request->validate([
+        'deposit_date'  => 'required|date',
+        'actual_amount' => 'required|numeric|min:0',
+    ]);
+
+    $branchId = auth()->user()->branch_id;
+    $date = $request->deposit_date;
+
+    $rows = Collection::whereDate('receipt_date', $date)
+        ->where('branch_id', $branchId)
+        ->where('status', 'saved')
+        ->get();
+
+    $net = $rows->sum('net_amount');
+    $actual = $request->actual_amount;
+    $variance = $actual - $net;
+
+    \App\Models\Deposit::updateOrCreate(
+        [
+            'deposit_date' => $date,
+            'branch_id' => $branchId,
+        ],
+        [
+            'gross_amount' => $rows->sum('gross_amount'),
+            'discount_amount' => $rows->sum('discount_amount'),
+            'net_amount' => $net,
+            'actual_amount' => $actual,
+            'variance' => $variance,
+            'user_id' => auth()->id(),
+        ]
+    );
+
+    return redirect()
+        ->route('cashier.deposit')
+        ->with('success', 'Deposit saved successfully.');
+}
 }
