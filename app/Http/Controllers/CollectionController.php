@@ -466,4 +466,32 @@ return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
                 ->with('error', $e->getMessage());
         }
     }
+
+    
+    // ==========================
+// 🔓 MANAGER REQUEST ACCESS
+// ==========================
+public function requestAccess()
+{
+    $closedDates = \App\Models\Deposit::with('branch')
+        ->latest()
+        ->paginate(10);
+
+    return view('manager.request-access', compact('closedDates'));
+}
+
+public function openTransaction(Request $request)
+{
+    $request->validate([
+        'id' => 'required|exists:deposits,id'
+    ]);
+
+    $deposit = \App\Models\Deposit::findOrFail($request->id);
+
+    $deposit->delete();
+
+    return redirect()
+        ->route('manager.request.access')
+        ->with('success', 'Transaction reopened successfully.');
+}
 }

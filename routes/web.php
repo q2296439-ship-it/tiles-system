@@ -169,6 +169,15 @@ Route::get('/manager/change-password', function () {
 Route::post('/manager/change-password', [UserController::class, 'changePassword'])
     ->middleware('auth');
 
+    // ✅ REQUEST ACCESS MANAGER
+Route::get('/manager/request-access', [CollectionController::class, 'requestAccess'])
+    ->middleware('auth')
+    ->name('manager.request.access');
+
+Route::post('/manager/request-access/open', [CollectionController::class, 'openTransaction'])
+    ->middleware('auth')
+    ->name('manager.request.open');
+
 
 // =====================
 // ADMIN GROUP
