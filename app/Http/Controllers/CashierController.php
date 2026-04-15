@@ -17,7 +17,7 @@ class CashierController extends Controller
         $branchId = $user->branch_id;
         $today = now()->toDateString();
 
-        // ✅ sariling branch lang products (kept)
+        // ✅ sariling branch lang products
         $products = Product::where('branch_id', $branchId)->get();
 
         // ✅ Dashboard Stats
@@ -35,7 +35,8 @@ class CashierController extends Controller
             ->take(5)
             ->get();
 
-        $recentSales = Sale::where('branch_id', $branchId)
+        // ✅ UPDATED: complete recent sales details from collections
+        $recentSales = \App\Models\Collection::where('branch_id', $branchId)
             ->latest()
             ->take(5)
             ->get();
@@ -79,7 +80,6 @@ class CashierController extends Controller
 
             foreach ($request->items as $item) {
 
-                // ✅ VALIDATE ITEM STRUCTURE
                 if (!isset($item['id'], $item['qty'], $item['price'])) {
                     throw new \Exception('Invalid cart data');
                 }
@@ -90,17 +90,14 @@ class CashierController extends Controller
                     throw new \Exception('Product not found');
                 }
 
-                // ✅ IMPORTANT: sariling branch lang pwede ibenta
                 if ($product->branch_id != $user->branch_id) {
                     throw new \Exception('Invalid product branch');
                 }
 
-                // ✅ STOCK CHECK
                 if ($product->stock < $item['qty']) {
                     throw new \Exception('Not enough stock for ' . $product->name);
                 }
 
-                // ✅ SAVE SALE ITEM
                 SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
@@ -108,14 +105,12 @@ class CashierController extends Controller
                     'price' => $item['price']
                 ]);
 
-                // ✅ DEDUCT STOCK
                 $product->stock -= $item['qty'];
                 $product->save();
             }
 
             DB::commit();
 
-            // ✅ RETURN UPDATED PRODUCTS (same branch lang)
             $updatedProducts = Product::where('branch_id', $user->branch_id)->get();
 
             return response()->json([

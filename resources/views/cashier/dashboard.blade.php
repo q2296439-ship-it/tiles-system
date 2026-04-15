@@ -97,6 +97,29 @@
         font-weight:700;
     }
 
+    .status-badge{
+        padding:4px 8px;
+        border-radius:999px;
+        font-size:12px;
+        font-weight:700;
+        display:inline-block;
+    }
+
+    .saved{
+        background:#dcfce7;
+        color:#166534;
+    }
+
+    .cancelled{
+        background:#fee2e2;
+        color:#991b1b;
+    }
+
+    .returned{
+        background:#dbeafe;
+        color:#1d4ed8;
+    }
+
     .empty{
         color:#94a3b8;
         font-size:14px;
@@ -152,21 +175,29 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
+                <th>Receipt No</th>
+                <th>Customer</th>
                 <th>Total</th>
-                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             @forelse($recentSales as $sale)
             <tr>
-                <td>#{{ $sale->id }}</td>
+                <td>{{ $sale->receipt_no }}</td>
+                <td>{{ $sale->customer_name ?: 'Walk-in Customer' }}</td>
                 <td>₱{{ number_format($sale->total_amount,2) }}</td>
                 <td>{{ $sale->created_at->format('M d, h:i A') }}</td>
+                <td>
+                    <span class="status-badge {{ strtolower($sale->status) }}">
+                        {{ ucfirst($sale->status) }}
+                    </span>
+                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="3" class="empty">No recent sales found.</td>
+                <td colspan="5" class="empty">No recent sales found.</td>
             </tr>
             @endforelse
         </tbody>
