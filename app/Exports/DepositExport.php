@@ -64,7 +64,7 @@ class DepositExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             ['NICOLE TILES CENTER'],
             ['CASH DEPOSIT SLIP'],
             [''],
-            ['Branch', $row->branch, '', '', 'Date', $row->deposit_date],
+            ['Branch', $row->branch, 'Date', $row->deposit_date],
             ['Deposited By', auth()->user()->name],
             [''],
             ['Denomination', 'Qty', 'Amount'],
@@ -121,6 +121,8 @@ class DepositExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
 
                 $sheet->getStyle('A21')->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
                 $sheet->getStyle('C21')->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+
+                $sheet->getStyle('A4:D5')->getFont()->setBold(true);
             }
         ];
     }
