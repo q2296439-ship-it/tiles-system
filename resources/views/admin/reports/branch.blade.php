@@ -8,6 +8,8 @@ $layout = match(auth()->user()->role) {
 
 @extends($layout)
 
+@section('content')
+
 <style>
 .page-wrap{
     max-width:1280px;
