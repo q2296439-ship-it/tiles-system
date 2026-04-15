@@ -30,8 +30,10 @@ class TransferOutExport implements FromCollection, WithHeadings, WithStyles, Sho
         $query = StockMovement::with([
             'product',
             'requester',
-            'approver'
-        ])->where('type', 'OUT');
+            'approver',
+            'from_branch',
+            'branch'
+        ])->where('type', 'IN_REQUEST');
 
         if ($this->search) {
             $query->whereHas('product', function ($q) {
@@ -46,8 +48,15 @@ class TransferOutExport implements FromCollection, WithHeadings, WithStyles, Sho
         return $query->latest()->get()->map(function ($t) {
             return [
                 'Product'      => $t->product->name ?? '-',
-                'From Branch'  => $t->from_branch_name ?? '-',
-                'To Branch'    => $t->to_branch_name ?? '-',
+
+                'From Branch'  => $t->from_branch->name
+                    ?? $t->from_branch_name
+                    ?? '-',
+
+                'To Branch'    => $t->branch->name
+                    ?? $t->to_branch_name
+                    ?? '-',
+
                 'Quantity'     => $t->quantity,
                 'Status'       => ucfirst($t->status),
                 'Requested By' => $t->requester->name ?? '-',

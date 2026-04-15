@@ -185,9 +185,23 @@
         @foreach($transfers as $index => $t)
         <tr>
             <td class="center">{{ $index + 1 }}</td>
+
             <td>{{ $t->product->name ?? '-' }}</td>
-            <td>{{ $t->from_branch_name ?? '-' }}</td>
-            <td>{{ $t->to_branch_name ?? '-' }}</td>
+
+            <td>
+                {{ optional($t->from_branch)->name 
+                    ?? $t->from_branch_name 
+                    ?? $t->from_branch_id
+                    ?? '-' }}
+            </td>
+
+            <td>
+                {{ optional($t->branch)->name 
+                    ?? $t->to_branch_name 
+                    ?? $t->branch_id
+                    ?? '-' }}
+            </td>
+
             <td class="center">{{ $t->quantity }}</td>
             <td class="center">{{ strtoupper($t->status) }}</td>
             <td>{{ $t->requester->name ?? '-' }}</td>
