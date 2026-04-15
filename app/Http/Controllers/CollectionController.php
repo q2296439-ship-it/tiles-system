@@ -467,14 +467,15 @@ return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
         }
     }
 
-    
+
     // ==========================
 // 🔓 MANAGER REQUEST ACCESS
 // ==========================
 public function requestAccess()
 {
-    $closedDates = \App\Models\Deposit::with('branch')
-        ->latest()
+    $closedDates = \App\Models\Deposit::leftJoin('branches', 'deposits.branch_id', '=', 'branches.id')
+        ->select('deposits.*', 'branches.name as branch_name')
+        ->latest('deposits.id')
         ->paginate(10);
 
     return view('manager.request-access', compact('closedDates'));
