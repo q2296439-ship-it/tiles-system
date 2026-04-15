@@ -654,7 +654,8 @@ public function managerCollection(Request $request)
     $selectedDate = $request->date ?? date('Y-m-d');
     $status = $request->status ?? 'all';
 
-    $branchId = auth()->user()->branch_id;
+    $manager = auth()->user();
+    $branchId = $manager->branch_id ?: 1;
 
     $collections = Collection::with(['user', 'items', 'branch'])
         ->whereDate('receipt_date', $selectedDate)
@@ -718,4 +719,5 @@ public function managerCollection(Request $request)
         'status'
     ));
 }
+
 }
