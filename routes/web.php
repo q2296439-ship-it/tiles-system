@@ -156,6 +156,11 @@ Route::get('/manager/transfer-in', [InventoryController::class, 'transferInAdmin
     ->middleware('auth')
     ->name('manager.transfer.in');
 
+// ✅ TRANSFER OUT MANAGER
+Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutAdmin'])
+    ->middleware('auth')
+    ->name('manager.transfer.out');
+
 
 // =====================
 // ADMIN GROUP
