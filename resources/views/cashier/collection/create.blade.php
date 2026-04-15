@@ -94,6 +94,11 @@ th{
 .btn-blue{ background:#2563eb; color:#fff; }
 .btn-green{ background:#16a34a; color:#fff; }
 .btn-red{ background:#dc2626; color:#fff; }
+.btn-disabled{
+    background:#9ca3af !important;
+    color:#fff !important;
+    cursor:not-allowed !important;
+}
 
 .actions{
     display:flex;
@@ -161,6 +166,14 @@ th{
     margin-bottom:15px;
     font-weight:600;
 }
+.alert-warning{
+    background:#fef3c7;
+    color:#92400e;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:15px;
+    font-weight:700;
+}
 .small-input{
     width:110px;
     padding:6px 8px;
@@ -168,6 +181,12 @@ th{
     border-radius:6px;
 }
 </style>
+
+@php
+$todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
+    ->where('branch_id', auth()->user()->branch_id)
+    ->exists();
+@endphp
 
 <div class="page">
 <div class="receipt-card">
@@ -188,6 +207,12 @@ th{
     @foreach ($errors->all() as $error)
         <div>{{ $error }}</div>
     @endforeach
+</div>
+@endif
+
+@if($todayClosed)
+<div class="alert-warning">
+    🔒 Today's transaction is already deposited and closed. Saving new receipt is disabled.
 </div>
 @endif
 
@@ -296,7 +321,10 @@ th{
 </div>
 
 <div class="actions" style="justify-content:flex-end;">
-    <button type="submit" class="btn btn-green" style="min-width:180px;">
+    <button type="submit"
+        class="btn {{ $todayClosed ? 'btn-disabled' : 'btn-green' }}"
+        style="min-width:180px;"
+        {{ $todayClosed ? 'disabled' : '' }}>
         💾 Save Receipt
     </button>
 </div>
@@ -382,10 +410,6 @@ function computeAll(){
     document.getElementById('hiddenDiscountType').value = type;
     document.getElementById('totalAmount').value = grand.toFixed(2);
 }
-
-document.querySelector('form').addEventListener('submit', function(){
-    console.log('Form submitting...');
-});
 
 computeAll();
 </script>

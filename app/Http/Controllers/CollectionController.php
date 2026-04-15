@@ -218,7 +218,6 @@ class CollectionController extends Controller
         ));
     }
 
-    // ✅ FIXED: ISA LANG ANG DEPOSIT METHOD
     public function deposit(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
@@ -326,6 +325,17 @@ class CollectionController extends Controller
                 'receipt_date' => 'required|date',
                 'items'        => 'required|array|min:1',
             ]);
+
+            // ✅ NEW LOCK: bawal magsave kapag closed na deposit date
+            $isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
+                ->where('branch_id', auth()->user()->branch_id)
+                ->exists();
+
+            if ($isClosed) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'This date is already deposited and closed. Saving is disabled.');
+            }
 
             DB::transaction(function () use ($request) {
 
