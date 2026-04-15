@@ -231,20 +231,54 @@ public function transferInStore(Request $request)
     }
 }
 
-    // =====================
+   // =====================
 // 🔥 ADMIN TRANSFER OUT
 // =====================
 public function transferOutAdmin(Request $request)
 {
-    $transfers = StockMovement::with([
+    $query = StockMovement::with([
         'product',
         'branch',
         'from_branch',
         'requester',
         'approver'
     ])
-    ->latest()
-    ->paginate(10);
+    ->where('type', 'IN_REQUEST');
+
+    // 🔍 SEARCH
+    if ($request->search) {
+        $query->whereHas('product', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    // 📌 STATUS FILTER
+    if ($request->status) {
+        $query->where('status', $request->status);
+    }
+
+    // 📊 EXPORT EXCEL
+    if ($request->export == 'excel') {
+        return Excel::download(
+            new TransferOutExport($request->search, $request->status),
+            'transfer-out-report.xlsx'
+        );
+    }
+
+    // 📄 EXPORT PDF
+    if ($request->export == 'pdf') {
+        $transfers = $query->latest()->get();
+
+        $pdf = Pdf::loadView(
+            'admin.inventory.transfer-out-pdf',
+            compact('transfers')
+        );
+
+        return $pdf->stream('transfer-out-report.pdf');
+    }
+
+    // 📃 NORMAL VIEW
+    $transfers = $query->latest()->paginate(10)->withQueryString();
 
     return view('admin.inventory.transfer-out', compact('transfers'));
 }
