@@ -132,7 +132,6 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // =====================
 Route::get('/manager', [InventoryController::class, 'managerDashboard'])->middleware('auth');
 Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->middleware('auth');
-
 Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutManager'])->middleware('auth');
 Route::post('/manager/release/{id}', [InventoryController::class, 'release'])->middleware('auth');
 
@@ -146,7 +145,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::get('/inventory', [InventoryController::class, 'overviewStock']);
-
     Route::get('/inventory/export/excel', [InventoryController::class, 'exportExcel']);
     Route::get('/inventory/export/pdf', [InventoryController::class, 'exportPdf']);
 
@@ -261,7 +259,7 @@ Route::prefix('cashier')->group(function () {
 
     Route::post('/collection-cancel', [CollectionController::class, 'cancelStore'])
         ->name('cashier.collection.cancel.store');
-    
+
     Route::get('/return-receipt', [CollectionController::class, 'returnForm'])
         ->name('cashier.return.create');
 
@@ -274,7 +272,6 @@ Route::prefix('cashier')->group(function () {
     Route::post('/deposit', [CollectionController::class, 'depositStore'])
         ->name('cashier.deposit.store');
 
-    // ✅ NEW CHANGE PASSWORD ROUTES
     Route::get('/change-password', [AuthController::class, 'showChangePassword'])
         ->name('cashier.password');
 

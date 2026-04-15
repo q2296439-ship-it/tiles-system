@@ -1,6 +1,10 @@
-@extends('layouts.cashier')
+@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.cashier')
 
 @section('content')
+
+@php
+    $isAdmin = strtolower(auth()->user()->role) === 'admin';
+@endphp
 
 <style>
 .page{
@@ -220,6 +224,11 @@ th{
                     <th>#</th>
                     <th>Receipt No</th>
                     <th>Date</th>
+
+                    @if($isAdmin)
+                        <th>Branch</th>
+                    @endif
+
                     <th>Customer</th>
                     <th>Products</th>
                     <th>Qty</th>
@@ -249,6 +258,11 @@ th{
                     </td>
 
                     <td>{{ \Carbon\Carbon::parse($row->receipt_date)->format('M d, Y') }}</td>
+
+                    @if($isAdmin)
+                        <td>{{ $row->branch->name ?? '-' }}</td>
+                    @endif
+
                     <td>{{ $row->customer_name }}</td>
 
                     <td>
@@ -282,7 +296,7 @@ th{
 
             @empty
                 <tr>
-                    <td colspan="10" class="empty">No collection found.</td>
+                    <td colspan="{{ $isAdmin ? '11' : '10' }}" class="empty">No collection found.</td>
                 </tr>
             @endforelse
             </tbody>
