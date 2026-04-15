@@ -151,6 +151,10 @@ Route::get('/manager/inventory-report', [InventoryController::class, 'overviewSt
 Route::get('/manager/add-stock', [InventoryController::class, 'create'])->middleware('auth')->name('manager.add.stock');
 Route::post('/manager/add-stock', [InventoryController::class, 'store'])->middleware('auth')->name('manager.add.stock.store');
 
+// ✅ TRANSFER IN MANAGER
+Route::get('/manager/transfer-in', [InventoryController::class, 'transferInForm'])->middleware('auth')->name('manager.transfer.in');
+Route::post('/manager/transfer-in', [InventoryController::class, 'transferInStore'])->middleware('auth')->name('manager.transfer.in.store');
+
 
 // =====================
 // ADMIN GROUP
