@@ -199,9 +199,12 @@ textarea{
                class="btn btn-green">📗 Excel</a>
 
             <a href="{{ auth()->user()->role === 'manager'
-                ? route('manager.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')])
-                : route('cashier.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
-               class="btn btn-red">📄 PDF</a>
+    ? route('manager.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')])
+    : route('cashier.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
+   class="btn btn-red"
+   target="_blank">
+   📄 PDF
+</a>
 
             @if($isCashier)
             <button type="button" class="btn btn-dark" onclick="toggleDeposit()">

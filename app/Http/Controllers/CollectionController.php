@@ -538,23 +538,34 @@ public function depositStore(Request $request)
     $variance = $actual - $net;
 
     \App\Models\Deposit::updateOrCreate(
-        [
-            'deposit_date' => $date,
-            'branch_id' => $branchId,
-        ],
-        [
-            'gross_amount' => $rows->sum('gross_amount'),
-            'discount_amount' => $rows->sum('discount_amount'),
-            'net_amount' => $net,
-            'actual_amount' => $actual,
-            'variance' => $variance,
-            'user_id' => auth()->id(),
-        ]
-    );
+    [
+        'deposit_date' => $date,
+        'branch_id' => $branchId,
+    ],
+    [
+        'gross_amount' => $rows->sum('gross_amount'),
+        'discount_amount' => $rows->sum('discount_amount'),
+        'net_amount' => $net,
+        'actual_amount' => $actual,
+        'variance' => $variance,
+        'user_id' => auth()->id(),
 
-    return redirect()
-        ->route('cashier.deposit')
-        ->with('success', 'Deposit saved successfully.');
+        'denom_1000' => $request->denom_1000 ?? 0,
+        'denom_500'  => $request->denom_500 ?? 0,
+        'denom_200'  => $request->denom_200 ?? 0,
+        'denom_100'  => $request->denom_100 ?? 0,
+        'denom_50'   => $request->denom_50 ?? 0,
+        'denom_20'   => $request->denom_20 ?? 0,
+        'coin_10'    => $request->coin_10 ?? 0,
+        'coin_5'     => $request->coin_5 ?? 0,
+        'coin_1'     => $request->coin_1 ?? 0,
+        'remarks'    => $request->remarks,
+    ]
+);
+
+return redirect()
+    ->route('cashier.deposit')
+    ->with('success', 'Deposit saved successfully.');
 }
 
 // ==========================
