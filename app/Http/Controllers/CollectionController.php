@@ -412,29 +412,4 @@ public function store(Request $request)
             ->with('error', $e->getMessage());
     }
 }
-public function deposit(Request $request)
-{
-    $selectedDate = $request->date ?? date('Y-m-d');
-    $branchId = auth()->user()->branch_id;
-
-    $rows = Collection::whereDate('receipt_date', $selectedDate)
-        ->where('branch_id', $branchId)
-        ->where('status', 'saved')
-        ->get();
-
-    $gross = $rows->sum('gross_amount');
-    $discount = $rows->sum('discount_amount');
-    $net = $rows->sum('net_amount');
-
-    $actual = $net;
-    $variance = $actual - $net;
-
-    return view('cashier.deposit.index', compact(
-        'gross',
-        'discount',
-        'net',
-        'actual',
-        'variance',
-        'selectedDate'
-    ));
 }
