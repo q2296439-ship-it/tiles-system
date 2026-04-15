@@ -65,6 +65,51 @@
             min-height: 100vh;
         }
 
+        .topbar {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .topbar h1 {
+            margin: 0;
+            font-size: 32px;
+            color: #0f172a;
+        }
+
+        .topbar p {
+            margin: 6px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .user-card {
+            background: #f8fafc;
+            padding: 12px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
         hr {
             border: none;
             border-top: 1px solid #334155;
@@ -87,8 +132,7 @@
     {{-- OPERATIONS --}}
     <p>OPERATIONS</p>
 
-    <!-- ✅ FIXED NA -->
-    <a href="/manager/approvals" 
+    <a href="/manager/approvals"
        class="{{ request()->is('manager/approvals') ? 'active' : '' }}">
         🧾 Approvals
     </a>
@@ -144,6 +188,27 @@
 </div>
 
 <div class="content">
+
+    <div class="topbar">
+        <div>
+            <h1>Manager Workspace</h1>
+            <p>Manage approvals, sales, inventory and transfers</p>
+        </div>
+
+        <div class="user-card">
+            <div class="avatar">
+                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+            </div>
+
+            <div>
+                <div style="font-weight:700;">
+                    {{ auth()->user()->name }}
+                </div>
+                <small style="color:#64748b;">Manager</small>
+            </div>
+        </div>
+    </div>
+
     @yield('content')
 </div>
 
