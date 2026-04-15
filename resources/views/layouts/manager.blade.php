@@ -197,7 +197,7 @@
         🔑 Change Password
     </a>
 
-    <form method="POST" action="{{ route('logout') }}">
+    <form method="POST" action="/logout">
         @csrf
         <button type="submit" class="logout-btn">
             🚪 Logout
