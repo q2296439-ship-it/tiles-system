@@ -18,7 +18,7 @@ class ProductController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
+        if (in_array($user->role, ['admin', 'manager'])) {
             $products = Product::with('branch')
                 ->latest()
                 ->paginate(10);
