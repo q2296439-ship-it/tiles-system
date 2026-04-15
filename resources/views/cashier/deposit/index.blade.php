@@ -193,25 +193,22 @@ textarea{
 
             <button class="btn btn-blue">Generate</button>
 
-           <a href="{{ auth()->user()->role === 'manager'
-    ? route('manager.deposit.excel', ['date' => request('date'), 'branch_id' => request('branch_id')])
-    : route('cashier.deposit.excel', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
-   class="btn btn-green">
-   📗 Excel
-</a>
+            <a href="{{ auth()->user()->role === 'manager'
+                ? route('manager.deposit.excel', ['date' => request('date'), 'branch_id' => request('branch_id')])
+                : route('cashier.deposit.excel', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
+               class="btn btn-green">📗 Excel</a>
 
-<a href="{{ auth()->user()->role === 'manager'
-    ? route('manager.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')])
-    : route('cashier.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
-   class="btn btn-red">
-   📄 PDF
-</a>
+            <a href="{{ auth()->user()->role === 'manager'
+                ? route('manager.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')])
+                : route('cashier.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
+               class="btn btn-red">📄 PDF</a>
 
             @if($isCashier)
             <button type="button" class="btn btn-dark" onclick="toggleDeposit()">
                 ➕ Deposit
             </button>
             @endif
+
         </form>
 
     </div>
@@ -347,15 +344,20 @@ textarea{
 </div>
 
 <script>
-function toggleDeposit(){
+function toggleDeposit() {
     let panel = document.getElementById('depositPanel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+
+    if (getComputedStyle(panel).display === 'none') {
+        panel.style.display = 'block';
+    } else {
+        panel.style.display = 'none';
+    }
 }
 
 function computeDeposit(){
     let total = 0;
 
-    document.querySelectorAll('.denom').forEach(input=>{
+    document.querySelectorAll('.denom').forEach(input => {
         let qty = parseFloat(input.value) || 0;
         let val = parseFloat(input.dataset.val) || 0;
         let line = qty * val;
