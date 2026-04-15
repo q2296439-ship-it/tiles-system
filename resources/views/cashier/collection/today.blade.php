@@ -195,11 +195,15 @@ th{
             <a href="{{ route('cashier.collection.export.excel', ['date' => request('date'),'status' => request('status')]) }}"
                class="btn btn-green">📗 Excel</a>
 
-            <a href="{{ route('cashier.collection.export.pdf', ['date' => request('date'),'status' => request('status')]) }}"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="btn btn-red">📄 PDF</a>
-
+            <a href="{{ strtolower(auth()->user()->role) === 'admin'
+        ? route('admin.collection.export.pdf', ['date' => request('date'),'status' => request('status')])
+        : (strtolower(auth()->user()->role) === 'manager'
+            ? route('manager.collection.export.pdf', ['date' => request('date'),'status' => request('status')])
+            : route('cashier.collection.export.pdf', ['date' => request('date'),'status' => request('status')]) }}"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="btn btn-red">📄 PDF</a>
+   
         </div>
 
     </div>
