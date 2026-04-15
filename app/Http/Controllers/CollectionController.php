@@ -412,4 +412,37 @@ public function store(Request $request)
             ->with('error', $e->getMessage());
     }
 }
+public function depositStore(Request $request)
+{
+    \App\Models\Deposit::updateOrCreate(
+        [
+            'deposit_date' => $request->deposit_date,
+            'branch_id' => auth()->user()->branch_id,
+        ],
+        [
+            'user_id' => auth()->id(),
+
+            'expected_amount' => $request->expected_amount,
+            'actual_amount'   => $request->actual_amount,
+            'variance'        => $request->variance,
+
+            'denom_1000' => $request->denom_1000 ?? 0,
+            'denom_500'  => $request->denom_500 ?? 0,
+            'denom_200'  => $request->denom_200 ?? 0,
+            'denom_100'  => $request->denom_100 ?? 0,
+            'denom_50'   => $request->denom_50 ?? 0,
+            'denom_20'   => $request->denom_20 ?? 0,
+
+            'coin_10' => $request->coin_10 ?? 0,
+            'coin_5'  => $request->coin_5 ?? 0,
+            'coin_1'  => $request->coin_1 ?? 0,
+
+            'remarks' => $request->remarks,
+        ]
+    );
+
+    return redirect()
+        ->route('cashier.deposit', ['date' => $request->deposit_date])
+        ->with('success', 'Deposit saved successfully!');
+}
 }

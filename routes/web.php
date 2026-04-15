@@ -268,6 +268,9 @@ Route::prefix('cashier')->group(function () {
 
     Route::get('/deposit', [CollectionController::class, 'deposit'])
     ->name('cashier.deposit');
+
+    Route::post('/deposit', [CollectionController::class, 'depositStore'])
+    ->name('cashier.deposit.store');
 });
 
 
