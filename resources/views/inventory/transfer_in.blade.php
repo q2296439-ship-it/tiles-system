@@ -89,7 +89,7 @@ $layout = match(auth()->user()->role) {
         </div>
     @endif
 
-    <form method="POST" action="{{ route('inventory.transfer.store') }}">
+    <form method="POST" action="/cashier/transfer-in">
         @csrf
 
         {{-- PRODUCT --}}
