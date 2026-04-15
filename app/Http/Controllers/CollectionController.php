@@ -11,6 +11,7 @@ use App\Models\SaleItem;
 use App\Models\ReturnModel;
 use App\Models\ReturnItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\CollectionExport;
@@ -151,8 +152,8 @@ class CollectionController extends Controller
     public function today(Request $request)
     {
         $selectedDate = $request->date ?? date('Y-m-d');
-        $status = $request->status ?? 'all';
-        $branchId = auth()->user()->branch_id;
+        $status       = $request->status ?? 'all';
+        $branchId     = auth()->user()->branch_id;
 
         $collections = Collection::with(['user', 'items'])
             ->whereDate('receipt_date', $selectedDate)
@@ -164,51 +165,68 @@ class CollectionController extends Controller
             });
 
         $returns = ReturnModel::with(['user', 'items'])
-    ->whereDate('return_date', $selectedDate)
-    ->where('branch_id', $branchId)
-    ->get()
-    ->map(function ($row) {
-        $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
-        $row->receipt_date = $row->return_date;
-        $row->status = 'returned';
-        $row->record_type = 'returned';
-        return $row;
-   });
+            ->whereDate('return_date', $selectedDate)
+            ->where('branch_id', $branchId)
+            ->get()
+            ->map(function ($row) {
+                $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
+                $row->receipt_date = $row->return_date;
+                $row->status = 'returned';
+                $row->record_type = 'returned';
+                return $row;
+            });
 
-$records = $collections->concat($returns);
+        $records = $collections->concat($returns);
 
-if ($status != 'all') {
-    $records = $records->where('record_type', $status);
-}
+        if ($status != 'all') {
+            $records = $records->where('record_type', $status);
+        }
 
-$collections = $records->sortByDesc('created_at')->values();
+        $records = $records->sortByDesc('created_at')->values();
 
-if ($status == 'returned') {
+        // TOTAL
+        if ($status == 'returned') {
 
-    $total = -1 * $collections->sum('total_amount');
+            $total = -1 * $records->sum('total_amount');
 
-} elseif ($status == 'cancelled') {
+        } elseif ($status == 'cancelled') {
 
-    $total = 0;
+            $total = 0;
 
-} elseif ($status == 'saved') {
+        } elseif ($status == 'saved') {
 
-    $total = $collections->sum('total_amount');
+            $total = $records->sum('total_amount');
 
-} else {
+        } else {
 
-    $savedTotal  = $collections->where('record_type', 'saved')->sum('total_amount');
-    $returnTotal = $collections->where('record_type', 'returned')->sum('total_amount');
+            $savedTotal  = $records->where('record_type', 'saved')->sum('total_amount');
+            $returnTotal = $records->where('record_type', 'returned')->sum('total_amount');
 
-    $total = $savedTotal - $returnTotal;
-}
+            $total = $savedTotal - $returnTotal;
+        }
 
-return view('cashier.collection.today', compact(
-    'collections',
-    'total',
-    'selectedDate'
-));
-}
+        // PAGINATION 10 ONLY
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 10;
+
+        $collections = new LengthAwarePaginator(
+            $records->forPage($page, $perPage)->values(),
+            $records->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        return view('cashier.collection.today', compact(
+            'collections',
+            'total',
+            'selectedDate',
+            'status'
+        ));
+    }
 
     public function exportPdf(Request $request)
     {
@@ -230,6 +248,7 @@ return view('cashier.collection.today', compact(
             ->where('branch_id', $branchId)
             ->get()
             ->map(function ($row) {
+                $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
                 $row->receipt_date = $row->return_date;
                 $row->status = 'returned';
                 $row->record_type = 'returned';
@@ -246,10 +265,11 @@ return view('cashier.collection.today', compact(
 
         $pdf = Pdf::loadView('cashier.collection.pdf', compact(
             'collections',
-            'selectedDate'
+            'selectedDate',
+            'status'
         ))->setPaper('a4', 'landscape');
 
-        return $pdf->stream('collection_report_'.$selectedDate.'.pdf');
+        return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
     }
 
     public function exportExcel(Request $request)
@@ -263,7 +283,7 @@ return view('cashier.collection.today', compact(
                 auth()->user()->branch_id,
                 $status
             ),
-            'collection_report_'.$selectedDate.'.xlsx'
+            'collection_report_' . $selectedDate . '.xlsx'
         );
     }
 

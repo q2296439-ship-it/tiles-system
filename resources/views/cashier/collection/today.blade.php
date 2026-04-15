@@ -124,6 +124,30 @@ th{
     font-size:12px;
     font-weight:700;
 }
+.pagination-wrap{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+}
+.pagination-wrap nav{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+}
+.pagination-wrap span,
+.pagination-wrap a{
+    padding:8px 12px;
+    border-radius:10px;
+    border:1px solid #e5e7eb;
+    text-decoration:none;
+    color:#0f172a;
+    font-size:14px;
+}
+.pagination-wrap .active span{
+    background:#2563eb;
+    color:#fff;
+    border-color:#2563eb;
+}
 </style>
 
 <div class="page">
@@ -139,28 +163,17 @@ th{
         <div class="right-tools">
 
             <form method="GET" action="" style="display:flex; gap:10px; flex-wrap:wrap;">
-                
+
                 <input type="date"
                        name="date"
                        class="date-input"
                        value="{{ request('date', date('Y-m-d')) }}">
 
-                <select name="status" id="statusFilter" class="select-filter">
-                    <option value="all" {{ request('status') == 'all' || request('status') == null ? 'selected' : '' }}>
-                        All Status
-                    </option>
-
-                    <option value="saved" {{ request('status') == 'saved' ? 'selected' : '' }}>
-                        Saved
-                    </option>
-
-                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
-                        Cancelled
-                    </option>
-
-                    <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>
-                        Returned
-                    </option>
+                <select name="status" class="select-filter">
+                    <option value="all" {{ request('status') == 'all' || request('status') == null ? 'selected' : '' }}>All Status</option>
+                    <option value="saved" {{ request('status') == 'saved' ? 'selected' : '' }}>Saved</option>
+                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Returned</option>
                 </select>
 
                 <button type="submit" class="btn btn-blue">Filter</button>
@@ -169,23 +182,13 @@ th{
             <input type="text" id="searchInput" class="search"
                    placeholder="🔍 Search customer / receipt no...">
 
-            <a href="{{ route('cashier.collection.export.excel', [
-                'date' => request('date'),
-                'status' => request('status')
-            ]) }}"
-               class="btn btn-green">
-               📗 Excel
-            </a>
+            <a href="{{ route('cashier.collection.export.excel', ['date' => request('date'),'status' => request('status')]) }}"
+               class="btn btn-green">📗 Excel</a>
 
-            <a href="{{ route('cashier.collection.export.pdf', [
-                'date' => request('date'),
-                'status' => request('status')
-            ]) }}"
+            <a href="{{ route('cashier.collection.export.pdf', ['date' => request('date'),'status' => request('status')]) }}"
                target="_blank"
                rel="noopener noreferrer"
-               class="btn btn-red">
-               📄 PDF
-            </a>
+               class="btn btn-red">📄 PDF</a>
 
         </div>
 
@@ -195,7 +198,7 @@ th{
 <div class="stats">
     <div class="card">
         <div class="label">Total Receipts</div>
-        <div class="value">{{ $collections->count() }}</div>
+        <div class="value">{{ $collections->total() }}</div>
     </div>
 
     <div class="card">
@@ -231,24 +234,24 @@ th{
             @forelse($collections as $row)
 
                 @php
-    $status = strtolower($row->record_type ?? $row->status ?? 'saved');
-@endphp
+                    $status = strtolower($row->record_type ?? $row->status ?? 'saved');
+                @endphp
 
-<tr data-status="{{ strtolower($status) }}">
-    <td>{{ $loop->iteration }}</td>
+                <tr data-status="{{ $status }}">
+                    <td>{{ ($collections->firstItem() ?? 0) + $loop->index }}</td>
 
-    <td>
-        @if($status == 'returned')
-            {{ $row->return_no ?? $row->receipt_no }}
-        @else
-            {{ $row->display_receipt_no ?? $row->receipt_no }}
-        @endif
-    </td>
+                    <td>
+                        @if($status == 'returned')
+                            {{ $row->receipt_no }}
+                        @else
+                            {{ $row->display_receipt_no ?? $row->receipt_no }}
+                        @endif
+                    </td>
 
-    <td>{{ \Carbon\Carbon::parse($row->receipt_date)->format('M d, Y') }}</td>
-    <td>{{ $row->customer_name }}</td>
+                    <td>{{ \Carbon\Carbon::parse($row->receipt_date)->format('M d, Y') }}</td>
+                    <td>{{ $row->customer_name }}</td>
 
-    <td>
+                    <td>
                         @foreach($row->items as $item)
                             <div class="item-line">{{ $item->description }}</div>
                         @endforeach
@@ -285,6 +288,12 @@ th{
             </tbody>
         </table>
     </div>
+
+    @if($collections->hasPages())
+        <div class="pagination-wrap">
+            {{ $collections->links() }}
+        </div>
+    @endif
 
 </div>
 
