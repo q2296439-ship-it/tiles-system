@@ -27,35 +27,43 @@ body{
     font-size:13px;
     margin-top:3px;
 }
-.row{
+.info-table{
     width:100%;
-    margin-bottom:8px;
+    border:none;
+    margin-bottom:12px;
 }
-.label{
-    display:inline-block;
-    width:120px;
-    font-weight:bold;
+.info-table td{
+    border:none;
+    padding:4px 0;
+    text-align:left;
+    vertical-align:middle;
 }
-.line{
+.field-line{
     display:inline-block;
     border-bottom:1px solid #000;
-    width:220px;
-    padding:2px 4px;
+    min-width:220px;
+    padding:2px 6px;
 }
-table{
+.field-line.small{
+    min-width:170px;
+}
+table.main{
     width:100%;
     border-collapse:collapse;
-    margin-top:15px;
+    margin-top:12px;
 }
-th,td{
+table.main th,
+table.main td{
     border:1px solid #000;
     padding:6px;
     text-align:center;
 }
-th{
+table.main th{
     background:#f2f2f2;
 }
-.right{text-align:right;}
+.right{
+    text-align:right !important;
+}
 .total-box{
     margin-top:15px;
     text-align:right;
@@ -94,20 +102,26 @@ th{
         <div class="sub">CASH DEPOSIT SLIP</div>
     </div>
 
-    <div class="row">
-        <span class="label">Branch:</span>
-        <span class="line">{{ $row->branch_name ?? '-' }}</span>
+    <table class="info-table">
+        <tr>
+            <td width="60%">
+                <strong>Branch:</strong>
+                <span class="field-line">{{ $row->branch_name ?? '-' }}</span>
+            </td>
+            <td width="40%">
+                <strong>Date:</strong>
+                <span class="field-line small">{{ $row->deposit_date }}</span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <strong>Deposited By:</strong>
+                <span class="field-line">{{ auth()->user()->name }}</span>
+            </td>
+        </tr>
+    </table>
 
-        <span class="label" style="margin-left:30px;">Date:</span>
-        <span class="line">{{ $row->deposit_date }}</span>
-    </div>
-
-    <div class="row">
-        <span class="label">Deposited By:</span>
-        <span class="line">{{ auth()->user()->name }}</span>
-    </div>
-
-    <table>
+    <table class="main">
         <thead>
             <tr>
                 <th>Denomination</th>
@@ -129,7 +143,7 @@ th{
     </table>
 
     <div class="total-box">
-        TOTAL CASH DEPOSIT: ₱{{ number_format($row->actual_amount,2) }}
+        TOTAL CASH DEPOSIT: PHP {{ number_format($row->actual_amount,2) }}
     </div>
 
     <div class="signatures">
@@ -143,7 +157,7 @@ th{
     </div>
 
     <div class="note">
-        Variance: ₱{{ number_format($row->variance,2) }}
+        Variance: PHP {{ number_format($row->variance,2) }}
     </div>
 
 </div>
