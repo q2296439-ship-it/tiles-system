@@ -246,7 +246,7 @@ public function transferOutAdmin(Request $request)
     ->latest()
     ->paginate(10);
 
-    return view('admin.inventory.transfer-out', compact('transfers'));
+    return view('inventory.transfer_out', compact('transfers'));
 }
 
    // =====================
@@ -297,7 +297,7 @@ public function transferInAdmin(Request $request)
     // 📃 NORMAL VIEW
     $transfers = $query->latest()->paginate(10)->withQueryString();
 
-    return view('admin.inventory.transfer-in', compact('transfers'));
+    return view('inventory.transfer_in', compact('transfers'));
 }
 
     // =====================
