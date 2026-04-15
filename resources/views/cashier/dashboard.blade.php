@@ -13,8 +13,8 @@
     }
 
     .title{
-        font-size:28px;
-        font-weight:700;
+        font-size:30px;
+        font-weight:800;
         color:#0f172a;
     }
 
@@ -32,9 +32,9 @@
     }
 
     .card-box{
-        background:linear-gradient(135deg,#ffffff,#f8fafc);
+        background:#ffffff;
         border-radius:18px;
-        padding:20px;
+        padding:22px;
         box-shadow:0 8px 20px rgba(0,0,0,0.05);
         border:1px solid #eef2f7;
     }
@@ -42,44 +42,19 @@
     .card-label{
         font-size:13px;
         color:#64748b;
-        margin-bottom:8px;
+        margin-bottom:10px;
     }
 
     .card-value{
-        font-size:28px;
-        font-weight:700;
+        font-size:30px;
+        font-weight:800;
         color:#0f172a;
     }
 
-    .actions{
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-        gap:18px;
-        margin-bottom:20px;
-    }
-
-    .action-btn{
-        display:block;
-        text-decoration:none;
-        background:#22c55e;
-        color:#fff;
-        padding:16px;
-        border-radius:16px;
-        font-weight:700;
-        text-align:center;
-        transition:.2s;
-    }
-
-    .action-btn:hover{
-        transform:translateY(-3px);
-        background:#16a34a;
-    }
-
-    .grid-2{
-        display:grid;
-        grid-template-columns:2fr 1fr;
-        gap:18px;
-    }
+    .green{ color:#16a34a; }
+    .blue{ color:#2563eb; }
+    .orange{ color:#ea580c; }
+    .red{ color:#dc2626; }
 
     .panel{
         background:#fff;
@@ -87,6 +62,7 @@
         padding:20px;
         box-shadow:0 8px 20px rgba(0,0,0,0.05);
         border:1px solid #eef2f7;
+        margin-bottom:20px;
     }
 
     .panel h3{
@@ -127,7 +103,7 @@
     }
 
     @media(max-width:900px){
-        .grid-2{
+        .cards{
             grid-template-columns:1fr;
         }
     }
@@ -135,7 +111,7 @@
 
 <div class="topbar">
     <div>
-        <div class="title">📊 Cashier Main Dashboard</div>
+        <div class="title">📊 Cashier Dashboard</div>
         <div class="subtitle">
             Welcome back, {{ auth()->user()->username }}
         </div>
@@ -150,109 +126,84 @@
 
     <div class="card-box">
         <div class="card-label">Today Sales</div>
-        <div class="card-value">₱{{ number_format($todaySales,2) }}</div>
+        <div class="card-value green">₱{{ number_format($todaySales,2) }}</div>
     </div>
 
     <div class="card-box">
         <div class="card-label">Receipts Today</div>
-        <div class="card-value">{{ $receiptCount }}</div>
+        <div class="card-value blue">{{ $receiptCount }}</div>
     </div>
 
     <div class="card-box">
-        <div class="card-label">Products</div>
-        <div class="card-value">{{ $products->count() }}</div>
+        <div class="card-label">Available Products</div>
+        <div class="card-value orange">{{ $products->count() }}</div>
     </div>
 
     <div class="card-box">
-        <div class="card-label">Low Stocks</div>
-        <div class="card-value">{{ $lowStocks->count() }}</div>
+        <div class="card-label">Low Stock Alerts</div>
+        <div class="card-value red">{{ $lowStocks->count() }}</div>
     </div>
 
 </div>
 
-<div class="actions">
+<div class="panel">
+    <h3>🕒 Recent Sales</h3>
 
-    <a href="{{ route('cashier.collection.create') }}" class="action-btn">
-        ➕ Add Collection Receipt
-    </a>
-
-    <a href="{{ route('cashier.collection.today') }}" class="action-btn">
-        🧾 Collection Today
-    </a>
-
-    <a href="{{ route('cashier.deposit') }}" class="action-btn">
-        💰 Deposit
-    </a>
-
-    <a href="{{ route('cashier.return.create') }}" class="action-btn">
-        ↩ Return Receipt
-    </a>
-
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Total</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($recentSales as $sale)
+            <tr>
+                <td>#{{ $sale->id }}</td>
+                <td>₱{{ number_format($sale->total_amount,2) }}</td>
+                <td>{{ $sale->created_at->format('M d, h:i A') }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="3" class="empty">No recent sales found.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 
-<div class="grid-2">
+<div class="panel">
+    <h3>⚠ Low Stock Items</h3>
 
-    <div class="panel">
-        <h3>🕒 Recent Sales</h3>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Total</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($recentSales as $sale)
-                <tr>
-                    <td>#{{ $sale->id }}</td>
-                    <td>₱{{ number_format($sale->total_amount,2) }}</td>
-                    <td>{{ $sale->created_at->format('M d, h:i A') }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="3" class="empty">No recent sales found.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="panel">
-        <h3>⚠ Low Stock Alerts</h3>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($lowStocks as $item)
-                <tr>
-                    <td>{{ $item->name }}</td>
-                    <td>
-                        <span class="badge-low">
-                            {{ $item->stock }}
-                        </span>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="2" class="empty">No low stock items.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($lowStocks as $item)
+            <tr>
+                <td>{{ $item->name }}</td>
+                <td>
+                    <span class="badge-low">{{ $item->stock }}</span>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="2" class="empty">No low stock items.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 
 @endsection
 
 @section('cart')
+<div></div>
 @endsection
 
 @section('scripts')
