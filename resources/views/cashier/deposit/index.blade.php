@@ -4,6 +4,8 @@ $layout = match(auth()->user()->role) {
     'manager' => 'layouts.manager',
     default => 'layouts.cashier',
 };
+
+$isCashier = auth()->user()->role === 'cashier';
 @endphp
 
 @extends($layout)
@@ -171,6 +173,19 @@ textarea{
         </div>
 
         <form method="GET" action="" class="tools">
+
+            @if(!$isCashier)
+            <select name="branch_id" class="input">
+                <option value="">All Branches</option>
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}"
+                        {{ ($selectedBranch == $branch->id) ? 'selected' : '' }}>
+                        {{ $branch->name }}
+                    </option>
+                @endforeach
+            </select>
+            @endif
+
             <input type="date"
                    name="date"
                    class="input"
@@ -181,9 +196,11 @@ textarea{
             <a href="#" class="btn btn-green">📗 Excel</a>
             <a href="#" class="btn btn-red">📄 PDF</a>
 
+            @if($isCashier)
             <button type="button" class="btn btn-dark" onclick="toggleDeposit()">
                 ➕ Deposit
             </button>
+            @endif
         </form>
 
     </div>

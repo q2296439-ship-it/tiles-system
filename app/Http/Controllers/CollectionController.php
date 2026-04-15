@@ -232,43 +232,64 @@ class CollectionController extends Controller
     }
 
     public function deposit(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $branchId = auth()->user()->branch_id;
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
 
-        $rows = Collection::whereDate('receipt_date', $selectedDate)
-            ->where('branch_id', $branchId)
-            ->where('status', 'saved')
-            ->get();
+    $user = auth()->user();
+    $role = strtolower($user->role);
 
-        $gross = $rows->sum('gross_amount');
-        $discount = $rows->sum('discount_amount');
-        $net = $rows->sum('net_amount');
+    $selectedBranch = $request->branch_id;
 
-        $deposit = \App\Models\Deposit::where('deposit_date', $selectedDate)
-            ->where('branch_id', $branchId)
-            ->first();
+    $query = Collection::whereDate('receipt_date', $selectedDate)
+        ->where('status', 'saved');
 
-        if ($deposit) {
-            $actual = $deposit->actual_amount;
-            $variance = $deposit->variance;
-            $isClosed = true;
-        } else {
-            $actual = 0;
-            $variance = 0 - $net;
-            $isClosed = false;
-        }
-
-        return view('cashier.deposit.index', compact(
-            'gross',
-            'discount',
-            'net',
-            'actual',
-            'variance',
-            'selectedDate',
-            'isClosed'
-        ));
+    if ($role === 'cashier') {
+        $query->where('branch_id', $user->branch_id);
+        $selectedBranch = $user->branch_id;
+    } elseif (!empty($selectedBranch)) {
+        $query->where('branch_id', $selectedBranch);
     }
+
+    $rows = $query->get();
+
+    $gross = $rows->sum('gross_amount');
+    $discount = $rows->sum('discount_amount');
+    $net = $rows->sum('net_amount');
+
+    $depositQuery = \App\Models\Deposit::where('deposit_date', $selectedDate);
+
+    if ($role === 'cashier') {
+        $depositQuery->where('branch_id', $user->branch_id);
+    } elseif (!empty($selectedBranch)) {
+        $depositQuery->where('branch_id', $selectedBranch);
+    }
+
+    $deposit = $depositQuery->first();
+
+    if ($deposit) {
+        $actual = $deposit->actual_amount;
+        $variance = $deposit->variance;
+        $isClosed = true;
+    } else {
+        $actual = 0;
+        $variance = 0 - $net;
+        $isClosed = false;
+    }
+
+    $branches = \App\Models\Branch::all();
+
+    return view('cashier.deposit.index', compact(
+        'gross',
+        'discount',
+        'net',
+        'actual',
+        'variance',
+        'selectedDate',
+        'isClosed',
+        'branches',
+        'selectedBranch'
+    ));
+}
 
     public function exportPdf(Request $request)
     {
