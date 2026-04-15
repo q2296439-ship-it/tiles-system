@@ -150,241 +150,265 @@ class CollectionController extends Controller
     }
 
     public function today(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $status       = $request->status ?? 'all';
-        $branchId     = auth()->user()->branch_id;
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status       = $request->status ?? 'all';
+    $branchId     = auth()->user()->branch_id;
 
-        $collections = Collection::with(['user', 'items'])
-            ->whereDate('receipt_date', $selectedDate)
-            ->where('branch_id', $branchId)
-            ->get()
-            ->map(function ($row) {
-                $row->record_type = strtolower($row->status ?? 'saved');
-                return $row;
-            });
+    $collections = Collection::with(['user', 'items'])
+        ->whereDate('receipt_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->get()
+        ->map(function ($row) {
+            $row->record_type = strtolower($row->status ?? 'saved');
+            return $row;
+        });
 
-        $returns = ReturnModel::with(['user', 'items'])
-            ->whereDate('return_date', $selectedDate)
-            ->where('branch_id', $branchId)
-            ->get()
-            ->map(function ($row) {
-                $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
-                $row->receipt_date = $row->return_date;
-                $row->status = 'returned';
-                $row->record_type = 'returned';
-                return $row;
-            });
+    $returns = ReturnModel::with(['user', 'items'])
+        ->whereDate('return_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->get()
+        ->map(function ($row) {
+            $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
+            $row->receipt_date = $row->return_date;
+            $row->status = 'returned';
+            $row->record_type = 'returned';
+            return $row;
+        });
 
-        $records = $collections->concat($returns);
+    $records = $collections->concat($returns);
 
-        if ($status != 'all') {
-            $records = $records->where('record_type', $status);
-        }
-
-        $records = $records->sortByDesc('created_at')->values();
-
-        // TOTAL
-        if ($status == 'returned') {
-
-            $total = -1 * $records->sum('total_amount');
-
-        } elseif ($status == 'cancelled') {
-
-            $total = 0;
-
-        } elseif ($status == 'saved') {
-
-            $total = $records->sum('total_amount');
-
-        } else {
-
-            $savedTotal  = $records->where('record_type', 'saved')->sum('total_amount');
-            $returnTotal = $records->where('record_type', 'returned')->sum('total_amount');
-
-            $total = $savedTotal - $returnTotal;
-        }
-
-        // PAGINATION 10 ONLY
-        $page = LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 10;
-
-        $collections = new LengthAwarePaginator(
-            $records->forPage($page, $perPage)->values(),
-            $records->count(),
-            $perPage,
-            $page,
-            [
-                'path' => request()->url(),
-                'query' => request()->query(),
-            ]
-        );
-
-        return view('cashier.collection.today', compact(
-            'collections',
-            'total',
-            'selectedDate',
-            'status'
-        ));
+    if ($status != 'all') {
+        $records = $records->where('record_type', $status);
     }
 
-    public function exportPdf(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $status = $request->status ?? 'all';
-        $branchId = auth()->user()->branch_id;
+    $records = $records->sortByDesc('created_at')->values();
 
-        $collections = Collection::with(['user', 'items'])
-            ->whereDate('receipt_date', $selectedDate)
-            ->where('branch_id', $branchId)
-            ->get()
-            ->map(function ($row) {
-                $row->record_type = strtolower($row->status ?? 'saved');
-                return $row;
-            });
+    if ($status == 'returned') {
 
-        $returns = ReturnModel::with(['user', 'items'])
-            ->whereDate('return_date', $selectedDate)
-            ->where('branch_id', $branchId)
-            ->get()
-            ->map(function ($row) {
-                $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
-                $row->receipt_date = $row->return_date;
-                $row->status = 'returned';
-                $row->record_type = 'returned';
-                return $row;
-            });
+        $total = -1 * $records->sum('total_amount');
 
-        $records = $collections->concat($returns);
+    } elseif ($status == 'cancelled') {
 
-        if ($status != 'all') {
-            $records = $records->where('record_type', $status);
-        }
+        $total = 0;
 
-        $collections = $records->sortByDesc('created_at')->values();
+    } elseif ($status == 'saved') {
 
-        $pdf = Pdf::loadView('cashier.collection.pdf', compact(
-            'collections',
-            'selectedDate',
-            'status'
-        ))->setPaper('a4', 'landscape');
+        $total = $records->sum('total_amount');
 
-        return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
+    } else {
+
+        $savedTotal  = $records->where('record_type', 'saved')->sum('total_amount');
+        $returnTotal = $records->where('record_type', 'returned')->sum('total_amount');
+
+        $total = $savedTotal - $returnTotal;
     }
 
-    public function exportExcel(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $status = $request->status ?? 'all';
+    $page = LengthAwarePaginator::resolveCurrentPage();
+    $perPage = 10;
 
-        return Excel::download(
-            new CollectionExport(
-                $selectedDate,
-                auth()->user()->branch_id,
-                $status
-            ),
-            'collection_report_' . $selectedDate . '.xlsx'
-        );
+    $collections = new LengthAwarePaginator(
+        $records->forPage($page, $perPage)->values(),
+        $records->count(),
+        $perPage,
+        $page,
+        [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]
+    );
+
+    return view('cashier.collection.today', compact(
+        'collections',
+        'total',
+        'selectedDate',
+        'status'
+    ));
+}
+
+public function deposit(Request $request)
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $branchId = auth()->user()->branch_id;
+
+    $rows = Collection::whereDate('receipt_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->where('status', 'saved')
+        ->get();
+
+    $gross = $rows->sum('gross_amount');
+    $discount = $rows->sum('discount_amount');
+    $net = $rows->sum('net_amount');
+
+    $actual = $net;
+    $variance = $actual - $net;
+
+    return view('cashier.deposit.index', compact(
+        'gross',
+        'discount',
+        'net',
+        'actual',
+        'variance',
+        'selectedDate'
+    ));
+}
+
+public function exportPdf(Request $request)
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status = $request->status ?? 'all';
+    $branchId = auth()->user()->branch_id;
+
+    $collections = Collection::with(['user', 'items'])
+        ->whereDate('receipt_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->get()
+        ->map(function ($row) {
+            $row->record_type = strtolower($row->status ?? 'saved');
+            return $row;
+        });
+
+    $returns = ReturnModel::with(['user', 'items'])
+        ->whereDate('return_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->get()
+        ->map(function ($row) {
+            $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
+            $row->receipt_date = $row->return_date;
+            $row->status = 'returned';
+            $row->record_type = 'returned';
+            return $row;
+        });
+
+    $records = $collections->concat($returns);
+
+    if ($status != 'all') {
+        $records = $records->where('record_type', $status);
     }
 
-    public function store(Request $request)
-    {
-        try {
+    $collections = $records->sortByDesc('created_at')->values();
 
-            $request->validate([
-                'receipt_no'   => 'required|unique:collections,receipt_no',
-                'receipt_date' => 'required|date',
-                'items'        => 'required|array|min:1',
+    $pdf = Pdf::loadView('cashier.collection.pdf', compact(
+        'collections',
+        'selectedDate',
+        'status'
+    ))->setPaper('a4', 'landscape');
+
+    return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
+}
+
+public function exportExcel(Request $request)
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status = $request->status ?? 'all';
+
+    return Excel::download(
+        new CollectionExport(
+            $selectedDate,
+            auth()->user()->branch_id,
+            $status
+        ),
+        'collection_report_' . $selectedDate . '.xlsx'
+    );
+}
+
+public function store(Request $request)
+{
+    try {
+
+        $request->validate([
+            'receipt_no'   => 'required|unique:collections,receipt_no',
+            'receipt_date' => 'required|date',
+            'items'        => 'required|array|min:1',
+        ]);
+
+        DB::transaction(function () use ($request) {
+
+            $branchId = auth()->user()->branch_id;
+            $userId   = auth()->id();
+
+            $gross = $request->gross_amount ?? $request->total_amount ?? 0;
+            $discount = $request->discount_amount ?? 0;
+            $net = $request->total_amount ?? 0;
+
+            $collection = Collection::create([
+                'receipt_no'      => $request->receipt_no,
+                'receipt_date'    => $request->receipt_date,
+                'customer_name'   => $request->customer_name ?? '',
+                'address'         => $request->address ?? '',
+                'terms'           => $request->terms ?? '',
+                'gross_amount'    => $gross,
+                'discount_type'   => $request->discount_type ?? null,
+                'discount_amount' => $discount,
+                'net_amount'      => $net,
+                'total_amount'    => $net,
+                'branch_id'       => $branchId,
+                'user_id'         => $userId,
+                'status'          => 'saved',
+                'cancel_reason'   => null,
             ]);
 
-            DB::transaction(function () use ($request) {
+            $sale = Sale::create([
+                'total_amount' => $request->total_amount ?? 0,
+                'branch_id'    => $branchId,
+                'user_id'      => $userId,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
 
-    $branchId = auth()->user()->branch_id;
-    $userId   = auth()->id();
+            foreach ($request->items as $item) {
 
-    $gross = $request->gross_amount ?? $request->total_amount ?? 0;
-    $discount = $request->discount_amount ?? 0;
-    $net = $request->total_amount ?? 0;
+                if (empty($item['description'])) {
+                    continue;
+                }
 
-    $collection = Collection::create([
-        'receipt_no'      => $request->receipt_no,
-        'receipt_date'    => $request->receipt_date,
-        'customer_name'   => $request->customer_name ?? '',
-        'address'         => $request->address ?? '',
-        'terms'           => $request->terms ?? '',
-        'gross_amount'    => $gross,
-        'discount_type'   => $request->discount_type ?? null,
-        'discount_amount' => $discount,
-        'net_amount'      => $net,
-        'total_amount'    => $net,
-        'branch_id'       => $branchId,
-        'user_id'         => $userId,
-        'status'          => 'saved',
-        'cancel_reason'   => null,
-    ]);
+                $qty    = (int) ($item['qty'] ?? 0);
+                $price  = (float) ($item['unit_price'] ?? 0);
+                $amount = $qty * $price;
+                $desc   = trim($item['description']);
 
-                $sale = Sale::create([
-                    'total_amount' => $request->total_amount ?? 0,
-                    'branch_id'    => $branchId,
-                    'user_id'      => $userId,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
+                CollectionItem::create([
+                    'collection_id' => $collection->id,
+                    'qty'           => $qty,
+                    'unit'          => $item['unit'] ?? '',
+                    'description'   => $desc,
+                    'unit_price'    => $price,
+                    'amount'        => $amount,
                 ]);
 
-                foreach ($request->items as $item) {
+                $product = Product::where('name', $desc)
+                    ->where('branch_id', $branchId)
+                    ->first();
 
-                    if (empty($item['description'])) {
-                        continue;
-                    }
-
-                    $qty    = (int) ($item['qty'] ?? 0);
-                    $price  = (float) ($item['unit_price'] ?? 0);
-                    $amount = $qty * $price;
-                    $desc   = trim($item['description']);
-
-                    CollectionItem::create([
-                        'collection_id' => $collection->id,
-                        'qty'           => $qty,
-                        'unit'          => $item['unit'] ?? '',
-                        'description'   => $desc,
-                        'unit_price'    => $price,
-                        'amount'        => $amount,
-                    ]);
-
-                    $product = Product::where('name', $desc)
-                        ->where('branch_id', $branchId)
-                        ->first();
-
-                    if (!$product) {
-                        throw new \Exception('Product not found: ' . $desc);
-                    }
-
-                    if ($product->stock < $qty) {
-                        throw new \Exception('Not enough stock: ' . $desc);
-                    }
-
-                    $product->stock -= $qty;
-                    $product->save();
-
-                    SaleItem::create([
-                        'sale_id'    => $sale->id,
-                        'product_id' => $product->id,
-                        'quantity'   => $qty,
-                        'price'      => $price,
-                        'subtotal'   => $amount,
-                    ]);
+                if (!$product) {
+                    throw new \Exception('Product not found: ' . $desc);
                 }
-            });
 
-            return redirect()
-                ->route('cashier.collection.create')
-                ->with('success', 'Receipt saved and reflected to sales!');
+                if ($product->stock < $qty) {
+                    throw new \Exception('Not enough stock: ' . $desc);
+                }
 
-        } catch (\Throwable $e) {
+                $product->stock -= $qty;
+                $product->save();
 
-            return back()
-                ->withInput()
-                ->with('error', $e->getMessage());
-        }
+                SaleItem::create([
+                    'sale_id'    => $sale->id,
+                    'product_id' => $product->id,
+                    'quantity'   => $qty,
+                    'price'      => $price,
+                    'subtotal'   => $amount,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('cashier.collection.create')
+            ->with('success', 'Receipt saved and reflected to sales!');
+
+    } catch (\Throwable $e) {
+
+        return back()
+            ->withInput()
+            ->with('error', $e->getMessage());
     }
 }
