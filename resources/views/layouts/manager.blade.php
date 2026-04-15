@@ -153,6 +153,11 @@
         🔓 Request Access
     </a>
 
+    <a href="/manager/deposit"
+       class="{{ request()->is('manager/deposit') ? 'active' : '' }}">
+        💰 Deposit
+    </a>
+
     {{-- SALES --}}
     <p>SALES</p>
 

@@ -178,6 +178,13 @@ Route::post('/manager/request-access/open', [CollectionController::class, 'openT
     ->middleware('auth')
     ->name('manager.request.open');
 
+// ✅ MANAGER DEPOSIT
+Route::get('/manager/deposit', [CollectionController::class, 'deposit'])
+    ->middleware('auth');
+
+Route::post('/manager/deposit', [CollectionController::class, 'depositStore'])
+    ->middleware('auth');
+
 
 // =====================
 // ADMIN GROUP
