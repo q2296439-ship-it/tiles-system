@@ -202,6 +202,14 @@ Route::get('/manager/deposit/pdf', [CollectionController::class, 'depositPdf'])
     ->middleware('auth')
     ->name('manager.deposit.pdf');
 
+Route::get('/manager/request-access/excel', [CollectionController::class, 'requestAccessExcel'])
+    ->middleware('auth')
+    ->name('manager.request.access.excel');
+
+Route::get('/manager/request-access/pdf', [CollectionController::class, 'requestAccessPdf'])
+    ->middleware('auth')
+    ->name('manager.request.access.pdf');
+
 
 // =====================
 // ADMIN GROUP
