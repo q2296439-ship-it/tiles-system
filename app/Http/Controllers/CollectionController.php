@@ -153,20 +153,33 @@ class CollectionController extends Controller
     {
         $selectedDate = $request->date ?? date('Y-m-d');
         $status       = $request->status ?? 'all';
-        $branchId     = auth()->user()->branch_id;
 
-        $collections = Collection::with(['user', 'items'])
-            ->whereDate('receipt_date', $selectedDate)
-            ->where('branch_id', $branchId)
+        $user = auth()->user();
+        $isAdmin = strtolower($user->role) === 'admin';
+        $branchId = $user->branch_id;
+
+        $collections = Collection::with(['user', 'items', 'branch'])
+            ->whereDate('receipt_date', $selectedDate);
+
+        if (!$isAdmin) {
+            $collections->where('branch_id', $branchId);
+        }
+
+        $collections = $collections
             ->get()
             ->map(function ($row) {
                 $row->record_type = strtolower($row->status ?? 'saved');
                 return $row;
             });
 
-        $returns = ReturnModel::with(['user', 'items'])
-            ->whereDate('return_date', $selectedDate)
-            ->where('branch_id', $branchId)
+        $returns = ReturnModel::with(['user', 'items', 'branch'])
+            ->whereDate('return_date', $selectedDate);
+
+        if (!$isAdmin) {
+            $returns->where('branch_id', $branchId);
+        }
+
+        $returns = $returns
             ->get()
             ->map(function ($row) {
                 $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
@@ -261,20 +274,33 @@ class CollectionController extends Controller
     {
         $selectedDate = $request->date ?? date('Y-m-d');
         $status = $request->status ?? 'all';
-        $branchId = auth()->user()->branch_id;
 
-        $collections = Collection::with(['user', 'items'])
-            ->whereDate('receipt_date', $selectedDate)
-            ->where('branch_id', $branchId)
+        $user = auth()->user();
+        $isAdmin = strtolower($user->role) === 'admin';
+        $branchId = $user->branch_id;
+
+        $collections = Collection::with(['user', 'items', 'branch'])
+            ->whereDate('receipt_date', $selectedDate);
+
+        if (!$isAdmin) {
+            $collections->where('branch_id', $branchId);
+        }
+
+        $collections = $collections
             ->get()
             ->map(function ($row) {
                 $row->record_type = strtolower($row->status ?? 'saved');
                 return $row;
             });
 
-        $returns = ReturnModel::with(['user', 'items'])
-            ->whereDate('return_date', $selectedDate)
-            ->where('branch_id', $branchId)
+        $returns = ReturnModel::with(['user', 'items', 'branch'])
+            ->whereDate('return_date', $selectedDate);
+
+        if (!$isAdmin) {
+            $returns->where('branch_id', $branchId);
+        }
+
+        $returns = $returns
             ->get()
             ->map(function ($row) {
                 $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
