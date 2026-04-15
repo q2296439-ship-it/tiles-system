@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cashier POS</title>
+    <title>Cashier Dashboard</title>
 
     <style>
         *{
@@ -12,7 +12,7 @@
             margin:0;
             font-family:'Segoe UI',sans-serif;
             display:flex;
-            height:100vh;
+            min-height:100vh;
             background:#f1f5f9;
         }
 
@@ -22,7 +22,7 @@
             color:#fff;
             display:flex;
             flex-direction:column;
-            height:100vh;
+            min-height:100vh;
             box-shadow:4px 0 18px rgba(0,0,0,0.08);
             flex-shrink:0;
         }
@@ -37,7 +37,6 @@
             margin:8px 8px 22px;
             font-size:16px;
             font-weight:800;
-            letter-spacing:.3px;
         }
 
         .sidebar p{
@@ -56,7 +55,7 @@
             color:#e5e7eb;
             text-decoration:none;
             font-size:14px;
-            transition:all .2s ease;
+            transition:.2s;
         }
 
         .sidebar a:hover{
@@ -78,15 +77,6 @@
             margin:14px 8px;
         }
 
-        .sidebar-menu::-webkit-scrollbar{
-            width:6px;
-        }
-
-        .sidebar-menu::-webkit-scrollbar-thumb{
-            background:#475569;
-            border-radius:10px;
-        }
-
         .logout{
             padding:14px 16px;
         }
@@ -101,7 +91,6 @@
             font-size:14px;
             font-weight:700;
             cursor:pointer;
-            transition:.2s;
         }
 
         .logout button:hover{
@@ -113,15 +102,6 @@
             padding:20px;
             overflow-y:auto;
             min-width:0;
-        }
-
-        .content::-webkit-scrollbar{
-            width:6px;
-        }
-
-        .content::-webkit-scrollbar-thumb{
-            background:#94a3b8;
-            border-radius:10px;
         }
 
         .topbar{
@@ -181,30 +161,6 @@
             font-size:12px;
             color:#6b7280;
         }
-
-        .cart{
-            width:320px;
-            background:linear-gradient(180deg,#1e293b,#020617);
-            color:#fff;
-            padding:20px;
-            display:flex;
-            flex-direction:column;
-            overflow-y:auto;
-            flex-shrink:0;
-        }
-
-        .cart h2{
-            margin-bottom:15px;
-        }
-
-        .cart::-webkit-scrollbar{
-            width:6px;
-        }
-
-        .cart::-webkit-scrollbar-thumb{
-            background:#64748b;
-            border-radius:10px;
-        }
     </style>
 </head>
 
@@ -219,7 +175,7 @@
         <p>Main</p>
         <a href="{{ url('/cashier') }}"
            class="{{ request()->is('cashier') ? 'active' : '' }}">
-            🧾 New Sale
+            📊 Dashboard
         </a>
 
         <p>Sales</p>
@@ -305,12 +261,6 @@
     @yield('content')
 
 </div>
-
-@if(View::hasSection('cart'))
-<div class="cart">
-    @yield('cart')
-</div>
-@endif
 
 @yield('scripts')
 
