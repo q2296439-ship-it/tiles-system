@@ -54,7 +54,9 @@ class DepositExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             $query->where('deposits.branch_id', $this->branchId);
         }
 
-        $row = $query->first();
+        $row = $query->where('deposits.status', 'closed')
+            ->latest('deposits.id')
+            ->first();
 
         if (!$row) {
             return collect([]);
