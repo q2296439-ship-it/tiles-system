@@ -299,21 +299,29 @@ class CollectionController extends Controller
 
             DB::transaction(function () use ($request) {
 
-                $branchId = auth()->user()->branch_id;
-                $userId   = auth()->id();
+    $branchId = auth()->user()->branch_id;
+    $userId   = auth()->id();
 
-                $collection = Collection::create([
-                    'receipt_no'    => $request->receipt_no,
-                    'receipt_date'  => $request->receipt_date,
-                    'customer_name' => $request->customer_name ?? '',
-                    'address'       => $request->address ?? '',
-                    'terms'         => $request->terms ?? '',
-                    'total_amount'  => $request->total_amount ?? 0,
-                    'branch_id'     => $branchId,
-                    'user_id'       => $userId,
-                    'status'        => 'saved',
-                    'cancel_reason' => null,
-                ]);
+    $gross = $request->gross_amount ?? $request->total_amount ?? 0;
+    $discount = $request->discount_amount ?? 0;
+    $net = $request->total_amount ?? 0;
+
+    $collection = Collection::create([
+        'receipt_no'      => $request->receipt_no,
+        'receipt_date'    => $request->receipt_date,
+        'customer_name'   => $request->customer_name ?? '',
+        'address'         => $request->address ?? '',
+        'terms'           => $request->terms ?? '',
+        'gross_amount'    => $gross,
+        'discount_type'   => $request->discount_type ?? null,
+        'discount_amount' => $discount,
+        'net_amount'      => $net,
+        'total_amount'    => $net,
+        'branch_id'       => $branchId,
+        'user_id'         => $userId,
+        'status'          => 'saved',
+        'cancel_reason'   => null,
+    ]);
 
                 $sale = Sale::create([
                     'total_amount' => $request->total_amount ?? 0,
