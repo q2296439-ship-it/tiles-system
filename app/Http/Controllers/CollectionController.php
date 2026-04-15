@@ -493,12 +493,22 @@ return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
     // ==========================
 // 🔓 MANAGER REQUEST ACCESS
 // ==========================
-public function requestAccess()
+public function requestAccess(Request $request)
 {
-    $closedDates = \App\Models\Deposit::leftJoin('branches', 'deposits.branch_id', '=', 'branches.id')
+    $query = \App\Models\Deposit::with(['user'])
+        ->leftJoin('branches', 'deposits.branch_id', '=', 'branches.id')
         ->select('deposits.*', 'branches.name as branch_name')
-        ->latest('deposits.id')
-        ->paginate(10);
+        ->where('deposits.status', 'closed');
+
+    if ($request->date) {
+        $query->whereDate('deposits.deposit_date', $request->date);
+    }
+
+    if ($request->branch_id) {
+        $query->where('deposits.branch_id', $request->branch_id);
+    }
+
+    $closedDates = $query->latest('deposits.id')->paginate(10);
 
     return view('manager.request-access', compact('closedDates'));
 }
@@ -506,12 +516,17 @@ public function requestAccess()
 public function openTransaction(Request $request)
 {
     $request->validate([
-        'id' => 'required|exists:deposits,id'
+        'id' => 'required|exists:deposits,id',
+        'reopen_reason' => 'nullable|string|max:255'
     ]);
 
     $deposit = \App\Models\Deposit::findOrFail($request->id);
 
-    $deposit->delete();
+    $deposit->status = 'reopened';
+    $deposit->reopened_by = auth()->id();
+    $deposit->reopened_at = now();
+    $deposit->reopen_reason = $request->reopen_reason;
+    $deposit->save();
 
     return redirect()
         ->route('manager.request.access')
