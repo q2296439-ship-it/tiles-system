@@ -117,7 +117,6 @@
 
 <div class="topbar"></div>
 
-<!-- HEADER -->
 <div class="header">
     <div class="company">NICOLE TILES CENTER</div>
     <div class="report-title">Transfer In History Report</div>
@@ -137,7 +136,6 @@
     </div>
 </div>
 
-<!-- SUMMARY -->
 <div class="summary">
     <table>
         <tr>
@@ -169,7 +167,6 @@
     </table>
 </div>
 
-<!-- TABLE -->
 <table class="main">
     <thead>
         <tr>
@@ -189,8 +186,15 @@
         <tr>
             <td class="center">{{ $index + 1 }}</td>
             <td>{{ $t->product->name ?? '-' }}</td>
-            <td>{{ $t->from_branch_name ?? '-' }}</td>
-            <td>{{ $t->to_branch_name ?? '-' }}</td>
+
+            <td>
+                {{ $t->from_branch->name ?? $t->from_branch_name ?? '-' }}
+            </td>
+
+            <td>
+                {{ $t->branch->name ?? $t->to_branch_name ?? '-' }}
+            </td>
+
             <td class="center">{{ $t->quantity }}</td>
             <td class="center">{{ strtoupper($t->status) }}</td>
             <td>{{ $t->requester->name ?? '-' }}</td>
@@ -200,7 +204,6 @@
     </tbody>
 </table>
 
-<!-- FOOTER -->
 <div class="footer">
     <div class="grand">
         TOTAL QTY: {{ $transfers->sum('quantity') }}
