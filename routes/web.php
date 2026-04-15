@@ -144,6 +144,9 @@ Route::prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
+    // ✅ SHARED COLLECTION PAGE
+    Route::get('/collection', [CollectionController::class, 'today']);
+
     Route::get('/inventory', [InventoryController::class, 'overviewStock']);
     Route::get('/inventory/export/excel', [InventoryController::class, 'exportExcel']);
     Route::get('/inventory/export/pdf', [InventoryController::class, 'exportPdf']);
