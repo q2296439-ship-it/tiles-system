@@ -185,6 +185,7 @@ th{
 @php
 $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
     ->where('branch_id', auth()->user()->branch_id)
+    ->where('status', 'closed')
     ->exists();
 @endphp
 
