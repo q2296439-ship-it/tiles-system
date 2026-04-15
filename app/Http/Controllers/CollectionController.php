@@ -450,3 +450,4 @@ public function deposit(Request $request)
         'isClosed'
     ));
 }
+}
