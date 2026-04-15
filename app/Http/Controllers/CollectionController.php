@@ -387,10 +387,11 @@ return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
                 'items'        => 'required|array|min:1',
             ]);
 
-            // ✅ NEW LOCK: bawal magsave kapag closed na deposit date
-            $isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
-                ->where('branch_id', auth()->user()->branch_id)
-                ->exists();
+           // ✅ NEW LOCK: bawal magsave kapag closed na deposit date
+$isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
+    ->where('branch_id', auth()->user()->branch_id)
+    ->where('status', 'closed')
+    ->exists();
 
             if ($isClosed) {
                 return back()
