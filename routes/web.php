@@ -267,7 +267,7 @@ Route::prefix('cashier')->group(function () {
         ->name('cashier.return.store');
 
     Route::get('/cashier/deposit', [CollectionController::class, 'deposit'])
-    ->name('cashier.deposit');
+    ->name('cashier.deposit.index');
 });
 
 
