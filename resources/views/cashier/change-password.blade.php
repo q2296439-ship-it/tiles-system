@@ -1,4 +1,12 @@
-@extends('layouts.cashier')
+@php
+$layout = match(auth()->user()->role) {
+    'admin' => 'layouts.admin',
+    'manager' => 'layouts.manager',
+    default => 'layouts.cashier',
+};
+@endphp
+
+@extends($layout)
 
 @section('content')
 

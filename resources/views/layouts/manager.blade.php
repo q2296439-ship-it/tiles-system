@@ -37,18 +37,25 @@
             letter-spacing: 1px;
         }
 
-        .sidebar a {
+        .sidebar a,
+        .sidebar button {
             display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
             color: #cbd5f5;
             text-decoration: none;
             padding: 10px 12px;
             border-radius: 6px;
             margin-bottom: 6px;
             font-size: 14px;
+            cursor: pointer;
             transition: 0.2s;
         }
 
-        .sidebar a:hover {
+        .sidebar a:hover,
+        .sidebar button:hover {
             background: #334155;
             color: white;
         }
@@ -115,6 +122,10 @@
             border-top: 1px solid #334155;
             margin: 15px 0;
         }
+
+        .logout-btn {
+            color: #f87171 !important;
+        }
     </style>
 </head>
 
@@ -137,12 +148,14 @@
         🧾 Approvals
     </a>
 
-    <a href="/manager/transactions" class="{{ request()->is('manager/transactions') ? 'active' : '' }}">
-        💳 Transactions
+    <a href="/manager/request-access"
+       class="{{ request()->is('manager/request-access') ? 'active' : '' }}">
+        🔓 Request Access
     </a>
 
     {{-- SALES --}}
     <p>SALES</p>
+
     <a href="/manager/daily-sales" class="{{ request()->is('manager/daily-sales') ? 'active' : '' }}">
         📅 Daily Sales
     </a>
@@ -174,17 +187,22 @@
         ➡️ Transfer Out
     </a>
 
-    <a href="/manager/transfers" class="{{ request()->is('manager/transfers') ? 'active' : '' }}">
-        🔄 Transfer Requests
-    </a>
-
     <hr>
 
     {{-- ACCOUNT --}}
     <p>ACCOUNT</p>
-    <a href="/logout" style="color:#f87171;">
-        🚪 Logout
+
+    <a href="/manager/change-password"
+       class="{{ request()->is('manager/change-password') ? 'active' : '' }}">
+        🔑 Change Password
     </a>
+
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="logout-btn">
+            🚪 Logout
+        </button>
+    </form>
 </div>
 
 <div class="content">

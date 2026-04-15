@@ -161,6 +161,14 @@ Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutAdm
     ->middleware('auth')
     ->name('manager.transfer.out');
 
+    // ✅ CHANGE PASSWORD MANAGER
+Route::get('/manager/change-password', function () {
+    return view('cashier.change-password');
+})->middleware('auth');
+
+Route::post('/manager/change-password', [UserController::class, 'changePassword'])
+    ->middleware('auth');
+
 
 // =====================
 // ADMIN GROUP
