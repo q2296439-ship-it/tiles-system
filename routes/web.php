@@ -152,8 +152,9 @@ Route::get('/manager/add-stock', [InventoryController::class, 'create'])->middle
 Route::post('/manager/add-stock', [InventoryController::class, 'store'])->middleware('auth')->name('manager.add.stock.store');
 
 // ✅ TRANSFER IN MANAGER
-Route::get('/manager/transfer-in', [InventoryController::class, 'transferInForm'])->middleware('auth')->name('manager.transfer.in');
-Route::post('/manager/transfer-in', [InventoryController::class, 'transferInStore'])->middleware('auth')->name('manager.transfer.in.store');
+Route::get('/manager/transfer-in', [InventoryController::class, 'transferInAdmin'])
+    ->middleware('auth')
+    ->name('manager.transfer.in');
 
 
 // =====================
