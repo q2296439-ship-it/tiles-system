@@ -2,117 +2,153 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Deposit Report</title>
+<title>Deposit Slip</title>
 
 <style>
 body{
     font-family: Arial, sans-serif;
-    font-size:11px;
-    padding:25px;
+    font-size:12px;
     color:#111;
+    padding:25px;
 }
-.topbar{
-    height:6px;
-    background:#111;
-    margin-bottom:12px;
+.box{
+    border:2px solid #000;
+    padding:18px;
+}
+.header{
+    text-align:center;
+    margin-bottom:15px;
 }
 .company{
-    font-size:18px;
+    font-size:22px;
     font-weight:bold;
 }
-.title{
+.sub{
     font-size:13px;
-    color:#555;
+    margin-top:3px;
 }
-.date{
-    margin-top:8px;
-    margin-bottom:15px;
-    font-size:11px;
-    color:#666;
+.row{
+    width:100%;
+    margin-bottom:8px;
+}
+.label{
+    display:inline-block;
+    width:120px;
+    font-weight:bold;
+}
+.line{
+    display:inline-block;
+    border-bottom:1px solid #000;
+    width:220px;
+    padding:2px 4px;
 }
 table{
     width:100%;
     border-collapse:collapse;
+    margin-top:15px;
 }
 th,td{
     border:1px solid #000;
-    padding:5px;
-    font-size:10px;
+    padding:6px;
     text-align:center;
 }
 th{
-    background:#111;
-    color:#fff;
+    background:#f2f2f2;
 }
-.right{
-    text-align:right;
-}
-.footer{
+.right{text-align:right;}
+.total-box{
     margin-top:15px;
     text-align:right;
+    font-size:15px;
     font-weight:bold;
+}
+.signatures{
+    margin-top:45px;
+    width:100%;
+}
+.sign{
+    width:45%;
+    display:inline-block;
+    text-align:center;
+}
+.sign-line{
+    border-top:1px solid #000;
+    margin-top:45px;
+    padding-top:4px;
+}
+.note{
+    margin-top:15px;
+    font-size:11px;
+    color:#444;
 }
 </style>
 </head>
-
 <body>
 
-<div class="topbar"></div>
-
-<div class="company">NICOLE TILES CENTER</div>
-<div class="title">Deposit Denomination Report</div>
-
-<div class="date">
-Generated: {{ now()->format('F d, Y h:i A') }} <br>
-Date: {{ $date }}
-</div>
-
-<table>
-<thead>
-<tr>
-    <th>#</th>
-    <th>Branch</th>
-    <th>Date</th>
-    <th>1000</th>
-    <th>500</th>
-    <th>200</th>
-    <th>100</th>
-    <th>50</th>
-    <th>20</th>
-    <th>10</th>
-    <th>5</th>
-    <th>1</th>
-    <th>Actual</th>
-    <th>Variance</th>
-</tr>
-</thead>
-
-<tbody>
 @foreach($rows as $row)
-<tr>
-    <td>{{ $loop->iteration }}</td>
-    <td>{{ $row->branch_name ?? '-' }}</td>
-    <td>{{ $row->deposit_date }}</td>
-    <td>{{ $row->denom_1000 }}</td>
-    <td>{{ $row->denom_500 }}</td>
-    <td>{{ $row->denom_200 }}</td>
-    <td>{{ $row->denom_100 }}</td>
-    <td>{{ $row->denom_50 }}</td>
-    <td>{{ $row->denom_20 }}</td>
-    <td>{{ $row->coin_10 }}</td>
-    <td>{{ $row->coin_5 }}</td>
-    <td>{{ $row->coin_1 }}</td>
-    <td class="right">{{ number_format($row->actual_amount,2) }}</td>
-    <td class="right">{{ number_format($row->variance,2) }}</td>
-</tr>
-@endforeach
-</tbody>
-</table>
 
-<div class="footer">
-TOTAL DEPOSIT:
-₱{{ number_format($rows->sum('actual_amount'),2) }}
+<div class="box">
+
+    <div class="header">
+        <div class="company">NICOLE TILES CENTER</div>
+        <div class="sub">CASH DEPOSIT SLIP</div>
+    </div>
+
+    <div class="row">
+        <span class="label">Branch:</span>
+        <span class="line">{{ $row->branch_name ?? '-' }}</span>
+
+        <span class="label" style="margin-left:30px;">Date:</span>
+        <span class="line">{{ $row->deposit_date }}</span>
+    </div>
+
+    <div class="row">
+        <span class="label">Deposited By:</span>
+        <span class="line">{{ auth()->user()->name }}</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Denomination</th>
+                <th>Qty</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1000</td><td>{{ $row->denom_1000 }}</td><td>{{ number_format($row->denom_1000 * 1000,2) }}</td></tr>
+            <tr><td>500</td><td>{{ $row->denom_500 }}</td><td>{{ number_format($row->denom_500 * 500,2) }}</td></tr>
+            <tr><td>200</td><td>{{ $row->denom_200 }}</td><td>{{ number_format($row->denom_200 * 200,2) }}</td></tr>
+            <tr><td>100</td><td>{{ $row->denom_100 }}</td><td>{{ number_format($row->denom_100 * 100,2) }}</td></tr>
+            <tr><td>50</td><td>{{ $row->denom_50 }}</td><td>{{ number_format($row->denom_50 * 50,2) }}</td></tr>
+            <tr><td>20</td><td>{{ $row->denom_20 }}</td><td>{{ number_format($row->denom_20 * 20,2) }}</td></tr>
+            <tr><td>10 Coin</td><td>{{ $row->coin_10 }}</td><td>{{ number_format($row->coin_10 * 10,2) }}</td></tr>
+            <tr><td>5 Coin</td><td>{{ $row->coin_5 }}</td><td>{{ number_format($row->coin_5 * 5,2) }}</td></tr>
+            <tr><td>1 Coin</td><td>{{ $row->coin_1 }}</td><td>{{ number_format($row->coin_1 * 1,2) }}</td></tr>
+        </tbody>
+    </table>
+
+    <div class="total-box">
+        TOTAL CASH DEPOSIT: ₱{{ number_format($row->actual_amount,2) }}
+    </div>
+
+    <div class="signatures">
+        <div class="sign">
+            <div class="sign-line">Depositor Signature</div>
+        </div>
+
+        <div class="sign" style="float:right;">
+            <div class="sign-line">Received By</div>
+        </div>
+    </div>
+
+    <div class="note">
+        Variance: ₱{{ number_format($row->variance,2) }}
+    </div>
+
 </div>
+
+@endforeach
 
 </body>
 </html>
