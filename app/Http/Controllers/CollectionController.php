@@ -537,31 +537,38 @@ public function depositStore(Request $request)
     $actual = $request->actual_amount;
     $variance = $actual - $net;
 
-    \App\Models\Deposit::updateOrCreate(
-    [
-        'deposit_date' => $date,
-        'branch_id' => $branchId,
-    ],
-    [
-        'gross_amount' => $rows->sum('gross_amount'),
-        'discount_amount' => $rows->sum('discount_amount'),
-        'net_amount' => $net,
-        'actual_amount' => $actual,
-        'variance' => $variance,
-        'user_id' => auth()->id(),
+    $existing = \App\Models\Deposit::where('deposit_date', $date)
+    ->where('branch_id', $branchId)
+    ->first();
 
-        'denom_1000' => $request->denom_1000 ?? 0,
-        'denom_500'  => $request->denom_500 ?? 0,
-        'denom_200'  => $request->denom_200 ?? 0,
-        'denom_100'  => $request->denom_100 ?? 0,
-        'denom_50'   => $request->denom_50 ?? 0,
-        'denom_20'   => $request->denom_20 ?? 0,
-        'coin_10'    => $request->coin_10 ?? 0,
-        'coin_5'     => $request->coin_5 ?? 0,
-        'coin_1'     => $request->coin_1 ?? 0,
-        'remarks'    => $request->remarks,
-    ]
-);
+if ($existing) {
+    return redirect()
+        ->route('cashier.deposit')
+        ->with('error', 'Deposit already closed for this date.');
+}
+
+\App\Models\Deposit::create([
+    'deposit_date' => $date,
+    'branch_id' => $branchId,
+
+    'gross_amount' => $rows->sum('gross_amount'),
+    'discount_amount' => $rows->sum('discount_amount'),
+    'net_amount' => $net,
+    'actual_amount' => $actual,
+    'variance' => $variance,
+    'user_id' => auth()->id(),
+
+    'denom_1000' => $request->denom_1000 ?? 0,
+    'denom_500'  => $request->denom_500 ?? 0,
+    'denom_200'  => $request->denom_200 ?? 0,
+    'denom_100'  => $request->denom_100 ?? 0,
+    'denom_50'   => $request->denom_50 ?? 0,
+    'denom_20'   => $request->denom_20 ?? 0,
+    'coin_10'    => $request->coin_10 ?? 0,
+    'coin_5'     => $request->coin_5 ?? 0,
+    'coin_1'     => $request->coin_1 ?? 0,
+    'remarks'    => $request->remarks,
+]);
 
 return redirect()
     ->route('cashier.deposit')
