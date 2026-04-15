@@ -108,11 +108,48 @@ textarea{
     text-align:center;
     color:#475569;
 }
+.right{text-align:right;}
+
+/* COMPACT DEPOSIT PANEL */
 #depositPanel{
     display:none;
     margin-top:20px;
+    padding:18px;
 }
-.right{text-align:right;}
+#depositPanel h3{
+    margin:0 0 12px 0;
+    font-size:22px;
+}
+#depositPanel th,
+#depositPanel td{
+    padding:8px 10px;
+    font-size:14px;
+    vertical-align:middle;
+}
+#depositPanel .input{
+    width:110px;
+    height:36px;
+    padding:6px 10px;
+    border-radius:8px;
+}
+#depositPanel tr td:first-child{
+    width:120px;
+    font-weight:600;
+}
+#depositPanel .right{
+    width:120px;
+    text-align:right;
+    font-weight:700;
+}
+#depositPanel textarea{
+    min-height:70px;
+    padding:10px;
+    font-size:14px;
+}
+#depositPanel .btn{
+    padding:9px 14px;
+    border-radius:8px;
+}
 </style>
 
 <div class="page">
@@ -185,7 +222,7 @@ textarea{
 
 <div class="table-card" id="depositPanel">
 
-    <h3 style="margin-top:0;">Cash Denomination</h3>
+    <h3>Cash Denomination</h3>
 
     <table>
         <tr>
@@ -205,12 +242,12 @@ textarea{
         <tr><td>1 Coin</td><td><input type="number" name="coin_1" class="input denom" data-val="1" value="0"></td><td class="right lineTotal">0.00</td></tr>
     </table>
 
-    <div style="margin-top:20px;">
+    <div style="margin-top:15px;">
         <label class="label">Remarks</label>
         <textarea name="remarks" placeholder="Enter remarks..."></textarea>
     </div>
 
-    <div style="margin-top:15px;text-align:right;">
+    <div style="margin-top:12px;text-align:right;">
         <button class="btn btn-green">💾 Save Deposit</button>
     </div>
 
