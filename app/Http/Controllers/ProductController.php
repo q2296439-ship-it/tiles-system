@@ -19,14 +19,17 @@ class ProductController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            $products = Product::latest()->paginate(10);
+            $products = Product::with('branch')
+                ->latest()
+                ->paginate(10);
         } else {
-            $products = Product::where('branch_id', $user->branch_id)
+            $products = Product::with('branch')
+                ->where('branch_id', $user->branch_id)
                 ->latest()
                 ->paginate(10);
         }
 
-        return view('products.index', compact('products'));
+        return view('admin.products.index', compact('products'));
     }
 
     // =====================
