@@ -18,6 +18,11 @@ class Deposit extends Model
         'actual_amount',
         'variance',
 
+        'status',
+        'reopened_by',
+        'reopened_at',
+        'reopen_reason',
+
         'denom_1000',
         'denom_500',
         'denom_200',
@@ -31,4 +36,19 @@ class Deposit extends Model
 
         'remarks',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function reopenedBy()
+    {
+        return $this->belongsTo(User::class, 'reopened_by');
+    }
 }
