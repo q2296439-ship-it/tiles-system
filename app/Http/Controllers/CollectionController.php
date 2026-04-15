@@ -555,6 +555,7 @@ public function depositStore(Request $request)
 
     $existing = \App\Models\Deposit::where('deposit_date', $date)
     ->where('branch_id', $branchId)
+    ->where('status', 'closed')
     ->first();
 
 if ($existing) {
