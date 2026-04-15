@@ -20,10 +20,17 @@ use App\Exports\DepositExport;
 class CollectionController extends Controller
 {
     public function create()
-    {
-        return view('cashier.collection.create');
-    }
+{
+    $today = date('Y-m-d');
+    $branchId = auth()->user()->branch_id;
 
+    $isClosed = \App\Models\Deposit::whereDate('deposit_date', $today)
+        ->where('branch_id', $branchId)
+        ->where('status', 'closed')
+        ->exists();
+
+    return view('cashier.collection.create', compact('isClosed'));
+}
     public function cancelForm()
     {
         return view('cashier.collection.cancel');
