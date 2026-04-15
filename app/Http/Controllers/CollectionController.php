@@ -272,9 +272,7 @@ class CollectionController extends Controller
         $depositQuery->where('branch_id', $selectedBranch);
     }
 
-    $rows = $query->where('deposits.status', 'closed')
-    ->latest('deposits.id')
-    ->get();
+    $deposit = $depositQuery->where('status', 'closed')->first();
 
     if ($deposit) {
         $actual = $deposit->actual_amount;
