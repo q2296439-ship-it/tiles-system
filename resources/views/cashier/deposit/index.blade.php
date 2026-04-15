@@ -200,16 +200,30 @@ textarea{
 
     <div class="card">
         <div class="label">Actual Deposit</div>
-        <div class="value" id="actualText">₱0.00</div>
+        <div class="value" id="actualText">
+            ₱{{ number_format($actual ?? 0,2) }}
+        </div>
     </div>
 
     <div class="card">
         <div class="label">Variance</div>
         <div class="value {{ ($variance ?? 0) < 0 ? 'red' : 'green' }}" id="varianceText">
-            ₱{{ number_format(0 - ($net ?? 0),2) }}
+            ₱{{ number_format($variance ?? 0,2) }}
         </div>
     </div>
 
+</div>
+
+<div class="table-card" style="margin-bottom:20px;">
+    @if($isClosed ?? false)
+        <div style="font-weight:700;color:#16a34a;">
+            ✅ Transaction successfully closed.
+        </div>
+    @else
+        <div style="font-weight:700;color:#d97706;">
+            ⚠️ Transaction still not deposited. Please proceed to deposit and close the transaction for the day.
+        </div>
+    @endif
 </div>
 
 <form method="POST" action="{{ route('cashier.deposit.store') }}">
@@ -217,8 +231,8 @@ textarea{
 
 <input type="hidden" name="deposit_date" value="{{ request('date', date('Y-m-d')) }}">
 <input type="hidden" name="expected_amount" value="{{ $net ?? 0 }}">
-<input type="hidden" name="actual_amount" id="actualAmount" value="0">
-<input type="hidden" name="variance" id="varianceInput" value="{{ 0 - ($net ?? 0) }}">
+<input type="hidden" name="actual_amount" id="actualAmount" value="{{ $actual ?? 0 }}">
+<input type="hidden" name="variance" id="varianceInput" value="{{ $variance ?? 0 }}">
 
 <div class="table-card" id="depositPanel">
 
@@ -278,11 +292,11 @@ textarea{
         </tr>
         <tr>
             <td>Actual Cash Deposited</td>
-            <td id="actualTable">₱0.00</td>
+            <td id="actualTable">₱{{ number_format($actual ?? 0,2) }}</td>
         </tr>
         <tr>
             <td><strong>Variance</strong></td>
-            <td><strong id="varianceTable">₱{{ number_format(0 - ($net ?? 0),2) }}</strong></td>
+            <td><strong id="varianceTable">₱{{ number_format($variance ?? 0,2) }}</strong></td>
         </tr>
     </table>
 
@@ -332,8 +346,6 @@ document.addEventListener('input', function(e){
         computeDeposit();
     }
 });
-
-computeDeposit();
 </script>
 
 @endsection

@@ -412,37 +412,41 @@ public function store(Request $request)
             ->with('error', $e->getMessage());
     }
 }
-public function depositStore(Request $request)
+public function deposit(Request $request)
 {
-    \App\Models\Deposit::updateOrCreate(
-        [
-            'deposit_date' => $request->deposit_date,
-            'branch_id' => auth()->user()->branch_id,
-        ],
-        [
-            'user_id' => auth()->id(),
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $branchId = auth()->user()->branch_id;
 
-            'expected_amount' => $request->expected_amount,
-            'actual_amount'   => $request->actual_amount,
-            'variance'        => $request->variance,
+    $rows = Collection::whereDate('receipt_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->where('status', 'saved')
+        ->get();
 
-            'denom_1000' => $request->denom_1000 ?? 0,
-            'denom_500'  => $request->denom_500 ?? 0,
-            'denom_200'  => $request->denom_200 ?? 0,
-            'denom_100'  => $request->denom_100 ?? 0,
-            'denom_50'   => $request->denom_50 ?? 0,
-            'denom_20'   => $request->denom_20 ?? 0,
+    $gross = $rows->sum('gross_amount');
+    $discount = $rows->sum('discount_amount');
+    $net = $rows->sum('net_amount');
 
-            'coin_10' => $request->coin_10 ?? 0,
-            'coin_5'  => $request->coin_5 ?? 0,
-            'coin_1'  => $request->coin_1 ?? 0,
+    $deposit = \App\Models\Deposit::where('deposit_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->first();
 
-            'remarks' => $request->remarks,
-        ]
-    );
+    if ($deposit) {
+        $actual = $deposit->actual_amount;
+        $variance = $deposit->variance;
+        $isClosed = true;
+    } else {
+        $actual = 0;
+        $variance = 0 - $net;
+        $isClosed = false;
+    }
 
-    return redirect()
-        ->route('cashier.deposit', ['date' => $request->deposit_date])
-        ->with('success', 'Deposit saved successfully!');
-}
+    return view('cashier.deposit.index', compact(
+        'gross',
+        'discount',
+        'net',
+        'actual',
+        'variance',
+        'selectedDate',
+        'isClosed'
+    ));
 }
