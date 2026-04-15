@@ -29,7 +29,7 @@ class ProductController extends Controller
                 ->paginate(10);
         }
 
-        return view('admin.products.index', compact('products'));
+        return view('products.index', compact('products'));
     }
 
     // =====================
