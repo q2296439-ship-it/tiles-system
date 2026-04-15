@@ -15,6 +15,9 @@ class Deposit extends Model
         'user_id',
 
         'expected_amount',
+        'gross_amount',
+        'discount_amount',
+        'net_amount',
         'actual_amount',
         'variance',
 
