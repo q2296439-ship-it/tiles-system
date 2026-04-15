@@ -258,7 +258,9 @@ class CollectionController extends Controller
         $query->where('branch_id', $selectedBranch);
     }
 
-    $rows = $query->get();
+    $rows = $query->where('deposits.status', 'closed')
+    ->latest('deposits.id')
+    ->get();
 
     $gross = $rows->sum('gross_amount');
     $discount = $rows->sum('discount_amount');
