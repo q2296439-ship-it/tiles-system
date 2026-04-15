@@ -103,14 +103,15 @@
     </thead>
 
     <tbody>
-        @php $grandTotal = 0; @endphp
 
         @forelse($collections as $index => $row)
-            @php $grandTotal += $row->total_amount; @endphp
-
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ $row->receipt_no }}</td>
+
+                <td>
+                    {{ $row->display_receipt_no ?? $row->receipt_no }}
+                </td>
+
                 <td>{{ $row->customer_name }}</td>
 
                 <td class="small">
@@ -125,10 +126,20 @@
                     @endforeach
                 </td>
 
-                <td class="text-right">₱{{ number_format($row->total_amount, 2) }}</td>
+                <td class="text-right">
+                    @if(($row->record_type ?? '') == 'returned')
+                        -₱{{ number_format($row->total_amount, 2) }}
+                    @elseif(($row->record_type ?? '') == 'cancelled')
+                        ₱0.00
+                    @else
+                        ₱{{ number_format($row->total_amount, 2) }}
+                    @endif
+                </td>
+
                 <td>{{ $row->user->name ?? 'Cashier' }}</td>
                 <td>{{ $row->created_at->format('h:i A') }}</td>
             </tr>
+
         @empty
             <tr>
                 <td colspan="8" class="text-center">No collection records found.</td>
@@ -137,9 +148,10 @@
 
         <tr class="total-row">
             <td colspan="5">TOTAL</td>
-            <td class="text-right">₱{{ number_format($grandTotal, 2) }}</td>
+            <td class="text-right">₱{{ number_format($total, 2) }}</td>
             <td colspan="2"></td>
         </tr>
+
     </tbody>
 </table>
 
