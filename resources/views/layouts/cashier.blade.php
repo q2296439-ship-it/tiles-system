@@ -244,11 +244,6 @@
             📊 Collection Today
         </a>
 
-        <a href="{{ url('/cashier/dccr') }}"
-           class="{{ request()->is('cashier/dccr*') ? 'active' : '' }}">
-            💰 DCCR
-        </a>
-
         <a href="{{ url('/cashier/deposit') }}"
            class="{{ request()->is('cashier/deposit*') ? 'active' : '' }}">
             🏦 Deposit
