@@ -138,6 +138,9 @@ Route::post('/manager/release/{id}', [InventoryController::class, 'release'])->m
 // ✅ DAILY SALES MANAGER
 Route::get('/manager/daily-sales', [SalesReportController::class, 'daily'])->middleware('auth')->name('manager.daily.sales');
 
+// ✅ SALES REPORT MANAGER
+Route::get('/manager/sales-report', [SalesReportController::class, 'perBranch'])->middleware('auth')->name('manager.sales.report');
+
 
 // =====================
 // ADMIN GROUP

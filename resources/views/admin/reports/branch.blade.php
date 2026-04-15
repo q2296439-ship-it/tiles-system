@@ -1,6 +1,12 @@
-@extends('layouts.admin')
+@php
+$layout = match(auth()->user()->role) {
+    'admin' => 'layouts.admin',
+    'manager' => 'layouts.manager',
+    default => 'layouts.cashier',
+};
+@endphp
 
-@section('content')
+@extends($layout)
 
 <style>
 .page-wrap{
