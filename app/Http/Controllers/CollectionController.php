@@ -601,6 +601,6 @@ public function depositPdf(Request $request)
     $pdf = Pdf::loadView('cashier.deposit.pdf', compact('rows', 'date'))
         ->setPaper('a4', 'portrait');
 
-    return $pdf->download('deposit-report.pdf');
+    return $pdf->stream('deposit-report.pdf');
 }
 }
