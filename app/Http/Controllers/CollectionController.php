@@ -649,4 +649,73 @@ public function depositPdf(Request $request)
 
     return $pdf->stream('deposit-report.pdf');
 }
+public function managerCollection(Request $request)
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status = $request->status ?? 'all';
+
+    $branchId = auth()->user()->branch_id;
+
+    $collections = Collection::with(['user', 'items', 'branch'])
+        ->whereDate('receipt_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->get()
+        ->map(function ($row) {
+            $row->record_type = strtolower($row->status ?? 'saved');
+            return $row;
+        });
+
+    $returns = ReturnModel::with(['user', 'items', 'branch'])
+        ->whereDate('return_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->get()
+        ->map(function ($row) {
+            $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
+            $row->receipt_date = $row->return_date;
+            $row->status = 'returned';
+            $row->record_type = 'returned';
+            return $row;
+        });
+
+    $records = $collections->concat($returns);
+
+    if ($status != 'all') {
+        $records = $records->where('record_type', $status);
+    }
+
+    $records = $records->sortByDesc('created_at')->values();
+
+    if ($status == 'returned') {
+        $total = -1 * $records->sum('total_amount');
+    } elseif ($status == 'cancelled') {
+        $total = 0;
+    } elseif ($status == 'saved') {
+        $total = $records->sum('total_amount');
+    } else {
+        $savedTotal = $records->where('record_type', 'saved')->sum('total_amount');
+        $returnTotal = $records->where('record_type', 'returned')->sum('total_amount');
+        $total = $savedTotal - $returnTotal;
+    }
+
+    $page = LengthAwarePaginator::resolveCurrentPage();
+    $perPage = 10;
+
+    $collections = new LengthAwarePaginator(
+        $records->forPage($page, $perPage)->values(),
+        $records->count(),
+        $perPage,
+        $page,
+        [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]
+    );
+
+    return view('cashier.collection.today', compact(
+        'collections',
+        'total',
+        'selectedDate',
+        'status'
+    ));
+}
 }

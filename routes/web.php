@@ -210,6 +210,9 @@ Route::get('/manager/request-access/pdf', [CollectionController::class, 'request
     ->middleware('auth')
     ->name('manager.request.access.pdf');
 
+Route::get('/manager/collection', [CollectionController::class, 'managerCollection'])
+    ->name('manager.collection');
+
 
 // =====================
 // ADMIN GROUP

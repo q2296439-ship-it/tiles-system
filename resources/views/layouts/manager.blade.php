@@ -169,6 +169,10 @@
         📈 Sales Report
     </a>
 
+    <a href="/manager/collection" class="{{ request()->is('manager/collection') ? 'active' : '' }}">
+        🧾 Collection
+    </a>
+
     {{-- INVENTORY --}}
     <p>INVENTORY</p>
 
