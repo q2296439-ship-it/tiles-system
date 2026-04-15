@@ -245,6 +245,9 @@ th{
     <button type="button" class="btn btn-blue" onclick="addRow()">➕ Add Row</button>
 </div>
 
+<input type="hidden" name="gross_amount" id="grossAmount">
+<input type="hidden" name="discount_amount" id="hiddenDiscount">
+<input type="hidden" name="discount_type" id="hiddenDiscountType">
 <input type="hidden" name="total_amount" id="totalAmount">
 
 <div class="footer-box">
@@ -374,6 +377,9 @@ function computeAll(){
     document.getElementById('salesAmount').innerText = '₱' + total.toFixed(2);
     document.getElementById('discountAmount').innerText = '₱' + discount.toFixed(2);
     document.getElementById('grandTotal').innerText = '₱' + grand.toFixed(2);
+    document.getElementById('grossAmount').value = total.toFixed(2);
+    document.getElementById('hiddenDiscount').value = discount.toFixed(2);
+    document.getElementById('hiddenDiscountType').value = type;
     document.getElementById('totalAmount').value = grand.toFixed(2);
 }
 
