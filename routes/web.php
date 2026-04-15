@@ -135,6 +135,9 @@ Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->mid
 Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutManager'])->middleware('auth');
 Route::post('/manager/release/{id}', [InventoryController::class, 'release'])->middleware('auth');
 
+// ✅ DAILY SALES MANAGER
+Route::get('/manager/daily-sales', [SalesReportController::class, 'daily'])->middleware('auth')->name('manager.daily.sales');
+
 
 // =====================
 // ADMIN GROUP
