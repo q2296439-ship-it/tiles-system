@@ -297,7 +297,10 @@ public function transferInAdmin(Request $request)
     // 📃 NORMAL VIEW
     $transfers = $query->latest()->paginate(10)->withQueryString();
 
-    return view('inventory.transfer_in', compact('transfers'));
+    $products = Product::all();
+$branches = Branch::all();
+
+return view('inventory.transfer_in', compact('transfers', 'products', 'branches'));
 }
 
     // =====================
