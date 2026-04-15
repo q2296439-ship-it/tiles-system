@@ -556,4 +556,51 @@ public function depositStore(Request $request)
         ->route('cashier.deposit')
         ->with('success', 'Deposit saved successfully.');
 }
+
+// ==========================
+// 📗 DEPOSIT EXCEL EXPORT
+// ==========================
+public function depositExcel(Request $request)
+{
+    $date = $request->date ?? date('Y-m-d');
+    $branchId = $request->branch_id;
+    $user = auth()->user();
+
+    return Excel::download(
+        new DepositExport(
+            $date,
+            $branchId,
+            strtolower($user->role),
+            $user->branch_id
+        ),
+        'deposit-report.xlsx'
+    );
+}
+
+// ==========================
+// 📄 DEPOSIT PDF EXPORT
+// ==========================
+public function depositPdf(Request $request)
+{
+    $date = $request->date ?? date('Y-m-d');
+    $branchId = $request->branch_id;
+    $user = auth()->user();
+
+    $query = \App\Models\Deposit::leftJoin('branches', 'deposits.branch_id', '=', 'branches.id')
+        ->select('deposits.*', 'branches.name as branch_name')
+        ->whereDate('deposits.deposit_date', $date);
+
+    if (strtolower($user->role) === 'cashier') {
+        $query->where('deposits.branch_id', $user->branch_id);
+    } elseif (!empty($branchId)) {
+        $query->where('deposits.branch_id', $branchId);
+    }
+
+    $rows = $query->get();
+
+    $pdf = Pdf::loadView('cashier.deposit.pdf', compact('rows', 'date'))
+        ->setPaper('a4', 'portrait');
+
+    return $pdf->download('deposit-report.pdf');
+}
 }
