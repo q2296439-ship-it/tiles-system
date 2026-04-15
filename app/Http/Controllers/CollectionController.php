@@ -638,7 +638,11 @@ public function depositPdf(Request $request)
         $query->where('deposits.branch_id', $branchId);
     }
 
-    $rows = $query->get();
+    $rows = collect([
+    $query->where('deposits.status', 'closed')
+        ->latest('deposits.id')
+        ->first()
+])->filter();
 
     $pdf = Pdf::loadView('cashier.deposit.pdf', compact('rows', 'date'))
         ->setPaper('a4', 'portrait');
