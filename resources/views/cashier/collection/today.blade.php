@@ -195,16 +195,11 @@ th{
             <a href="{{ route('cashier.collection.export.excel', ['date' => request('date'),'status' => request('status')]) }}"
                class="btn btn-green">📗 Excel</a>
 
-            @php
+           @php
     $role = strtolower(auth()->user()->role);
 
     if ($role === 'admin') {
         $pdfRoute = route('admin.collection.export.pdf', [
-            'date' => request('date'),
-            'status' => request('status')
-        ]);
-    } elseif ($role === 'manager') {
-        $pdfRoute = route('manager.collection.export.pdf', [
             'date' => request('date'),
             'status' => request('status')
         ]);
