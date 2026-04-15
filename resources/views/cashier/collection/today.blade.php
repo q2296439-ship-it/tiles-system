@@ -1,4 +1,10 @@
-@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.cashier')
+@extends(
+    strtolower(auth()->user()->role) === 'admin'
+        ? 'layouts.admin'
+        : (strtolower(auth()->user()->role) === 'manager'
+            ? 'layouts.manager'
+            : 'layouts.cashier')
+)
 
 @section('content')
 
