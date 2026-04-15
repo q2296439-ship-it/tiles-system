@@ -316,16 +316,29 @@ class CollectionController extends Controller
             $records = $records->where('record_type', $status);
         }
 
-        $collections = $records->sortByDesc('created_at')->values();
+       $collections = $records->sortByDesc('created_at')->values();
 
-        $pdf = Pdf::loadView('cashier.collection.pdf', compact(
-            'collections',
-            'selectedDate',
-            'status'
-        ))->setPaper('a4', 'landscape');
+if ($status == 'returned') {
+    $total = -1 * $collections->sum('total_amount');
+} elseif ($status == 'cancelled') {
+    $total = 0;
+} elseif ($status == 'saved') {
+    $total = $collections->sum('total_amount');
+} else {
+    $savedTotal  = $collections->where('record_type', 'saved')->sum('total_amount');
+    $returnTotal = $collections->where('record_type', 'returned')->sum('total_amount');
+    $total = $savedTotal - $returnTotal;
+}
 
-        return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
-    }
+$pdf = Pdf::loadView('cashier.collection.pdf', compact(
+    'collections',
+    'selectedDate',
+    'status',
+    'total'
+))->setPaper('a4', 'landscape');
+
+return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
+}
 
     public function exportExcel(Request $request)
     {
