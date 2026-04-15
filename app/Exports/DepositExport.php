@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Concerns\{
 };
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class DepositExport implements FromCollection, WithHeadings, ShouldAutoSize, WithEvents
 {
@@ -53,73 +54,73 @@ class DepositExport implements FromCollection, WithHeadings, ShouldAutoSize, Wit
             $query->where('deposits.branch_id', $this->branchId);
         }
 
-        return $query->get()->map(function ($row) {
-            return [
-                $row->branch,
-                $row->deposit_date,
-                $row->denom_1000,
-                $row->denom_500,
-                $row->denom_200,
-                $row->denom_100,
-                $row->denom_50,
-                $row->denom_20,
-                $row->coin_10,
-                $row->coin_5,
-                $row->coin_1,
-                $row->actual_amount,
-                $row->variance,
-            ];
-        });
+        $row = $query->first();
+
+        if (!$row) {
+            return collect([]);
+        }
+
+        return collect([
+            ['NICOLE TILES CENTER'],
+            ['CASH DEPOSIT SLIP'],
+            [''],
+            ['Branch', $row->branch, '', '', 'Date', $row->deposit_date],
+            ['Deposited By', auth()->user()->name],
+            [''],
+            ['Denomination', 'Qty', 'Amount'],
+            ['1000', $row->denom_1000, $row->denom_1000 * 1000],
+            ['500', $row->denom_500, $row->denom_500 * 500],
+            ['200', $row->denom_200, $row->denom_200 * 200],
+            ['100', $row->denom_100, $row->denom_100 * 100],
+            ['50', $row->denom_50, $row->denom_50 * 50],
+            ['20', $row->denom_20, $row->denom_20 * 20],
+            ['10 Coin', $row->coin_10, $row->coin_10 * 10],
+            ['5 Coin', $row->coin_5, $row->coin_5 * 5],
+            ['1 Coin', $row->coin_1, $row->coin_1 * 1],
+            [''],
+            ['TOTAL CASH DEPOSIT', '', $row->actual_amount],
+            ['Variance', '', $row->variance],
+            [''],
+            ['Depositor Signature', '', 'Received By'],
+        ]);
     }
 
     public function headings(): array
     {
-        return [
-            'Branch',
-            'Date',
-            '1000',
-            '500',
-            '200',
-            '100',
-            '50',
-            '20',
-            '10',
-            '5',
-            '1',
-            'Actual Deposit',
-            'Variance'
-        ];
+        return [];
     }
 
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function($event){
+            AfterSheet::class => function ($event) {
 
                 $sheet = $event->sheet->getDelegate();
 
-                $sheet->insertNewRowBefore(1, 3);
+                $sheet->mergeCells('A1:C1');
+                $sheet->mergeCells('A2:C2');
 
-                $sheet->setCellValue('A1', 'NICOLE TILES CENTER');
-                $sheet->mergeCells('A1:M1');
+                $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(16);
+                $sheet->getStyle('A1:C2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                $sheet->setCellValue('A2', 'CASH DEPOSIT REPORT');
-                $sheet->mergeCells('A2:M2');
-
-                $sheet->setCellValue('A3', 'Generated: ' . now()->format('Y-m-d h:i A'));
-                $sheet->mergeCells('A3:M3');
-
-                $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(14);
-                $sheet->getStyle('A1:M3')->getAlignment()->setHorizontal('center');
-
-                $lastRow = $sheet->getHighestRow();
-
-                $sheet->getStyle("A4:M{$lastRow}")
+                $sheet->getStyle('A7:C16')
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
 
-                $sheet->getStyle("A4:M4")->getFont()->setBold(true);
+                $sheet->getStyle('A7:C7')->getFont()->setBold(true);
+
+                $sheet->getStyle('A18:C19')->getFont()->setBold(true);
+
+                $sheet->getStyle('C8:C19')
+                    ->getNumberFormat()
+                    ->setFormatCode('#,##0.00');
+
+                $sheet->getStyle('A21:C21')->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $sheet->getStyle('A21')->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle('C21')->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
             }
         ];
     }
