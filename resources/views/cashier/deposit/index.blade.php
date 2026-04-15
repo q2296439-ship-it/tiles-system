@@ -5,7 +5,7 @@ $layout = match(auth()->user()->role) {
     default => 'layouts.cashier',
 };
 
-$isCashier = auth()->user()->role === 'cashier';
+$isCashier = strtolower(auth()->user()->role) === 'cashier';
 @endphp
 
 @extends($layout)
