@@ -224,11 +224,9 @@ Route::prefix('admin')->group(function () {
 // =====================
 Route::prefix('cashier')->group(function () {
 
-    // ✅ SAME ROUTE, gagawin nating dashboard page later
     Route::get('/', [CashierController::class, 'index'])
         ->name('cashier.dashboard');
 
-    // ✅ KEEP EXISTING checkout route para walang masira
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
     Route::get('/inventory-stock', [InventoryController::class, 'overviewStock'])
@@ -275,6 +273,13 @@ Route::prefix('cashier')->group(function () {
 
     Route::post('/deposit', [CollectionController::class, 'depositStore'])
         ->name('cashier.deposit.store');
+
+    // ✅ NEW CHANGE PASSWORD ROUTES
+    Route::get('/change-password', [AuthController::class, 'showChangePassword'])
+        ->name('cashier.password');
+
+    Route::post('/change-password', [AuthController::class, 'changePassword'])
+        ->name('cashier.password.update');
 });
 
 

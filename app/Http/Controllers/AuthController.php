@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -20,68 +21,81 @@ class AuthController extends Controller
     // =====================
     public function login(Request $request)
     {
-        // 🔥 VALIDATION
         $request->validate([
             'username' => 'required',
             'password' => 'required'
         ]);
 
-        // 🔥 EMAIL LOGIN (FIXED: trim + lowercase)
         $credentials = [
             'email' => strtolower(trim($request->username)),
             'password' => $request->password
         ];
 
-        // 🔥 REMEMBER ME SUPPORT
         $remember = $request->has('remember');
 
-        // 🔥 CHECK USER EXISTS
         $userCheck = \App\Models\User::where('email', $credentials['email'])->first();
 
         if (!$userCheck) {
             return back()->withErrors(['login' => 'User not found (email mismatch)']);
         }
 
-        // 🔥 TRY LOGIN
         if (Auth::attempt($credentials, $remember)) {
 
             $request->session()->regenerate();
 
             $user = Auth::user();
-
-            // 🔥 CLEAN ROLE
             $role = strtolower(trim($user->role));
 
-            // =====================
-            // ROLE BASED REDIRECT
-            // =====================
-
-            // ADMIN
             if ($role === 'admin') {
                 return redirect('/admin');
             }
 
-            // CASHIER
             if ($role === 'cashier') {
                 return redirect('/cashier');
             }
 
-            // INVENTORY
             if ($role === 'inventory') {
                 return redirect('/inventory-dashboard');
             }
 
-            // 🔥 MANAGER (SUPPORT BOTH)
             if ($role === 'manager' || $role === 'branch_manager') {
                 return redirect('/manager');
             }
 
-            // DEFAULT FALLBACK
             return redirect('/');
         }
 
-        // 🔥 PASSWORD FAIL
         return back()->withErrors(['login' => 'Wrong password']);
+    }
+
+    // =====================
+    // SHOW CHANGE PASSWORD PAGE
+    // =====================
+    public function showChangePassword()
+    {
+        return view('cashier.change-password');
+    }
+
+    // =====================
+    // CHANGE PASSWORD FUNCTION
+    // =====================
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->with('error', 'Current password is incorrect.');
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return back()->with('success', 'Password changed successfully!');
     }
 
     // =====================
@@ -91,7 +105,6 @@ class AuthController extends Controller
     {
         Auth::logout();
 
-        // 🔥 IMPORTANT SECURITY
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

@@ -243,23 +243,27 @@
         </a>
 
         <a href="{{ url('/cashier/incoming') }}"
-           class="{{ request()->is('cashier/incoming*') ? 'active' : '' }}">
-            📦 Incoming Transfer Stock
-        </a>
+   class="{{ request()->is('cashier/incoming*') ? 'active' : '' }}">
+    📦 Incoming Transfer Stock
+</a>
 
-        <hr>
+<hr>
 
-        <p>Account</p>
-        <a href="#">🔑 Change Password</a>
+<p>Account</p>
 
-    </div>
+<a href="{{ route('cashier.password') }}"
+   class="{{ request()->is('cashier/change-password*') ? 'active' : '' }}">
+    🔑 Change Password
+</a>
 
-    <div class="logout">
-        <form method="POST" action="{{ url('/logout') }}">
-            @csrf
-            <button>🚪 Logout</button>
-        </form>
-    </div>
+</div>
+
+<div class="logout">
+    <form method="POST" action="{{ url('/logout') }}">
+        @csrf
+        <button>🚪 Logout</button>
+    </form>
+</div>
 
 </div>
 
