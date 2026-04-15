@@ -224,7 +224,11 @@ Route::prefix('admin')->group(function () {
 // =====================
 Route::prefix('cashier')->group(function () {
 
-    Route::get('/', [CashierController::class, 'index']);
+    // ✅ SAME ROUTE, gagawin nating dashboard page later
+    Route::get('/', [CashierController::class, 'index'])
+        ->name('cashier.dashboard');
+
+    // ✅ KEEP EXISTING checkout route para walang masira
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
     Route::get('/inventory-stock', [InventoryController::class, 'overviewStock'])
@@ -267,10 +271,10 @@ Route::prefix('cashier')->group(function () {
         ->name('cashier.return.store');
 
     Route::get('/deposit', [CollectionController::class, 'deposit'])
-    ->name('cashier.deposit');
+        ->name('cashier.deposit');
 
     Route::post('/deposit', [CollectionController::class, 'depositStore'])
-    ->name('cashier.deposit.store');
+        ->name('cashier.deposit.store');
 });
 
 

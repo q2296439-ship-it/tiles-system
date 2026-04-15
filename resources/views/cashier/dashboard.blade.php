@@ -3,422 +3,257 @@
 @section('content')
 
 <style>
-    .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+    .topbar{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:20px;
+        gap:15px;
+        flex-wrap:wrap;
     }
 
-    .search input {
-        width: 100%;
-        padding: 14px;
-        border-radius: 14px;
-        border: 1px solid #ddd;
-        background: #fff;
+    .title{
+        font-size:28px;
+        font-weight:700;
+        color:#0f172a;
     }
 
-    .pos-wrapper {
-        background: #ffffff;
-        padding: 20px;
-        border-radius: 18px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    .subtitle{
+        color:#64748b;
+        font-size:14px;
+        margin-top:4px;
     }
 
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 18px;
-        margin-top: 15px;
+    .cards{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:18px;
+        margin-bottom:20px;
     }
 
-    .product {
-        background: #f9fafb;
-        padding: 18px;
-        border-radius: 16px;
-        text-align: center;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: 0.2s;
+    .card-box{
+        background:linear-gradient(135deg,#ffffff,#f8fafc);
+        border-radius:18px;
+        padding:20px;
+        box-shadow:0 8px 20px rgba(0,0,0,0.05);
+        border:1px solid #eef2f7;
     }
 
-    .product:hover {
-        border-color: #22c55e;
-        transform: translateY(-4px);
+    .card-label{
+        font-size:13px;
+        color:#64748b;
+        margin-bottom:8px;
     }
 
-    .product h4 {
-        margin: 8px 0;
-        font-size: 15px;
-        font-weight: 600;
+    .card-value{
+        font-size:28px;
+        font-weight:700;
+        color:#0f172a;
     }
 
-    .size {
-        font-size: 12px;
-        color: #64748b;
+    .actions{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:18px;
+        margin-bottom:20px;
     }
 
-    .price {
-        color: #22c55e;
-        font-weight: bold;
-        margin-top: 5px;
+    .action-btn{
+        display:block;
+        text-decoration:none;
+        background:#22c55e;
+        color:#fff;
+        padding:16px;
+        border-radius:16px;
+        font-weight:700;
+        text-align:center;
+        transition:.2s;
     }
 
-    .stock {
-        font-size: 12px;
-        margin-top: 6px;
+    .action-btn:hover{
+        transform:translateY(-3px);
+        background:#16a34a;
     }
 
-    .out {
-        opacity: 0.4;
-        pointer-events: none;
+    .grid-2{
+        display:grid;
+        grid-template-columns:2fr 1fr;
+        gap:18px;
+    }
+
+    .panel{
+        background:#fff;
+        border-radius:18px;
+        padding:20px;
+        box-shadow:0 8px 20px rgba(0,0,0,0.05);
+        border:1px solid #eef2f7;
+    }
+
+    .panel h3{
+        margin:0 0 15px;
+        font-size:18px;
+        color:#0f172a;
+    }
+
+    table{
+        width:100%;
+        border-collapse:collapse;
+    }
+
+    th,td{
+        padding:12px 10px;
+        border-bottom:1px solid #f1f5f9;
+        text-align:left;
+        font-size:14px;
+    }
+
+    th{
+        color:#64748b;
+        font-weight:600;
+    }
+
+    .badge-low{
+        background:#fee2e2;
+        color:#b91c1c;
+        padding:4px 8px;
+        border-radius:999px;
+        font-size:12px;
+        font-weight:700;
+    }
+
+    .empty{
+        color:#94a3b8;
+        font-size:14px;
+    }
+
+    @media(max-width:900px){
+        .grid-2{
+            grid-template-columns:1fr;
+        }
     }
 </style>
 
 <div class="topbar">
-    <h2>🧾 New Sale</h2>
-    <div>👤 {{ auth()->user()->username }}</div>
-</div>
-
-<div class="pos-wrapper">
-
-    <div class="search">
-        <input type="text" placeholder="🔍 Search product...">
+    <div>
+        <div class="title">📊 Cashier Main Dashboard</div>
+        <div class="subtitle">
+            Welcome back, {{ auth()->user()->username }}
+        </div>
     </div>
 
-    <div class="grid">
-        @foreach($products as $product)
-        <div class="product {{ $product->stock <= 0 ? 'out' : '' }}"
-            onclick='addToCart({{ $product->id }}, @json($product->name), {{ $product->price }})'>
+    <div class="subtitle">
+        {{ now()->format('F d, Y h:i A') }}
+    </div>
+</div>
 
-            <h4>{{ $product->name }}</h4>
-            <div class="size">{{ $product->size }}</div>
+<div class="cards">
 
-            <div class="price">₱{{ number_format($product->price,2) }}</div>
+    <div class="card-box">
+        <div class="card-label">Today Sales</div>
+        <div class="card-value">₱{{ number_format($todaySales,2) }}</div>
+    </div>
 
-            <div class="stock" style="color: {{ $product->stock <= 5 ? 'red' : '#64748b' }}">
-                Stock: {{ $product->stock }}
-            </div>
+    <div class="card-box">
+        <div class="card-label">Receipts Today</div>
+        <div class="card-value">{{ $receiptCount }}</div>
+    </div>
 
-        </div>
-        @endforeach
+    <div class="card-box">
+        <div class="card-label">Products</div>
+        <div class="card-value">{{ $products->count() }}</div>
+    </div>
+
+    <div class="card-box">
+        <div class="card-label">Low Stocks</div>
+        <div class="card-value">{{ $lowStocks->count() }}</div>
+    </div>
+
+</div>
+
+<div class="actions">
+
+    <a href="{{ route('cashier.collection.create') }}" class="action-btn">
+        ➕ Add Collection Receipt
+    </a>
+
+    <a href="{{ route('cashier.collection.today') }}" class="action-btn">
+        🧾 Collection Today
+    </a>
+
+    <a href="{{ route('cashier.deposit') }}" class="action-btn">
+        💰 Deposit
+    </a>
+
+    <a href="{{ route('cashier.return.create') }}" class="action-btn">
+        ↩ Return Receipt
+    </a>
+
+</div>
+
+<div class="grid-2">
+
+    <div class="panel">
+        <h3>🕒 Recent Sales</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($recentSales as $sale)
+                <tr>
+                    <td>#{{ $sale->id }}</td>
+                    <td>₱{{ number_format($sale->total_amount,2) }}</td>
+                    <td>{{ $sale->created_at->format('M d, h:i A') }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="3" class="empty">No recent sales found.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel">
+        <h3>⚠ Low Stock Alerts</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($lowStocks as $item)
+                <tr>
+                    <td>{{ $item->name }}</td>
+                    <td>
+                        <span class="badge-low">
+                            {{ $item->stock }}
+                        </span>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="2" class="empty">No low stock items.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 
 </div>
 
 @endsection
-
 
 @section('cart')
-
-<style>
-    .cart-items {
-        flex: 1;
-        overflow-y: auto;
-        margin-bottom: 10px;
-    }
-
-    .item {
-        background: #334155;
-        padding: 14px;
-        border-radius: 12px;
-        margin-bottom: 10px;
-    }
-
-    .item-name {
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    .qty-control {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 8px;
-    }
-
-    .qty-control button {
-        padding: 4px 8px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .qty-control input {
-        width: 55px;
-        text-align: center;
-        border-radius: 6px;
-        border: none;
-    }
-
-    .total {
-        font-size: 20px;
-        margin: 10px 0;
-        font-weight: bold;
-    }
-
-    #cash {
-        width: 100%;
-        padding: 12px;
-        border-radius: 10px;
-        border: none;
-        margin-bottom: 10px;
-    }
-
-    .pay {
-        width: 100%;
-        padding: 15px;
-        border-radius: 12px;
-        background: #22c55e;
-        color: white;
-        font-weight: bold;
-    }
-
-    /* MODAL */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.6);
-        backdrop-filter: blur(5px);
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
-
-    .modal-box {
-        background: #fff;
-        padding: 35px;
-        border-radius: 18px;
-        width: 340px;
-        text-align: center;
-    }
-
-    .actions {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-print {
-        background: #22c55e;
-        color: white;
-    }
-
-    .btn-close {
-        background: #64748b;
-        color: white;
-    }
-
-    .actions button {
-        flex: 1;
-        padding: 12px;
-        border-radius: 10px;
-        border: none;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    /* PRINT ONLY RECEIPT */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-
-        #receipt, #receipt * {
-            visibility: visible;
-        }
-
-        #receipt {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-    }
-</style>
-
-<h2>🛒 Cart</h2>
-
-<div class="cart-items" id="cart"></div>
-
-<div class="total">
-    Total: ₱<span id="total">0.00</span>
-</div>
-
-<input type="number" id="cash" placeholder="Enter exact cash" oninput="calculateChange()">
-
-<div>Change: ₱<span id="change">0.00</span></div>
-
-<button class="pay" id="payBtn" onclick="checkout()" disabled>
-    💳 PAY
-</button>
-
-<!-- MODAL -->
-<div id="successModal" class="modal-overlay">
-    <div class="modal-box">
-        <h2>Payment Successful</h2>
-
-        <div class="actions">
-            <button class="btn-print" onclick="printReceipt()">🖨 Print</button>
-            <button class="btn-close" onclick="closeModal()">Close</button>
-        </div>
-    </div>
-</div>
-
-<!-- 🔥 RECEIPT -->
-<div id="receipt" style="display:none; font-family: monospace; width:300px; padding:10px;">
-    <h3 style="text-align:center;">Nicole Tiles Center</h3>
-    <p style="text-align:center;">------------------</p>
-
-    <div id="receiptItems"></div>
-
-    <p>------------------</p>
-    <p>Total: ₱<span id="rTotal"></span></p>
-    <p>Cash: ₱<span id="rCash"></span></p>
-    <p>Change: ₱<span id="rChange"></span></p>
-    <p id="rDate"></p>
-</div>
-
 @endsection
 
-
 @section('scripts')
-
-<script>
-let cart = [];
-
-function addToCart(id, name, price){
-    let item = cart.find(i => i.id === id);
-
-    if(item){
-        item.qty++;
-    } else {
-        cart.push({id, name, price, qty:1});
-    }
-
-    renderCart();
-}
-
-function renderCart(){
-    let html = '';
-    let total = 0;
-
-    cart.forEach((item, index)=>{
-        total += item.price * item.qty;
-
-        html += `
-            <div class="item">
-                <div class="item-name">${item.name}</div>
-                ₱${item.price}
-
-                <div class="qty-control">
-                    <button onclick="decreaseQty(${index})">-</button>
-                    <input type="number" value="${item.qty}" min="1"
-                        onchange="updateQty(${index}, this.value)">
-                    <button onclick="increaseQty(${index})">+</button>
-                </div>
-            </div>
-        `;
-    });
-
-    document.getElementById('cart').innerHTML = html;
-    document.getElementById('total').innerText = total.toFixed(2);
-
-    calculateChange();
-}
-
-function increaseQty(index){ cart[index].qty++; renderCart(); }
-function decreaseQty(index){
-    if(cart[index].qty > 1){ cart[index].qty--; }
-    else { cart.splice(index, 1); }
-    renderCart();
-}
-
-function updateQty(index, value){
-    let qty = parseInt(value);
-    if(qty <= 0 || isNaN(qty)){ cart.splice(index, 1); }
-    else { cart[index].qty = qty; }
-    renderCart();
-}
-
-function calculateChange(){
-    let cash = parseFloat(document.getElementById('cash').value) || 0;
-    let total = parseFloat(document.getElementById('total').innerText) || 0;
-
-    let change = cash - total;
-    document.getElementById('change').innerText = change.toFixed(2);
-
-    let payBtn = document.getElementById('payBtn');
-
-    if(cash !== total || total === 0){
-        payBtn.disabled = true;
-        payBtn.style.opacity = 0.5;
-    } else {
-        payBtn.disabled = false;
-        payBtn.style.opacity = 1;
-    }
-}
-
-function checkout(){
-    let cash = parseFloat(document.getElementById('cash').value) || 0;
-    let total = parseFloat(document.getElementById('total').innerText) || 0;
-
-    if(cart.length === 0){ alert("No items in cart"); return; }
-    if(cash !== total){ alert("Cash must be exact amount!"); return; }
-
-    fetch('/cashier/checkout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ items: cart, total: total })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success){
-            showSuccessModal();
-            buildReceipt();
-            cart = [];
-            renderCart();
-        } else {
-            alert(data.message);
-        }
-    });
-}
-
-function buildReceipt(){
-    let html = '';
-    let total = 0;
-
-    cart.forEach(item=>{
-        total += item.price * item.qty;
-
-        html += `<p>${item.name} (${item.qty}) - ₱${item.price}</p>`;
-    });
-
-    document.getElementById('receiptItems').innerHTML = html;
-    document.getElementById('rTotal').innerText = total.toFixed(2);
-
-    let cash = document.getElementById('cash').value;
-    let change = cash - total;
-
-    document.getElementById('rCash').innerText = cash;
-    document.getElementById('rChange').innerText = change.toFixed(2);
-    document.getElementById('rDate').innerText = new Date().toLocaleString();
-}
-
-function printReceipt(){
-    window.print();
-}
-
-function showSuccessModal(){
-    document.getElementById('successModal').style.display = 'flex';
-}
-
-function closeModal(){
-    document.getElementById('successModal').style.display = 'none';
-}
-</script>
-
 @endsection

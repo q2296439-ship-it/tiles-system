@@ -14,11 +14,39 @@ class CashierController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        $branchId = $user->branch_id;
+        $today = now()->toDateString();
 
-        // ✅ sariling branch lang products
-        $products = Product::where('branch_id', $user->branch_id)->get();
+        // ✅ sariling branch lang products (kept)
+        $products = Product::where('branch_id', $branchId)->get();
 
-        return view('cashier.dashboard', compact('products'));
+        // ✅ Dashboard Stats
+        $todaySales = Sale::whereDate('created_at', $today)
+            ->where('branch_id', $branchId)
+            ->sum('total_amount');
+
+        $receiptCount = \App\Models\Collection::whereDate('receipt_date', $today)
+            ->where('branch_id', $branchId)
+            ->count();
+
+        $lowStocks = Product::where('branch_id', $branchId)
+            ->where('stock', '<=', 5)
+            ->orderBy('stock', 'asc')
+            ->take(5)
+            ->get();
+
+        $recentSales = Sale::where('branch_id', $branchId)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('cashier.dashboard', compact(
+            'products',
+            'todaySales',
+            'receiptCount',
+            'lowStocks',
+            'recentSales'
+        ));
     }
 
     // 🔥 CHECKOUT (REALTIME FIXED + SAFE)
