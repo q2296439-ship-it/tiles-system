@@ -147,6 +147,10 @@ Route::get('/manager/inventory', [ProductController::class, 'index'])->middlewar
 // ✅ INVENTORY REPORT MANAGER
 Route::get('/manager/inventory-report', [InventoryController::class, 'overviewStock'])->middleware('auth')->name('manager.inventory.report');
 
+// ✅ ADD STOCK MANAGER
+Route::get('/manager/add-stock', [InventoryController::class, 'create'])->middleware('auth')->name('manager.add.stock');
+Route::post('/manager/add-stock', [InventoryController::class, 'store'])->middleware('auth')->name('manager.add.stock.store');
+
 
 // =====================
 // ADMIN GROUP
