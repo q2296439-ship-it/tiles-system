@@ -12,7 +12,8 @@
             margin:0;
             font-family:'Segoe UI',sans-serif;
             display:flex;
-            min-height:100vh;
+            height:100vh;
+            overflow:hidden;
             background:#f1f5f9;
         }
 
@@ -22,7 +23,10 @@
             color:#fff;
             display:flex;
             flex-direction:column;
-            min-height:100vh;
+            height:100vh;
+            position:sticky;
+            top:0;
+            overflow:hidden;
             box-shadow:4px 0 18px rgba(0,0,0,0.08);
             flex-shrink:0;
         }
@@ -31,6 +35,15 @@
             flex:1;
             overflow-y:auto;
             padding:18px 16px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar{
+            width:5px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb{
+            background:#334155;
+            border-radius:10px;
         }
 
         .sidebar h2{
@@ -79,6 +92,7 @@
 
         .logout{
             padding:14px 16px;
+            margin-top:auto;
         }
 
         .logout button{
@@ -91,6 +105,7 @@
             font-size:14px;
             font-weight:700;
             cursor:pointer;
+            transition:.2s;
         }
 
         .logout button:hover{
@@ -102,6 +117,16 @@
             padding:20px;
             overflow-y:auto;
             min-width:0;
+            height:100vh;
+        }
+
+        .content::-webkit-scrollbar{
+            width:6px;
+        }
+
+        .content::-webkit-scrollbar-thumb{
+            background:#94a3b8;
+            border-radius:10px;
         }
 
         .topbar{
