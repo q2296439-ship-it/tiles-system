@@ -306,16 +306,20 @@
                         </td>
 
                         <td>
-                            <form method="POST" action="{{ route('manager.request.open') }}">
-                                @csrf
-                                <input type="hidden" name="id" value="{{ $row->id }}">
+                            @if(auth()->user()->role != 'audit')
+                                <form method="POST" action="{{ route('manager.request.open') }}">
+                                    @csrf
+                                    <input type="hidden" name="id" value="{{ $row->id }}">
 
-                                <button type="submit"
-                                        class="btn btn-danger"
-                                        onclick="return confirm('Reopen this transaction?')">
-                                    Reopen
-                                </button>
-                            </form>
+                                    <button type="submit"
+                                            class="btn btn-danger"
+                                            onclick="return confirm('Reopen this transaction?')">
+                                        Reopen
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-muted">View Only</span>
+                            @endif
                         </td>
                     </tr>
 
