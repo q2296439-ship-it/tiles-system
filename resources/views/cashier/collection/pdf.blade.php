@@ -83,7 +83,7 @@
 
     <div class="info">
         Generated: {{ now()->format('F d, Y h:i A') }} <br>
-        Branch: {{ auth()->user()->branch->name ?? 'Current Branch' }} <br>
+        Branch: {{ $branchName ?? 'Current Branch' }} <br>
         Date: {{ $selectedDate ?? date('Y-m-d') }}
     </div>
 </div>
@@ -108,9 +108,7 @@
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
 
-                <td>
-                    {{ $row->display_receipt_no ?? $row->receipt_no }}
-                </td>
+                <td>{{ $row->display_receipt_no ?? $row->receipt_no }}</td>
 
                 <td>{{ $row->customer_name }}</td>
 
@@ -142,7 +140,9 @@
 
         @empty
             <tr>
-                <td colspan="8" class="text-center">No collection records found.</td>
+                <td colspan="8" class="text-center">
+                    No collection records found.
+                </td>
             </tr>
         @endforelse
 

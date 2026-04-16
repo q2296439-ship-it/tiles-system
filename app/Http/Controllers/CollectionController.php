@@ -314,6 +314,7 @@ class CollectionController extends Controller
 
     $isAdmin = $role === 'admin';
     $branchId = $user->branch_id ?: 1;
+    $branchName = optional($user->branch)->name ?? 'Current Branch';
 
     $collections = Collection::with(['user', 'items', 'branch'])
         ->whereDate('receipt_date', $selectedDate);
@@ -366,26 +367,33 @@ class CollectionController extends Controller
         'collections',
         'selectedDate',
         'status',
-        'total'
+        'total',
+        'branchName'
     ))->setPaper('a4', 'landscape');
 
     return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
 }
 
     public function exportExcel(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $status = $request->status ?? 'all';
-
-        return Excel::download(
-            new CollectionExport(
-                $selectedDate,
-                auth()->user()->branch_id,
-                $status
-            ),
-            'collection_report_' . $selectedDate . '.xlsx'
-        );
+{
+    if (!auth()->check()) {
+        return redirect('/login');
     }
+
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status = $request->status ?? 'all';
+
+    $user = auth()->user();
+
+    return Excel::download(
+        new CollectionExport(
+            $selectedDate,
+            $user->branch_id,
+            $status
+        ),
+        'collection_report_' . $selectedDate . '.xlsx'
+    );
+}
 
     public function store(Request $request)
     {

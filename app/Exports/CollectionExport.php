@@ -31,7 +31,6 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
     {
         $rows = [];
 
-        // collections (saved/cancelled)
         $collections = Collection::with(['user', 'items'])
             ->when($this->date, function ($query) {
                 $query->whereDate('receipt_date', $this->date);
@@ -45,7 +44,6 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
                 return $row;
             });
 
-        // returns
         $returns = ReturnModel::with(['user', 'items'])
             ->when($this->date, function ($query) {
                 $query->whereDate('return_date', $this->date);
@@ -125,7 +123,11 @@ class CollectionExport implements FromCollection, WithHeadings, WithStyles, Shou
 
                 $sheet->insertNewRowBefore(1, 4);
 
-                $branchName = auth()->user()->branch->name ?? 'Current Branch';
+                $branchName = 'Current Branch';
+
+                if (auth()->check()) {
+                    $branchName = optional(auth()->user()->branch)->name ?? 'Current Branch';
+                }
 
                 $sheet->setCellValue('A1', 'COLLECTION REPORT');
                 $sheet->mergeCells('A1:I1');
