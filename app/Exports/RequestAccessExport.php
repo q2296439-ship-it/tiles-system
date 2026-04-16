@@ -3,18 +3,19 @@
 namespace App\Exports;
 
 use App\Models\Deposit;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class RequestAccessExport implements
     FromCollection,
     WithHeadings,
     WithStyles,
-    ShouldAutoSize
+    ShouldAutoSize,
+    WithCustomStartCell
 {
     protected $date;
     protected $branchId;
@@ -23,6 +24,11 @@ class RequestAccessExport implements
     {
         $this->date = $date;
         $this->branchId = $branchId;
+    }
+
+    public function startCell(): string
+    {
+        return 'A5';
     }
 
     public function collection()
@@ -51,14 +57,14 @@ class RequestAccessExport implements
 
         return $query->latest('deposits.id')->get()->map(function ($row) {
             return [
-                'Branch'      => $row->branch,
-                'Date Closed' => $row->deposit_date,
-                'Net Amount'  => number_format($row->net_amount, 2),
-                'Actual'      => number_format($row->actual_amount, 2),
-                'Variance'    => number_format($row->variance, 2),
-                'Closed By'   => $row->closed_by,
-                'Closed At'   => date('M d, Y h:i A', strtotime($row->created_at)),
-                'Status'      => ucfirst($row->status),
+                $row->branch,
+                $row->deposit_date,
+                number_format($row->net_amount, 2),
+                number_format($row->actual_amount, 2),
+                number_format($row->variance, 2),
+                $row->closed_by,
+                date('M d, Y h:i A', strtotime($row->created_at)),
+                ucfirst($row->status),
             ];
         });
     }
@@ -79,10 +85,20 @@ class RequestAccessExport implements
 
     public function styles(Worksheet $sheet)
     {
-        return [
-            1 => [
-                'font' => ['bold' => true, 'size' => 12],
-            ],
-        ];
+        $sheet->setCellValue('A1', 'NICOLE TILES CENTER');
+        $sheet->setCellValue('A2', 'Request Access Report');
+        $sheet->setCellValue('A3', 'Generated: ' . now()->format('M d, Y h:i A'));
+
+        $sheet->mergeCells('A1:H1');
+        $sheet->mergeCells('A2:H2');
+        $sheet->mergeCells('A3:H3');
+
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(13);
+        $sheet->getStyle('A3')->getFont()->setSize(11);
+
+        $sheet->getStyle('A5:H5')->getFont()->setBold(true);
+
+        return [];
     }
 }
