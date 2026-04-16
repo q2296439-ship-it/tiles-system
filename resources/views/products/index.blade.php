@@ -1,8 +1,9 @@
 @php
-$layout = match(auth()->user()->role) {
-    'admin' => 'layouts.admin',
+$layout = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'layouts.admin',
     'manager' => 'layouts.manager',
-    default => 'layouts.cashier',
+    'audit'   => 'layouts.manager',
+    default   => 'layouts.cashier',
 };
 @endphp
 
