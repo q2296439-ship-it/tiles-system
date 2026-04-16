@@ -235,7 +235,10 @@
                     <input type="checkbox" name="remember">
                     <span>Remember me</span>
                 </label>
-           
+
+                <a href="#" class="forgot">Forgot?</a>
+            </div>
+
             <button type="submit" class="btn">Login</button>
 
         </form>
