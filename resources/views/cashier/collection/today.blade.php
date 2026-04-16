@@ -1,9 +1,11 @@
 @extends(
     strtolower(auth()->user()->role) === 'admin'
         ? 'layouts.admin'
-        : (strtolower(auth()->user()->role) === 'manager'
-            ? 'layouts.manager'
-            : 'layouts.cashier')
+        : (
+            in_array(strtolower(auth()->user()->role), ['manager', 'audit'])
+                ? 'layouts.manager'
+                : 'layouts.cashier'
+          )
 )
 
 @section('content')
