@@ -80,9 +80,9 @@ button:hover {
 
                 <input type="text" name="employee_id" placeholder="Employee ID" required>
 
-                {{-- 🔥 UPDATED: BRANCH SELECT --}}
+                {{-- Unified Branch Access --}}
                 <select name="branch_id">
-                    <option value="">🌐 All Branches (Manager)</option>
+                    <option value="">🌐 All Branches</option>
                     @foreach($branches as $branch)
                         <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                     @endforeach
@@ -91,7 +91,7 @@ button:hover {
                 <select name="role" required>
                     <option value="">Select Role</option>
                     <option value="admin">🔥 Admin</option>
-                    <option value="manager">👨‍💼 Manager (All Branches)</option>
+                    <option value="manager">👨‍💼 Manager</option>
                     <option value="cashier">💰 Cashier</option>
                     <option value="audit">📊 Audit</option>
                 </select>

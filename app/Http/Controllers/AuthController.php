@@ -17,7 +17,7 @@ class AuthController extends Controller
     }
 
     // =====================
-    // LOGIN FUNCTION (EMAIL BASED FIX - FINAL)
+    // LOGIN FUNCTION
     // =====================
     public function login(Request $request)
     {
@@ -36,7 +36,9 @@ class AuthController extends Controller
         $userCheck = \App\Models\User::where('email', $credentials['email'])->first();
 
         if (!$userCheck) {
-            return back()->withErrors(['login' => 'User not found (email mismatch)']);
+            return back()->withErrors([
+                'login' => 'User not found (email mismatch)'
+            ]);
         }
 
         if (Auth::attempt($credentials, $remember)) {
@@ -46,26 +48,37 @@ class AuthController extends Controller
             $user = Auth::user();
             $role = strtolower(trim($user->role));
 
+            // ADMIN
             if ($role === 'admin') {
                 return redirect('/admin');
             }
 
+            // CASHIER
             if ($role === 'cashier') {
                 return redirect('/cashier');
             }
 
+            // INVENTORY
             if ($role === 'inventory') {
                 return redirect('/inventory-dashboard');
             }
 
-            if ($role === 'manager' || $role === 'branch_manager') {
+            // MANAGER + BRANCH MANAGER + AUDIT
+            if (
+                $role === 'manager' ||
+                $role === 'branch_manager' ||
+                $role === 'audit'
+            ) {
                 return redirect('/manager');
             }
 
+            // DEFAULT
             return redirect('/');
         }
 
-        return back()->withErrors(['login' => 'Wrong password']);
+        return back()->withErrors([
+            'login' => 'Wrong password'
+        ]);
     }
 
     // =====================
@@ -99,7 +112,7 @@ class AuthController extends Controller
     }
 
     // =====================
-    // LOGOUT (SECURE FIX)
+    // LOGOUT
     // =====================
     public function logout(Request $request)
     {
