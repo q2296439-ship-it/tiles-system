@@ -11,13 +11,20 @@
             padding:0;
         }
 
+        html,body{
+            width:100%;
+            overflow-x:hidden;
+        }
+
         body{
             font-family:'Segoe UI',Tahoma,sans-serif;
             background:#f1f5f9;
             color:#111827;
         }
 
-        a{text-decoration:none;}
+        a{
+            text-decoration:none;
+        }
 
         /* SIDEBAR */
         .sidebar{
@@ -42,6 +49,7 @@
             font-size:18px;
             font-weight:800;
             margin-bottom:24px;
+            white-space:nowrap;
         }
 
         .menu-title{
@@ -67,6 +75,7 @@
             cursor:pointer;
             margin-bottom:6px;
             transition:.2s;
+            white-space:nowrap;
         }
 
         .sidebar a:hover,
@@ -84,6 +93,7 @@
         /* MAIN */
         .main{
             margin-left:250px;
+            width:calc(100% - 250px);
             min-height:100vh;
             transition:.3s ease;
         }
@@ -100,12 +110,14 @@
             position:sticky;
             top:0;
             z-index:900;
+            width:100%;
         }
 
         .left-wrap{
             display:flex;
             align-items:center;
             gap:12px;
+            min-width:0;
         }
 
         .menu-btn{
@@ -113,21 +125,24 @@
             border:none;
             background:#2563eb;
             color:#fff;
-            width:40px;
-            height:40px;
+            width:42px;
+            height:42px;
             border-radius:10px;
             font-size:18px;
             cursor:pointer;
+            flex-shrink:0;
         }
 
         .top-title{
             font-size:18px;
             font-weight:800;
+            line-height:1.2;
         }
 
         .top-sub{
             font-size:12px;
             color:#6b7280;
+            margin-top:2px;
         }
 
         .user-box{
@@ -137,6 +152,7 @@
             background:#f8fafc;
             padding:8px 12px;
             border-radius:12px;
+            flex-shrink:0;
         }
 
         .avatar{
@@ -154,6 +170,7 @@
         .user-name{
             font-size:14px;
             font-weight:700;
+            white-space:nowrap;
         }
 
         .user-role{
@@ -164,9 +181,28 @@
         /* CONTENT */
         .content{
             padding:20px;
+            width:100%;
+            max-width:100%;
         }
 
-        /* MOBILE OVERLAY */
+        /* IMPORTANT FIX FOR DESKTOP */
+        .content > *{
+            width:100%;
+            max-width:100%;
+        }
+
+        /* TABLES */
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        .table-responsive{
+            width:100%;
+            overflow-x:auto;
+        }
+
+        /* OVERLAY */
         .overlay{
             position:fixed;
             inset:0;
@@ -179,18 +215,13 @@
             display:block;
         }
 
-        /* TABLES */
-        table{
-            width:100%;
-            overflow-x:auto;
-            display:block;
-        }
-
         /* RESPONSIVE */
         @media(max-width:768px){
 
             .menu-btn{
-                display:block;
+                display:flex;
+                align-items:center;
+                justify-content:center;
             }
 
             .sidebar{
@@ -203,6 +234,7 @@
 
             .main{
                 margin-left:0;
+                width:100%;
             }
 
             .topbar{
@@ -224,9 +256,14 @@
             .user-info{
                 display:none;
             }
+
+            table{
+                min-width:700px;
+            }
         }
 
         @media(max-width:480px){
+
             .content{
                 padding:12px;
             }
@@ -238,10 +275,20 @@
             .sidebar a{
                 font-size:13px;
             }
+
+            .topbar{
+                gap:10px;
+            }
+
+            .avatar{
+                width:32px;
+                height:32px;
+            }
         }
 
         ::-webkit-scrollbar{
             width:7px;
+            height:7px;
         }
 
         ::-webkit-scrollbar-thumb{
@@ -273,7 +320,7 @@
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
 
     <div class="menu-title">Inventory</div>
-    <a href="/admin/inventory" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
+    <a href="{{ route('admin.inventory.index') }}" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
     <a href="{{ route('inventory.create') }}" class="{{ request()->is('admin/inventory/add-stock') ? 'active' : '' }}">➕ Add New Stock</a>
     <a href="/admin/inventory/transfer-out" class="{{ request()->is('admin/inventory/transfer-out') ? 'active' : '' }}">🔄 Transfer Out</a>
     <a href="/admin/inventory/transfer-in" class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">📥 Transfer In</a>

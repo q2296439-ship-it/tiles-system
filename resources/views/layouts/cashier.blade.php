@@ -11,13 +11,20 @@
             padding:0;
         }
 
+        html,body{
+            width:100%;
+            overflow-x:hidden;
+        }
+
         body{
             font-family:'Segoe UI',sans-serif;
             background:#f1f5f9;
             color:#111827;
         }
 
-        a{text-decoration:none;}
+        a{
+            text-decoration:none;
+        }
 
         /* SIDEBAR */
         .sidebar{
@@ -53,6 +60,7 @@
             font-size:16px;
             font-weight:800;
             margin-bottom:20px;
+            white-space:nowrap;
         }
 
         .sidebar p{
@@ -71,6 +79,7 @@
             font-size:14px;
             margin-bottom:8px;
             transition:.2s;
+            white-space:nowrap;
         }
 
         .sidebar a:hover{
@@ -108,6 +117,7 @@
         /* MAIN */
         .main{
             margin-left:240px;
+            width:calc(100% - 240px);
             min-height:100vh;
             transition:.3s;
         }
@@ -124,12 +134,14 @@
             position:sticky;
             top:0;
             z-index:900;
+            width:100%;
         }
 
         .left-wrap{
             display:flex;
             align-items:center;
             gap:12px;
+            min-width:0;
         }
 
         .menu-btn{
@@ -142,11 +154,13 @@
             color:#fff;
             font-size:18px;
             cursor:pointer;
+            flex-shrink:0;
         }
 
         .topbar-left h1{
             font-size:18px;
             font-weight:800;
+            line-height:1.2;
         }
 
         .topbar-left p{
@@ -162,6 +176,7 @@
             background:#f8fafc;
             padding:8px 12px;
             border-radius:12px;
+            flex-shrink:0;
         }
 
         .avatar{
@@ -179,6 +194,7 @@
         .user-info strong{
             display:block;
             font-size:14px;
+            white-space:nowrap;
         }
 
         .user-info span{
@@ -189,6 +205,24 @@
         /* CONTENT */
         .content{
             padding:18px;
+            width:100%;
+            max-width:100%;
+        }
+
+        .content > *{
+            width:100%;
+            max-width:100%;
+        }
+
+        /* TABLE */
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        .table-responsive{
+            width:100%;
+            overflow-x:auto;
         }
 
         /* OVERLAY */
@@ -204,18 +238,13 @@
             display:block;
         }
 
-        /* TABLE */
-        table{
-            width:100%;
-            display:block;
-            overflow-x:auto;
-        }
-
         /* MOBILE */
         @media(max-width:768px){
 
             .menu-btn{
-                display:block;
+                display:flex;
+                align-items:center;
+                justify-content:center;
             }
 
             .sidebar{
@@ -228,6 +257,7 @@
 
             .main{
                 margin-left:0;
+                width:100%;
             }
 
             .topbar-left p,
@@ -238,15 +268,25 @@
             .content{
                 padding:14px;
             }
+
+            table{
+                min-width:700px;
+            }
         }
 
         @media(max-width:480px){
+
             .content{
                 padding:12px;
             }
 
             .sidebar a{
                 font-size:13px;
+            }
+
+            .avatar{
+                width:32px;
+                height:32px;
             }
         }
     </style>
