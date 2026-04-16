@@ -369,17 +369,12 @@ class CollectionController extends Controller
         'total'
     ))->setPaper('a4', 'landscape');
 
-    return response()->make(
-        $pdf->output(),
-        200,
-        [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="collection_report_' . $selectedDate . '.pdf"',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate',
-            'Pragma' => 'public',
-            'Expires' => '0',
-        ]
-    );
+    return response($pdf->output(), 200)
+        ->header('Content-Type', 'application/pdf')
+        ->header(
+            'Content-Disposition',
+            'inline; filename="collection_report_' . $selectedDate . '.pdf"'
+        );
 }
 
     public function exportExcel(Request $request)
@@ -399,16 +394,7 @@ class CollectionController extends Controller
             $user->branch_id,
             $status
         ),
-        'collection_report_' . $selectedDate . '.xlsx',
-        \Maatwebsite\Excel\Excel::XLSX,
-        [
-            'Content-Type' =>
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Cache-Control' =>
-                'no-store, no-cache, must-revalidate',
-            'Pragma' => 'public',
-            'Expires' => '0',
-        ]
+        'collection_report_' . $selectedDate . '.xlsx'
     );
 }
 
