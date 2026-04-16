@@ -302,6 +302,10 @@ class CollectionController extends Controller
 
     public function exportPdf(Request $request)
 {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+
     $selectedDate = $request->date ?? date('Y-m-d');
     $status = $request->status ?? 'all';
 
@@ -365,34 +369,40 @@ class CollectionController extends Controller
         'total'
     ))->setPaper('a4', 'landscape');
 
-    return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
+    return $pdf->download('collection_report_' . $selectedDate . '.pdf');
 }
 
     public function exportExcel(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $status = $request->status ?? 'all';
-
-        return Excel::download(
-            new CollectionExport(
-                $selectedDate,
-                auth()->user()->branch_id,
-                $status
-            ),
-            'collection_report_' . $selectedDate . '.xlsx'
-        );
+{
+    if (!auth()->check()) {
+        return redirect('/login');
     }
 
-    public function store(Request $request)
-    {
-        try {
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status = $request->status ?? 'all';
 
-            $request->validate([
-                'receipt_no'   => 'required|unique:collections,receipt_no',
-                'receipt_date' => 'required|date',
-                'items'        => 'required|array|min:1',
-            ]);
+    $user = auth()->user();
 
+    return Excel::download(
+        new CollectionExport(
+            $selectedDate,
+            $user->branch_id,
+            $status
+        ),
+        'collection_report_' . $selectedDate . '.xlsx'
+    );
+}
+
+public function store(Request $request)
+{
+    try {
+
+        $request->validate([
+            'receipt_no'   => 'required|unique:collections,receipt_no',
+            'receipt_date' => 'required|date',
+            'items'        => 'required|array|min:1',
+        ]);
+        
            // ✅ NEW LOCK: bawal magsave kapag closed na deposit date
 $isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
     ->where('branch_id', auth()->user()->branch_id)
