@@ -369,7 +369,7 @@ class CollectionController extends Controller
         'total'
     ))->setPaper('a4', 'landscape');
 
-    return $pdf->download('collection_report_' . $selectedDate . '.pdf');
+    return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
 }
 
     public function exportExcel(Request $request)
