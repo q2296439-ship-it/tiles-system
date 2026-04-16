@@ -12,25 +12,26 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
     // =====================
-    // SHOW PRODUCTS
-    // =====================
-    public function index()
-    {
-        $user = Auth::user();
+// SHOW PRODUCTS
+// =====================
+public function index()
+{
+    $user = Auth::user();
+    $role = strtolower($user->role);
 
-        if (in_array($user->role, ['admin', 'manager'])) {
-            $products = Product::with('branch')
-                ->latest()
-                ->paginate(10);
-        } else {
-            $products = Product::with('branch')
-                ->where('branch_id', $user->branch_id)
-                ->latest()
-                ->paginate(10);
-        }
-
-        return view('products.index', compact('products'));
+    if (in_array($role, ['admin', 'manager', 'audit'])) {
+        $products = Product::with('branch')
+            ->latest()
+            ->paginate(10);
+    } else {
+        $products = Product::with('branch')
+            ->where('branch_id', $user->branch_id)
+            ->latest()
+            ->paginate(10);
     }
+
+    return view('products.index', compact('products'));
+}
 
     // =====================
     // ADMIN OVERVIEW STOCK
