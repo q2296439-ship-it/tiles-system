@@ -26,16 +26,12 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        $credentials = [
-            'username' => strtolower(trim($request->username)),
-            'password' => $request->password
-        ];
-
+        $loginUsername = trim($request->username);
         $remember = $request->has('remember');
 
-        $userCheck = \App\Models\User::where(
-            'username',
-            $credentials['username']
+        $userCheck = \App\Models\User::whereRaw(
+            'LOWER(username) = ?',
+            [strtolower($loginUsername)]
         )->first();
 
         if (!$userCheck) {
@@ -44,7 +40,10 @@ class AuthController extends Controller
             ]);
         }
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt([
+            'username' => $userCheck->username,
+            'password' => $request->password
+        ], $remember)) {
 
             $request->session()->regenerate();
 
