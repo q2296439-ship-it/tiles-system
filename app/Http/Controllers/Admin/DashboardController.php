@@ -18,15 +18,18 @@ class DashboardController extends Controller
 
         $branches = Branch::all();
 
-        // ✅ TOTAL PRODUCTS (branch-based)
-        $totalProducts = DB::table('branch_product')
-            ->when($branchId, function ($q) use ($branchId) {
+        // =====================
+        // TOTAL PRODUCTS
+        // =====================
+        $totalProducts = Product::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
-            ->distinct('product_id')
-            ->count('product_id');
+            ->distinct('name')
+            ->count('name');
 
-        // ✅ LOW STOCKS (branch-based)
+        // =====================
+        // LOW STOCKS
+        // =====================
         $lowStocks = DB::table('branch_product')
             ->join('products', 'branch_product.product_id', '=', 'products.id')
             ->join('branches', 'branch_product.branch_id', '=', 'branches.id')
@@ -41,21 +44,27 @@ class DashboardController extends Controller
             )
             ->get();
 
-        // ✅ TODAY SALES
+        // =====================
+        // TODAY SALES
+        // =====================
         $todaySales = Sale::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
             ->whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
-        // ✅ TRANSACTIONS TODAY
+        // =====================
+        // TRANSACTIONS TODAY
+        // =====================
         $transactionsToday = Sale::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
             ->whereDate('created_at', Carbon::today())
             ->count();
 
-        // ✅ GRAPH (LAST 7 DAYS)
+        // =====================
+        // GRAPH (LAST 7 DAYS)
+        // =====================
         $dates = collect();
 
         for ($i = 6; $i >= 0; $i--) {
@@ -73,7 +82,9 @@ class DashboardController extends Controller
             return [$date => $salesRaw[$date] ?? 0];
         });
 
-        // ✅ RECENT SALES (10 rows + branch name)
+        // =====================
+        // RECENT SALES
+        // =====================
         $recentSales = Sale::with('branch')
             ->when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
@@ -82,7 +93,9 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        // ✅ TOP BRANCHES
+        // =====================
+        // TOP BRANCHES
+        // =====================
         $topBranches = Sale::join('branches', 'sales.branch_id', '=', 'branches.id')
             ->selectRaw('branches.id, branches.name as branch_name, SUM(total_amount) as total')
             ->groupBy('branches.id', 'branches.name')
