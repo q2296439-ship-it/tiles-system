@@ -2,6 +2,10 @@
 
 @section('content')
 
+@php
+    $isAudit = strtolower(auth()->user()->role) === 'audit';
+@endphp
+
 <style>
     .header h2 {
         margin: 0;
@@ -77,40 +81,6 @@
         vertical-align: middle;
     }
 
-    th:nth-child(3),
-    td:nth-child(3) {
-        text-align: center;
-    }
-
-    th:nth-child(4),
-    td:nth-child(4) {
-        text-align: center;
-    }
-
-    td:last-child {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-    }
-
-    .approve {
-        background: #22c55e;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-    }
-
-    .reject {
-        background: #ef4444;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-    }
-
     .danger {
         color: red;
         font-weight: bold;
@@ -128,10 +98,14 @@
 </style>
 
 <div class="header">
-    <h2>📊 Manager Dashboard</h2>
-    <p>Welcome, {{ auth()->user()->name }}</p>
+    <h2>
+        {{ $isAudit ? '📊 Audit Dashboard' : '📊 Manager Dashboard' }}
+    </h2>
 
-    {{-- 🔥 UPDATED: WORKING DROPDOWN --}}
+    <p>
+        {{ $isAudit ? 'Welcome, ' . auth()->user()->name . ' • Read Only Access' : 'Welcome, ' . auth()->user()->name }}
+    </p>
+
     <div class="branch-filter">
         <form method="GET" action="/manager">
             <label><strong>Select Branch:</strong></label>
