@@ -302,10 +302,6 @@ class CollectionController extends Controller
 
     public function exportPdf(Request $request)
 {
-    if (!auth()->check()) {
-        return redirect('/login');
-    }
-
     $selectedDate = $request->date ?? date('Y-m-d');
     $status = $request->status ?? 'all';
 
@@ -394,10 +390,6 @@ class CollectionController extends Controller
 
     public function exportExcel(Request $request)
 {
-    if (!auth()->check()) {
-        return redirect('/login');
-    }
-
     $selectedDate = $request->date ?? date('Y-m-d');
     $status = $request->status ?? 'all';
 
@@ -415,6 +407,7 @@ class CollectionController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Cache-Control' => 'max-age=0, no-cache, no-store, must-revalidate',
             'Pragma' => 'public',
+            'Expires' => '0',
         ]
     );
 }
