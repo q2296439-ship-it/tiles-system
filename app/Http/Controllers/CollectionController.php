@@ -717,5 +717,97 @@ public function managerCollection(Request $request)
         'status'
     ));
 }
+// ==========================
+// 📄 REQUEST ACCESS PDF
+// ==========================
+public function requestAccessPdf(Request $request)
+{
+    $query = \App\Models\Deposit::with(['user'])
+        ->leftJoin('branches', 'deposits.branch_id', '=', 'branches.id')
+        ->select('deposits.*', 'branches.name as branch_name')
+        ->where('deposits.status', 'closed');
+
+    if ($request->date) {
+        $query->whereDate('deposits.deposit_date', $request->date);
+    }
+
+    if ($request->branch_id) {
+        $query->where('deposits.branch_id', $request->branch_id);
+    }
+
+    $rows = $query->latest('deposits.id')->get();
+
+    $pdf = Pdf::loadView('manager.request-access-pdf', compact('rows'))
+        ->setPaper('a4', 'landscape');
+
+    return $pdf->stream('request-access-report.pdf');
+}
+
+// ==========================
+// 📗 REQUEST ACCESS EXCEL
+// ==========================
+public function requestAccessExcel(Request $request)
+{
+    $query = \App\Models\Deposit::with(['user'])
+        ->leftJoin('branches', 'deposits.branch_id', '=', 'branches.id')
+        ->select('deposits.*', 'branches.name as branch_name')
+        ->where('deposits.status', 'closed');
+
+    if ($request->date) {
+        $query->whereDate('deposits.deposit_date', $request->date);
+    }
+
+    if ($request->branch_id) {
+        $query->where('deposits.branch_id', $request->branch_id);
+    }
+
+    $rows = $query->latest('deposits.id')->get();
+
+    $filename = 'request-access-report.xlsx';
+
+    return Excel::download(
+        new class($rows) implements \Maatwebsite\Excel\Concerns\FromCollection,
+                                   \Maatwebsite\Excel\Concerns\WithHeadings {
+
+            protected $rows;
+
+            public function __construct($rows)
+            {
+                $this->rows = $rows;
+            }
+
+            public function collection()
+            {
+                return $this->rows->map(function ($row) {
+                    return [
+                        'Branch'      => $row->branch_name,
+                        'Date Closed' => $row->deposit_date,
+                        'Net'         => $row->net_amount,
+                        'Actual'      => $row->actual_amount,
+                        'Variance'    => $row->variance,
+                        'Closed By'   => $row->user->name ?? 'N/A',
+                        'Closed At'   => $row->created_at,
+                        'Status'      => $row->status,
+                    ];
+                });
+            }
+
+            public function headings(): array
+            {
+                return [
+                    'Branch',
+                    'Date Closed',
+                    'Net',
+                    'Actual',
+                    'Variance',
+                    'Closed By',
+                    'Closed At',
+                    'Status',
+                ];
+            }
+        },
+        $filename
+    );
+}
 
 }
