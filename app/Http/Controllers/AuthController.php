@@ -27,17 +27,20 @@ class AuthController extends Controller
         ]);
 
         $credentials = [
-            'email' => strtolower(trim($request->username)),
+            'username' => strtolower(trim($request->username)),
             'password' => $request->password
         ];
 
         $remember = $request->has('remember');
 
-        $userCheck = \App\Models\User::where('email', $credentials['email'])->first();
+        $userCheck = \App\Models\User::where(
+            'username',
+            $credentials['username']
+        )->first();
 
         if (!$userCheck) {
             return back()->withErrors([
-                'login' => 'User not found (email mismatch)'
+                'login' => 'Username not found'
             ]);
         }
 
