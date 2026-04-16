@@ -320,7 +320,7 @@
     <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
 
     <div class="menu-title">Inventory</div>
-    <a href="{{ route('/admin/inventory') }}" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
+    <a href="{{ url('/admin/inventory') }}" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
     <a href="{{ route('inventory.create') }}" class="{{ request()->is('admin/inventory/add-stock') ? 'active' : '' }}">➕ Add New Stock</a>
     <a href="/admin/inventory/transfer-out" class="{{ request()->is('admin/inventory/transfer-out') ? 'active' : '' }}">🔄 Transfer Out</a>
     <a href="/admin/inventory/transfer-in" class="{{ request()->is('admin/inventory/transfer-in') ? 'active' : '' }}">📥 Transfer In</a>
