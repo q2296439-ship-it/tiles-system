@@ -371,6 +371,24 @@ class CollectionController extends Controller
         'branchName'
     ))->setPaper('a4', 'landscape');
 
+    $agent = strtolower($request->header('User-Agent'));
+
+    $isMobile =
+        str_contains($agent, 'android') ||
+        str_contains($agent, 'iphone') ||
+        str_contains($agent, 'ipad') ||
+        str_contains($agent, 'mobile');
+
+    if ($isMobile) {
+        return response()->make($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="collection_report_' . $selectedDate . '.pdf"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'public',
+            'Expires' => '0',
+        ]);
+    }
+
     return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
 }
 
@@ -391,7 +409,13 @@ class CollectionController extends Controller
             $user->branch_id,
             $status
         ),
-        'collection_report_' . $selectedDate . '.xlsx'
+        'collection_report_' . $selectedDate . '.xlsx',
+        \Maatwebsite\Excel\Excel::XLSX,
+        [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0, no-cache, no-store, must-revalidate',
+            'Pragma' => 'public',
+        ]
     );
 }
 
