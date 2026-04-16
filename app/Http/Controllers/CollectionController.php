@@ -300,7 +300,7 @@ class CollectionController extends Controller
     ));
 }
 
-    public function exportPdf(Request $request)
+   public function exportPdf(Request $request)
 {
     if (!auth()->check()) {
         return redirect('/login');
@@ -369,12 +369,12 @@ class CollectionController extends Controller
         'total'
     ))->setPaper('a4', 'landscape');
 
-    return response($pdf->output(), 200)
-        ->header('Content-Type', 'application/pdf')
-        ->header(
-            'Content-Disposition',
-            'inline; filename="collection_report_' . $selectedDate . '.pdf"'
-        );
+    return $pdf->stream(
+        'collection_report_' . $selectedDate . '.pdf',
+        [
+            'Attachment' => false
+        ]
+    );
 }
 
     public function exportExcel(Request $request)
@@ -394,7 +394,18 @@ class CollectionController extends Controller
             $user->branch_id,
             $status
         ),
-        'collection_report_' . $selectedDate . '.xlsx'
+        'collection_report_' . $selectedDate . '.xlsx',
+        \Maatwebsite\Excel\Excel::XLSX,
+        [
+            'Content-Type' =>
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' =>
+                'attachment; filename="collection_report_' . $selectedDate . '.xlsx"',
+            'Cache-Control' =>
+                'no-store, no-cache, must-revalidate',
+            'Pragma' => 'public',
+            'Expires' => '0',
+        ]
     );
 }
 
