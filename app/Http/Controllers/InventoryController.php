@@ -510,23 +510,24 @@ public function approvals()
     }
 
     // =====================
-    // GET PRODUCTS
-    // =====================
-    private function getProducts()
-    {
-        $user = Auth::user();
+// GET PRODUCTS
+// =====================
+private function getProducts()
+{
+    $user = Auth::user();
 
-        if (!$user) return collect();
+    if (!$user) return collect();
 
-        if ($user->role === 'admin') {
-            return Product::with('branch')->get();
-        }
+    $role = strtolower($user->role);
 
-        return Product::with('branch')
-            ->where('branch_id', $user->branch_id)
-            ->get();
+    if (in_array($role, ['admin', 'manager', 'audit'])) {
+        return Product::with('branch')->get();
     }
 
+    return Product::with('branch')
+        ->where('branch_id', $user->branch_id)
+        ->get();
+}
     // =====================
     // GET MOVEMENTS
     // =====================
