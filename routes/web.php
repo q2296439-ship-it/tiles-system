@@ -295,6 +295,13 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])
         ->name('report.brand.excel');
+
+    Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])
+    ->name('admin.collection.export.pdf');
+
+Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])
+    ->name('admin.collection.export.excel');    
+    
 });
 
 
