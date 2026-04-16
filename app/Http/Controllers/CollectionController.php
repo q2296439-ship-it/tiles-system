@@ -369,12 +369,7 @@ class CollectionController extends Controller
         'total'
     ))->setPaper('a4', 'landscape');
 
-    return response($pdf->output(), 200)
-        ->header('Content-Type', 'application/pdf')
-        ->header(
-            'Content-Disposition',
-            'inline; filename="collection_report_' . $selectedDate . '.pdf"'
-        );
+    return $pdf->download('collection_report_' . $selectedDate . '.pdf');
 }
 
     public function exportExcel(Request $request)
@@ -407,7 +402,7 @@ public function store(Request $request)
             'receipt_date' => 'required|date',
             'items'        => 'required|array|min:1',
         ]);
-
+        
            // ✅ NEW LOCK: bawal magsave kapag closed na deposit date
 $isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
     ->where('branch_id', auth()->user()->branch_id)
