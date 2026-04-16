@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Manager Panel</title>
+    <title>{{ auth()->user()->role == 'audit' ? 'Audit Panel' : 'Manager Panel' }}</title>
 
     <style>
         * {
@@ -132,10 +132,11 @@
 <body>
 
 <div class="sidebar">
-    <h2>Manager Panel</h2>
+    <h2>{{ auth()->user()->role == 'audit' ? 'Audit Panel' : 'Manager Panel' }}</h2>
 
     {{-- MAIN --}}
     <p>MAIN</p>
+
     <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">
         📊 Dashboard
     </a>
@@ -143,10 +144,12 @@
     {{-- OPERATIONS --}}
     <p>OPERATIONS</p>
 
+    @if(auth()->user()->role != 'audit')
     <a href="/manager/approvals"
        class="{{ request()->is('manager/approvals') ? 'active' : '' }}">
         🧾 Approvals
     </a>
+    @endif
 
     <a href="/manager/request-access"
        class="{{ request()->is('manager/request-access') ? 'active' : '' }}">
@@ -161,38 +164,48 @@
     {{-- SALES --}}
     <p>SALES</p>
 
-    <a href="/manager/daily-sales" class="{{ request()->is('manager/daily-sales') ? 'active' : '' }}">
+    <a href="/manager/daily-sales"
+       class="{{ request()->is('manager/daily-sales') ? 'active' : '' }}">
         📅 Daily Sales
     </a>
 
-    <a href="/manager/sales-report" class="{{ request()->is('manager/sales-report') ? 'active' : '' }}">
+    <a href="/manager/sales-report"
+       class="{{ request()->is('manager/sales-report') ? 'active' : '' }}">
         📈 Sales Report
     </a>
 
-    <a href="/manager/collection" class="{{ request()->is('manager/collection') ? 'active' : '' }}">
+    <a href="/manager/collection"
+       class="{{ request()->is('manager/collection') ? 'active' : '' }}">
         🧾 Collection
     </a>
 
     {{-- INVENTORY --}}
     <p>INVENTORY</p>
 
-    <a href="/manager/inventory" class="{{ request()->is('manager/inventory') ? 'active' : '' }}">
+    <a href="/manager/inventory"
+       class="{{ request()->is('manager/inventory') ? 'active' : '' }}">
         📦 Branch Stock
     </a>
 
-    <a href="/manager/inventory-report" class="{{ request()->is('manager/inventory-report') ? 'active' : '' }}">
+    <a href="/manager/inventory-report"
+       class="{{ request()->is('manager/inventory-report') ? 'active' : '' }}">
         📊 Inventory Report
     </a>
 
-    <a href="/manager/add-stock" class="{{ request()->is('manager/add-stock') ? 'active' : '' }}">
+    @if(auth()->user()->role != 'audit')
+    <a href="/manager/add-stock"
+       class="{{ request()->is('manager/add-stock') ? 'active' : '' }}">
         ➕ Add Stock
     </a>
+    @endif
 
-    <a href="/manager/transfer-in" class="{{ request()->is('manager/transfer-in') ? 'active' : '' }}">
+    <a href="/manager/transfer-in"
+       class="{{ request()->is('manager/transfer-in') ? 'active' : '' }}">
         ⬅️ Transfer In
     </a>
 
-    <a href="/manager/transfer-out" class="{{ request()->is('manager/transfer-out') ? 'active' : '' }}">
+    <a href="/manager/transfer-out"
+       class="{{ request()->is('manager/transfer-out') ? 'active' : '' }}">
         ➡️ Transfer Out
     </a>
 
@@ -218,8 +231,13 @@
 
     <div class="topbar">
         <div>
-            <h1>Manager Workspace</h1>
-            <p>Manage approvals, sales, inventory and transfers</p>
+            <h1>{{ auth()->user()->role == 'audit' ? 'Audit Workspace' : 'Manager Workspace' }}</h1>
+
+            <p>
+                {{ auth()->user()->role == 'audit'
+                    ? 'View reports, logs, sales and inventory'
+                    : 'Manage approvals, sales, inventory and transfers' }}
+            </p>
         </div>
 
         <div class="user-card">
@@ -231,7 +249,10 @@
                 <div style="font-weight:700;">
                     {{ auth()->user()->name }}
                 </div>
-                <small style="color:#64748b;">Manager</small>
+
+                <small style="color:#64748b;">
+                    {{ ucfirst(auth()->user()->role) }}
+                </small>
             </div>
         </div>
     </div>
