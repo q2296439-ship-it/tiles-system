@@ -176,16 +176,20 @@
             <div class="subtitle">Manage closed deposits and reopen transactions</div>
         </div>
 
-        <div class="actions">
-            <a href="{{ route('manager.request.access.excel', request()->query()) }}" class="btn btn-success">
-                Excel
-            </a>
+       <div class="actions">
+    <a href="{{ route('manager.request.access.excel', request()->query()) }}"
+       class="btn btn-success"
+       target="_blank">
+        Excel
+    </a>
 
-            <a href="{{ route('manager.request.access.pdf', request()->query()) }}" class="btn btn-dark">
-                PDF
-            </a>
-        </div>
-    </div>
+    <a href="{{ route('manager.request.access.pdf', request()->query()) }}"
+       class="btn btn-dark"
+       target="_blank">
+        PDF
+    </a>
+</div>
+</div>
 
     {{-- Stats --}}
     <div class="stats">
