@@ -151,9 +151,9 @@ public function loadReceipt($receipt_no)
                     $amount = $qty * $price;
                     $desc   = trim($item['description']);
 
-                    $product = Product::where('name', $desc)
-                        ->where('branch_id', $branchId)
-                        ->first();
+                    $product = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($desc))])
+                    ->where('branch_id', $branchId)
+                    ->first();
 
                     ReturnItem::create([
                         'return_id'   => $return->id,
