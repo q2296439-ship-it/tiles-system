@@ -352,6 +352,10 @@ Route::prefix('cashier')->group(function () {
         return 'Delivery Fee Page';
         })->name('cashier.delivery.fee');
 
+    Route::get('/ar-accounts', function () {
+        return 'A/R Accounts Page';
+        })->name('cashier.ar.accounts');
+
     Route::get('/deposit', [CollectionController::class, 'deposit'])
         ->name('cashier.deposit');
 
