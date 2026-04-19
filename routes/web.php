@@ -363,6 +363,9 @@ Route::prefix('cashier')->group(function () {
         ->middleware('auth')
         ->name('cashier.delivery.load');
 
+    Route::get('/delivery-today', [CollectionController::class, 'deliveryToday'])
+        ->name('cashier.delivery.today');
+
     Route::get('/ar-accounts', function () {
         return 'A/R Accounts Page';
         })->name('cashier.ar.accounts');

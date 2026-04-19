@@ -908,4 +908,29 @@ public function deliveryStore(Request $request)
         ->with('success', 'Delivery fee saved successfully.');
 }
 
+public function deliveryToday(Request $request)
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+
+    $rows = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate)
+        ->where('branch_id', auth()->user()->branch_id)
+        ->orderByDesc('id')
+        ->get();
+
+    $totalCount = $rows->count();
+
+    $income = $rows->where('status', 'saved')->sum('amount');
+    $refund = $rows->where('status', 'returned')->sum('amount');
+
+    $totalIncome = $income - $refund;
+
+    return view('cashier.delivery_today', compact(
+        'rows',
+        'selectedDate',
+        'totalCount',
+        'totalIncome'
+    ));
+}
+
 }
