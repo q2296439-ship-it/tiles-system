@@ -161,7 +161,6 @@ Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutAdm
     ->middleware('auth')
     ->name('manager.transfer.out');
 
-    // ✅ CHANGE PASSWORD MANAGER
 Route::get('/manager/change-password', function () {
     return view('cashier.change-password');
 })->middleware('auth');
@@ -169,7 +168,6 @@ Route::get('/manager/change-password', function () {
 Route::post('/manager/change-password', [UserController::class, 'changePassword'])
     ->middleware('auth');
 
-    // ✅ REQUEST ACCESS MANAGER
 Route::get('/manager/request-access', [CollectionController::class, 'requestAccess'])
     ->middleware('auth')
     ->name('manager.request.access');
@@ -178,14 +176,12 @@ Route::post('/manager/request-access/open', [CollectionController::class, 'openT
     ->middleware('auth')
     ->name('manager.request.open');
 
-// ✅ MANAGER DEPOSIT
 Route::get('/manager/deposit', [CollectionController::class, 'deposit'])
     ->middleware('auth');
 
 Route::post('/manager/deposit', [CollectionController::class, 'depositStore'])
     ->middleware('auth');
 
-// ✅ DEPOSIT EXPORT
 Route::get('/cashier/deposit/excel', [CollectionController::class, 'depositExcel'])
     ->middleware('auth')
     ->name('cashier.deposit.excel');
@@ -222,7 +218,6 @@ Route::prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
-    // ✅ SHARED COLLECTION PAGE
     Route::get('/collection', [CollectionController::class, 'today']);
 
     Route::get('/inventory', [InventoryController::class, 'overviewStock']);
@@ -297,11 +292,10 @@ Route::prefix('admin')->group(function () {
         ->name('report.brand.excel');
 
     Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])
-    ->name('admin.collection.export.pdf');
+        ->name('admin.collection.export.pdf');
 
-Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])
-    ->name('admin.collection.export.excel');    
-    
+    Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])
+        ->name('admin.collection.export.excel');
 });
 
 
@@ -359,6 +353,25 @@ Route::prefix('cashier')->group(function () {
 
     Route::post('/deposit', [CollectionController::class, 'depositStore'])
         ->name('cashier.deposit.store');
+
+    // =====================
+    // CASH FLOW
+    // =====================
+    Route::get('/cash-total', function () {
+        return 'Total Cash Page';
+    })->name('cashier.cash.total');
+
+    Route::get('/cash-transfer', function () {
+        return 'Transfer Cash to Other Branch Page';
+    })->name('cashier.cash.transfer');
+
+    Route::get('/expenses', function () {
+        return 'Store Expenses Page';
+    })->name('cashier.expenses');
+
+    Route::get('/salary', function () {
+        return 'Employee Salary Page';
+    })->name('cashier.salary');
 
     Route::get('/change-password', [AuthController::class, 'showChangePassword'])
         ->name('cashier.password');
