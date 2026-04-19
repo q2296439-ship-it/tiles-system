@@ -65,6 +65,15 @@ border-radius:8px;margin-bottom:15px;
 background:#fee2e2;color:#991b1b;padding:12px;
 border-radius:8px;margin-bottom:15px;
 }
+.info-box{
+margin-top:12px;
+padding:12px;
+background:#eff6ff;
+border:1px solid #93c5fd;
+border-radius:8px;
+font-size:13px;
+color:#1e3a8a;
+}
 </style>
 
 <div class="page">
@@ -114,6 +123,7 @@ border-radius:8px;margin-bottom:15px;
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
 <input type="text"
        name="receipt_no"
+       id="receiptNo"
        class="input"
        placeholder="Original Receipt No"
        value="{{ session('success') ? '' : old('receipt_no') }}"
@@ -125,6 +135,10 @@ border-radius:8px;margin-bottom:15px;
        placeholder="Customer Name"
        value="{{ session('success') ? '' : old('customer_name') }}"
        autocomplete="off">
+</div>
+
+<div class="info-box">
+If original sale has discount, you may edit the return price manually to reflect actual charged amount.
 </div>
 
 <div class="table-wrap">
@@ -154,6 +168,7 @@ border-radius:8px;margin-bottom:15px;
 
 <div class="actions">
 <button type="button" class="btn btn-blue" onclick="addRow()">➕ Add Row</button>
+<button type="button" class="btn btn-blue" onclick="loadReceipt()">🔍 Load Receipt</button>
 </div>
 
 <input type="hidden" name="total_amount" id="totalAmount">
@@ -224,6 +239,18 @@ total += parseFloat(el.value)||0;
 });
 document.getElementById('grandTotal').innerText = '₱'+total.toFixed(2);
 document.getElementById('totalAmount').value = total.toFixed(2);
+}
+
+// Placeholder loader for future controller integration
+function loadReceipt(){
+let receipt = document.getElementById('receiptNo').value.trim();
+
+if(receipt === ''){
+alert('Enter receipt number first.');
+return;
+}
+
+alert('Next step: controller will auto load original items for Receipt No: ' + receipt);
 }
 
 computeAll();
