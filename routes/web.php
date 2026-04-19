@@ -345,6 +345,10 @@ Route::prefix('cashier')->group(function () {
     Route::get('/return-receipt', [CollectionController::class, 'returnForm'])
         ->name('cashier.return.create');
 
+    Route::get('/cashier/return/load/{receipt_no}', [CollectionController::class, 'loadReceipt'])
+        ->middleware('auth')
+        ->name('cashier.return.load');
+
     Route::post('/return-receipt', [CollectionController::class, 'returnStore'])
         ->name('cashier.return.store');
 

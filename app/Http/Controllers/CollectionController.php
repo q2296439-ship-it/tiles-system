@@ -37,10 +37,44 @@ class CollectionController extends Controller
         return view('cashier.collection.cancel');
     }
 
-    public function returnForm()
-    {
-        return view('cashier.collection.return');
+   public function returnForm()
+{
+    return view('cashier.collection.return');
+}
+
+public function loadReceipt($receipt_no)
+{
+    $branchId = auth()->user()->branch_id;
+
+    $collection = Collection::with('items')
+        ->where('receipt_no', $receipt_no)
+        ->where('branch_id', $branchId)
+        ->first();
+
+    if (!$collection) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Receipt not found.'
+        ]);
     }
+
+    return response()->json([
+        'success' => true,
+        'customer_name' => $collection->customer_name,
+        'items' => $collection->items->map(function ($item) {
+            return [
+                'qty' => $item->qty,
+                'unit' => $item->unit,
+                'description' => $item->description,
+                'unit_price' => $item->unit_price,
+                'amount' => $item->amount,
+                'discount_amount' => $item->discount_amount ?? 0,
+                'net_amount' => $item->net_amount ?? $item->amount,
+                'return_amount' => $item->net_amount ?? $item->amount,
+            ];
+        })->values()
+    ]);
+}
 
     // CANCEL = documentation only
     public function cancelStore(Request $request)
@@ -159,88 +193,109 @@ class CollectionController extends Controller
     }
 
     public function today(Request $request)
-    {
-        $selectedDate = $request->date ?? date('Y-m-d');
-        $status       = $request->status ?? 'all';
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $status       = $request->status ?? 'all';
 
-        $user = auth()->user();
-        $isAdmin = strtolower($user->role) === 'admin';
-        $branchId = $user->branch_id;
+    $user = auth()->user();
+    $isAdmin = strtolower($user->role) === 'admin';
+    $branchId = $user->branch_id;
 
-        $collections = Collection::with(['user', 'items', 'branch'])
-            ->whereDate('receipt_date', $selectedDate);
+    $collections = Collection::with(['user', 'items', 'branch'])
+        ->whereDate('receipt_date', $selectedDate);
 
-        if (!$isAdmin) {
-            $collections->where('branch_id', $branchId);
-        }
-
-        $collections = $collections
-            ->get()
-            ->map(function ($row) {
-                $row->record_type = strtolower($row->status ?? 'saved');
-                return $row;
-            });
-
-        $returns = ReturnModel::with(['user', 'items', 'branch'])
-            ->whereDate('return_date', $selectedDate);
-
-        if (!$isAdmin) {
-            $returns->where('branch_id', $branchId);
-        }
-
-        $returns = $returns
-            ->get()
-            ->map(function ($row) {
-                $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
-                $row->receipt_date = $row->return_date;
-                $row->status = 'returned';
-                $row->record_type = 'returned';
-                return $row;
-            });
-
-        $records = $collections->concat($returns);
-
-        if ($status != 'all') {
-            $records = $records->where('record_type', $status);
-        }
-
-        $records = $records->sortByDesc('created_at')->values();
-
-        if ($status == 'returned') {
-            $total = -1 * $records->sum('total_amount');
-        } elseif ($status == 'cancelled') {
-            $total = 0;
-        } elseif ($status == 'saved') {
-            $total = $records->sum('total_amount');
-        } else {
-            $savedTotal  = $records->where('record_type', 'saved')->sum('total_amount');
-            $returnTotal = $records->where('record_type', 'returned')->sum('total_amount');
-            $total = $savedTotal - $returnTotal;
-        }
-
-        $page = LengthAwarePaginator::resolveCurrentPage();
-        $perPage = 10;
-
-        $collections = new LengthAwarePaginator(
-            $records->forPage($page, $perPage)->values(),
-            $records->count(),
-            $perPage,
-            $page,
-            [
-                'path' => request()->url(),
-                'query' => request()->query(),
-            ]
-        );
-
-        return view('cashier.collection.today', compact(
-            'collections',
-            'total',
-            'selectedDate',
-            'status'
-        ));
+    if (!$isAdmin) {
+        $collections->where('branch_id', $branchId);
     }
 
-    public function deposit(Request $request)
+    $collections = $collections
+        ->get()
+        ->map(function ($row) {
+            $row->record_type = strtolower($row->status ?? 'saved');
+            return $row;
+        });
+
+    $returns = ReturnModel::with(['user', 'items', 'branch'])
+        ->whereDate('return_date', $selectedDate);
+
+    if (!$isAdmin) {
+        $returns->where('branch_id', $branchId);
+    }
+
+    $returns = $returns
+        ->get()
+        ->map(function ($row) {
+            $row->display_receipt_no = $row->receipt_no ?: $row->return_no;
+            $row->receipt_date = $row->return_date;
+            $row->status = 'returned';
+            $row->record_type = 'returned';
+            return $row;
+        });
+
+    $records = $collections->concat($returns);
+
+    if ($status != 'all') {
+        $records = $records->where('record_type', $status);
+    }
+
+    $records = $records->sortByDesc('created_at')->values();
+
+    if ($status == 'returned') {
+
+        $total = -abs($records->sum('total_amount'));
+        $actualCollection = 0;
+
+    } elseif ($status == 'cancelled') {
+
+        $total = 0;
+        $actualCollection = 0;
+
+    } elseif ($status == 'saved') {
+
+        $total = $records->sum('total_amount');
+        $actualCollection = $records->sum('paid_amount');
+
+    } else {
+
+        $savedTotal = $records
+            ->whereIn('record_type', ['saved', 'pending'])
+            ->sum('total_amount');
+
+        $returnTotal = $records
+            ->where('record_type', 'returned')
+            ->sum('total_amount');
+
+        $total = $savedTotal - $returnTotal;
+
+        $actualCollection = $records
+            ->whereIn('record_type', ['saved', 'pending'])
+            ->sum('paid_amount');
+    }
+
+    $page = LengthAwarePaginator::resolveCurrentPage();
+    $perPage = 10;
+
+    $collections = new LengthAwarePaginator(
+        $records->forPage($page, $perPage)->values(),
+        $records->count(),
+        $perPage,
+        $page,
+        [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]
+    );
+
+    return view('cashier.collection.today', compact(
+        'collections',
+        'total',
+        'actualCollection',
+        'selectedDate',
+        'status'
+    ));
+}
+
+public function deposit(Request $request)
 {
     $selectedDate = $request->date ?? date('Y-m-d');
 

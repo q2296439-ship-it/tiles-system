@@ -127,6 +127,7 @@ color:#1e3a8a;
 
 <input type="text"
        name="customer_name"
+       id="customerName"
        class="input"
        placeholder="Customer Name"
        value="{{ session('success') ? '' : old('customer_name') }}">
@@ -200,17 +201,17 @@ Sold = Original Price | Discount = Deducted Amount | Net Paid = Actual Customer 
 <script>
 let rowIndex = 1;
 
-function rowHtml(i){
+function rowHtml(i,data={}) {
 return `
 <tr>
-<td><input type="number" name="items[${i}][qty]" class="input qty" value="1"></td>
-<td><input type="text" name="items[${i}][unit]" class="input"></td>
-<td><input type="text" name="items[${i}][description]" class="input"></td>
-<td><input type="number" step="0.01" name="items[${i}][unit_price]" class="input price" value="0"></td>
-<td><input type="number" step="0.01" name="items[${i}][amount]" class="input sold" value="0" readonly></td>
-<td><input type="number" step="0.01" name="items[${i}][discount_amount]" class="input discount" value="0"></td>
-<td><input type="number" step="0.01" name="items[${i}][net_amount]" class="input net" value="0" readonly></td>
-<td><input type="number" step="0.01" name="items[${i}][return_amount]" class="input returnAmt" value="0"></td>
+<td><input type="number" name="items[${i}][qty]" class="input qty" value="${data.qty ?? 1}"></td>
+<td><input type="text" name="items[${i}][unit]" class="input" value="${data.unit ?? ''}"></td>
+<td><input type="text" name="items[${i}][description]" class="input" value="${data.description ?? ''}"></td>
+<td><input type="number" step="0.01" name="items[${i}][unit_price]" class="input price" value="${data.unit_price ?? 0}"></td>
+<td><input type="number" step="0.01" name="items[${i}][amount]" class="input sold" value="${data.amount ?? 0}" readonly></td>
+<td><input type="number" step="0.01" name="items[${i}][discount_amount]" class="input discount" value="${data.discount_amount ?? 0}"></td>
+<td><input type="number" step="0.01" name="items[${i}][net_amount]" class="input net" value="${data.net_amount ?? 0}" readonly></td>
+<td><input type="number" step="0.01" name="items[${i}][return_amount]" class="input returnAmt" value="${data.return_amount ?? 0}"></td>
 <td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
 </tr>
 `;
@@ -219,6 +220,7 @@ return `
 function addRow(){
 document.querySelector('#itemsTable tbody').insertAdjacentHTML('beforeend', rowHtml(rowIndex));
 rowIndex++;
+computeAll();
 }
 
 function removeRow(btn){
@@ -267,7 +269,7 @@ computeAll();
 }
 });
 
-function loadReceipt(){
+async function loadReceipt(){
 let receipt = document.getElementById('receiptNo').value.trim();
 
 if(receipt === ''){
@@ -275,7 +277,31 @@ alert('Enter receipt number first.');
 return;
 }
 
-alert('Next step: auto-load sales data from controller for OR # ' + receipt);
+try{
+let res = await fetch('/cashier/return/load/' + receipt);
+let data = await res.json();
+
+if(!data.success){
+alert(data.message);
+return;
+}
+
+document.getElementById('customerName').value = data.customer_name ?? '';
+
+let tbody = document.querySelector('#itemsTable tbody');
+tbody.innerHTML = '';
+rowIndex = 0;
+
+data.items.forEach(item=>{
+tbody.insertAdjacentHTML('beforeend', rowHtml(rowIndex, item));
+rowIndex++;
+});
+
+computeAll();
+
+}catch(error){
+alert('Unable to load receipt.');
+}
 }
 
 computeAll();
