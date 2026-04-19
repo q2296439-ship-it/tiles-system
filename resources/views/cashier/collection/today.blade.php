@@ -121,6 +121,10 @@ th{
     background:#dbeafe;
     color:#1d4ed8;
 }
+.badge-pending{
+    background:#fef3c7;
+    color:#92400e;
+}
 .empty{
     text-align:center;
     padding:35px;
@@ -184,6 +188,7 @@ th{
                 <select name="status" class="select-filter">
                     <option value="all" {{ request('status') == 'all' || request('status') == null ? 'selected' : '' }}>All Status</option>
                     <option value="saved" {{ request('status') == 'saved' ? 'selected' : '' }}>Saved</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                     <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Returned</option>
                 </select>
@@ -256,7 +261,9 @@ th{
                     <th>Customer</th>
                     <th>Products</th>
                     <th>Qty</th>
-                    <th>Total</th>
+                    <th>Total Sales</th>
+                    <th>Paid Amount</th>
+                    <th>Balance</th>
                     <th>Cashier</th>
                     <th>Time</th>
                     <th>Status</th>
@@ -304,6 +311,9 @@ th{
                     </td>
 
                     <td>₱{{ number_format($row->total_amount, 2) }}</td>
+                    <td>₱{{ number_format($row->paid_amount ?? 0, 2) }}</td>
+                    <td>₱{{ number_format($row->balance ?? 0, 2) }}</td>
+
                     <td>{{ $row->user->name ?? 'Cashier' }}</td>
                     <td>{{ $row->created_at->format('h:i A') }}</td>
 
@@ -312,6 +322,8 @@ th{
                             <span class="badge badge-cancel">Cancelled</span>
                         @elseif($status == 'returned')
                             <span class="badge badge-return">Returned</span>
+                        @elseif($status == 'pending')
+                            <span class="badge badge-pending">Pending</span>
                         @else
                             <span class="badge badge-saved">Saved</span>
                         @endif
@@ -320,7 +332,7 @@ th{
 
             @empty
                 <tr>
-                    <td colspan="{{ $isAdmin ? '11' : '10' }}" class="empty">No collection found.</td>
+                    <td colspan="{{ $isAdmin ? '13' : '12' }}" class="empty">No collection found.</td>
                 </tr>
             @endforelse
             </tbody>
