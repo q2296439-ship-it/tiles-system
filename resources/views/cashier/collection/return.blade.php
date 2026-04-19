@@ -29,7 +29,7 @@ background:#fff;border-radius:6px;font-size:14px;
 }
 .table-wrap{overflow:auto;margin-top:10px;}
 table{width:100%;border-collapse:collapse;background:#fff;}
-th,td{border:1px solid #333;padding:8px;font-size:14px;}
+th,td{border:1px solid #333;padding:8px;font-size:14px;text-align:center;}
 th{background:#f3f4f6;}
 .btn{
 border:none;padding:11px 16px;border-radius:10px;
@@ -56,7 +56,6 @@ justify-content:space-between;
 padding:10px 0;
 border-bottom:1px solid #ddd;
 }
-.total-final{font-size:22px;font-weight:900;color:#1d4ed8;}
 .alert-success{
 background:#dcfce7;color:#166534;padding:12px;
 border-radius:8px;margin-bottom:15px;
@@ -107,7 +106,6 @@ color:#1e3a8a;
        style="width:140px;"
        placeholder="Return No"
        value="{{ session('success') ? '' : old('return_no') }}"
-       autocomplete="off"
        required>
 
 <input type="date"
@@ -115,7 +113,6 @@ color:#1e3a8a;
        class="input"
        style="width:170px;"
        value="{{ session('success') ? date('Y-m-d') : old('return_date', date('Y-m-d')) }}"
-       autocomplete="off"
        required>
 </div>
 </div>
@@ -126,19 +123,17 @@ color:#1e3a8a;
        id="receiptNo"
        class="input"
        placeholder="Original Receipt No"
-       value="{{ session('success') ? '' : old('receipt_no') }}"
-       autocomplete="off">
+       value="{{ session('success') ? '' : old('receipt_no') }}">
 
 <input type="text"
        name="customer_name"
        class="input"
        placeholder="Customer Name"
-       value="{{ session('success') ? '' : old('customer_name') }}"
-       autocomplete="off">
+       value="{{ session('success') ? '' : old('customer_name') }}">
 </div>
 
 <div class="info-box">
-If original sale has discount, you may edit the return price manually to reflect actual charged amount.
+Sold = Original Price | Discount = Deducted Amount | Net Paid = Actual Customer Payment | Return = Amount to Refund / Deduct to Sales
 </div>
 
 <div class="table-wrap">
@@ -149,17 +144,23 @@ If original sale has discount, you may edit the return price manually to reflect
 <th>Unit</th>
 <th>Articles</th>
 <th>Price</th>
-<th>Amount</th>
+<th>Sold</th>
+<th>Discount</th>
+<th>Net Paid</th>
+<th>Return</th>
 <th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><input type="number" name="items[0][qty]" class="input qty" value="1" autocomplete="off"></td>
-<td><input type="text" name="items[0][unit]" class="input" autocomplete="off"></td>
-<td><input type="text" name="items[0][description]" class="input" autocomplete="off"></td>
-<td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0" autocomplete="off"></td>
-<td><input type="number" step="0.01" name="items[0][amount]" class="input amount" value="0" readonly></td>
+<td><input type="number" name="items[0][qty]" class="input qty" value="1"></td>
+<td><input type="text" name="items[0][unit]" class="input"></td>
+<td><input type="text" name="items[0][description]" class="input"></td>
+<td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0"></td>
+<td><input type="number" step="0.01" name="items[0][amount]" class="input sold" value="0" readonly></td>
+<td><input type="number" step="0.01" name="items[0][discount_amount]" class="input discount" value="0"></td>
+<td><input type="number" step="0.01" name="items[0][net_amount]" class="input net" value="0" readonly></td>
+<td><input type="number" step="0.01" name="items[0][return_amount]" class="input returnAmt" value="0"></td>
 <td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
 </tr>
 </tbody>
@@ -176,11 +177,7 @@ If original sale has discount, you may edit the return price manually to reflect
 <div class="footer-box">
 <div class="note-box">
 <strong>Reason</strong><br><br>
-<textarea name="reason"
-          class="input"
-          style="height:120px;"
-          autocomplete="off"
-          required>{{ session('success') ? '' : old('reason') }}</textarea>
+<textarea name="reason" class="input" style="height:120px;" required>{{ session('success') ? '' : old('reason') }}</textarea>
 </div>
 
 <div class="total-box">
@@ -203,17 +200,24 @@ If original sale has discount, you may edit the return price manually to reflect
 <script>
 let rowIndex = 1;
 
-function addRow(){
-document.querySelector('#itemsTable tbody').insertAdjacentHTML('beforeend', `
+function rowHtml(i){
+return `
 <tr>
-<td><input type="number" name="items[${rowIndex}][qty]" class="input qty" value="1" autocomplete="off"></td>
-<td><input type="text" name="items[${rowIndex}][unit]" class="input" autocomplete="off"></td>
-<td><input type="text" name="items[${rowIndex}][description]" class="input" autocomplete="off"></td>
-<td><input type="number" step="0.01" name="items[${rowIndex}][unit_price]" class="input price" value="0" autocomplete="off"></td>
-<td><input type="number" step="0.01" name="items[${rowIndex}][amount]" class="input amount" value="0" readonly></td>
+<td><input type="number" name="items[${i}][qty]" class="input qty" value="1"></td>
+<td><input type="text" name="items[${i}][unit]" class="input"></td>
+<td><input type="text" name="items[${i}][description]" class="input"></td>
+<td><input type="number" step="0.01" name="items[${i}][unit_price]" class="input price" value="0"></td>
+<td><input type="number" step="0.01" name="items[${i}][amount]" class="input sold" value="0" readonly></td>
+<td><input type="number" step="0.01" name="items[${i}][discount_amount]" class="input discount" value="0"></td>
+<td><input type="number" step="0.01" name="items[${i}][net_amount]" class="input net" value="0" readonly></td>
+<td><input type="number" step="0.01" name="items[${i}][return_amount]" class="input returnAmt" value="0"></td>
 <td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
 </tr>
-`);
+`;
+}
+
+function addRow(){
+document.querySelector('#itemsTable tbody').insertAdjacentHTML('beforeend', rowHtml(rowIndex));
 rowIndex++;
 }
 
@@ -222,26 +226,47 @@ btn.closest('tr').remove();
 computeAll();
 }
 
-document.addEventListener('input', function(e){
-if(e.target.classList.contains('qty') || e.target.classList.contains('price')){
-let row = e.target.closest('tr');
+function computeRow(row){
 let qty = parseFloat(row.querySelector('.qty').value)||0;
 let price = parseFloat(row.querySelector('.price').value)||0;
-row.querySelector('.amount').value = (qty*price).toFixed(2);
-computeAll();
+let discount = parseFloat(row.querySelector('.discount').value)||0;
+
+let sold = qty * price;
+let net = sold - discount;
+if(net < 0) net = 0;
+
+row.querySelector('.sold').value = sold.toFixed(2);
+row.querySelector('.net').value = net.toFixed(2);
+
+let ret = row.querySelector('.returnAmt');
+if(parseFloat(ret.value) === 0 || parseFloat(ret.value) > net){
+ret.value = net.toFixed(2);
 }
-});
+}
 
 function computeAll(){
 let total = 0;
-document.querySelectorAll('.amount').forEach(el=>{
-total += parseFloat(el.value)||0;
+
+document.querySelectorAll('#itemsTable tbody tr').forEach(row=>{
+computeRow(row);
+total += parseFloat(row.querySelector('.returnAmt').value)||0;
 });
+
 document.getElementById('grandTotal').innerText = '₱'+total.toFixed(2);
 document.getElementById('totalAmount').value = total.toFixed(2);
 }
 
-// Placeholder loader for future controller integration
+document.addEventListener('input', function(e){
+if(
+e.target.classList.contains('qty') ||
+e.target.classList.contains('price') ||
+e.target.classList.contains('discount') ||
+e.target.classList.contains('returnAmt')
+){
+computeAll();
+}
+});
+
 function loadReceipt(){
 let receipt = document.getElementById('receiptNo').value.trim();
 
@@ -250,24 +275,15 @@ alert('Enter receipt number first.');
 return;
 }
 
-alert('Next step: controller will auto load original items for Receipt No: ' + receipt);
+alert('Next step: auto-load sales data from controller for OR # ' + receipt);
 }
 
 computeAll();
 
 @if(session('success'))
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function(){
 document.getElementById('returnForm').reset();
-document.querySelector('#itemsTable tbody').innerHTML = `
-<tr>
-<td><input type="number" name="items[0][qty]" class="input qty" value="1" autocomplete="off"></td>
-<td><input type="text" name="items[0][unit]" class="input" autocomplete="off"></td>
-<td><input type="text" name="items[0][description]" class="input" autocomplete="off"></td>
-<td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0" autocomplete="off"></td>
-<td><input type="number" step="0.01" name="items[0][amount]" class="input amount" value="0" readonly></td>
-<td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
-</tr>
-`;
+document.querySelector('#itemsTable tbody').innerHTML = rowHtml(0);
 rowIndex = 1;
 computeAll();
 });
