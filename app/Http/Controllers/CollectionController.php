@@ -447,13 +447,18 @@ class CollectionController extends Controller
             $paid      = (float) ($request->paid_amount ?? 0);
             $balance   = (float) ($request->balance ?? 0);
 
+            // ✅ NEW VALIDATION
+            if (in_array($salesType, ['dp', 'partial']) && $paid <= 0) {
+                throw new \Exception('Paid amount is required for DP or Partial payment.');
+            }
+
             // ✅ Cash auto full payment
             if ($salesType === 'cash') {
                 $paid = $net;
                 $balance = 0;
                 $status = 'saved';
             } else {
-                // DP / Partial
+
                 if ($paid > $net) {
                     $paid = $net;
                 }
@@ -481,7 +486,6 @@ class CollectionController extends Controller
                 'net_amount'      => $net,
                 'total_amount'    => $net,
 
-                // ✅ New fields
                 'sales_type'      => $salesType,
                 'paid_amount'     => $paid,
                 'balance'         => $balance,
@@ -492,7 +496,6 @@ class CollectionController extends Controller
                 'cancel_reason'   => null,
             ]);
 
-            // ✅ sales record
             $sale = Sale::create([
                 'total_amount' => $net,
                 'branch_id'    => $branchId,
