@@ -7,7 +7,7 @@
     <style>
         body{
             font-family: DejaVu Sans, sans-serif;
-            font-size:12px;
+            font-size:11px;
         }
 
         .top-line{
@@ -36,21 +36,28 @@
             line-height:1.6;
         }
 
+        .summary{
+            margin-top:12px;
+            font-size:11px;
+            line-height:1.8;
+        }
+
         table{
             width:100%;
             border-collapse:collapse;
-            margin-top:20px;
+            margin-top:18px;
         }
 
         table th,
         table td{
             border:1px solid #ccc;
-            padding:6px;
+            padding:5px;
             vertical-align:top;
         }
 
         table th{
             background:#f3f4f6;
+            font-size:10px;
         }
 
         .text-right{
@@ -67,13 +74,26 @@
         }
 
         .small{
-            font-size:11px;
+            font-size:10px;
             color:#444;
+        }
+
+        .status{
+            font-weight:bold;
+            text-transform:uppercase;
+            font-size:10px;
         }
     </style>
 </head>
 
 <body>
+
+@php
+    $totalSales = $collections->sum('total_amount');
+    $actualCollection = $collections->sum(function($row){
+        return $row->paid_amount ?? 0;
+    });
+@endphp
 
 <div class="top-line"></div>
 
@@ -86,69 +106,92 @@
         Branch: {{ $branchName ?? 'Current Branch' }} <br>
         Date: {{ $selectedDate ?? date('Y-m-d') }}
     </div>
+
+    <div class="summary">
+        Total Receipts: <strong>{{ count($collections) }}</strong> &nbsp;&nbsp;&nbsp;
+        Total Sales: <strong>₱{{ number_format($totalSales, 2) }}</strong> &nbsp;&nbsp;&nbsp;
+        Actual Collection: <strong>₱{{ number_format($actualCollection, 2) }}</strong>
+    </div>
 </div>
 
 <table>
     <thead>
         <tr>
             <th width="4%">#</th>
-            <th width="10%">Receipt No</th>
-            <th width="12%">Customer</th>
-            <th width="28%">Products</th>
-            <th width="8%">Qty</th>
-            <th width="12%">Total</th>
-            <th width="14%">Cashier</th>
-            <th width="12%">Time</th>
+            <th width="8%">Receipt</th>
+            <th width="11%">Customer</th>
+            <th width="20%">Products</th>
+            <th width="6%">Qty</th>
+            <th width="10%">Sales</th>
+            <th width="10%">Paid</th>
+            <th width="10%">Balance</th>
+            <th width="9%">Status</th>
+            <th width="12%">Cashier</th>
         </tr>
     </thead>
 
     <tbody>
 
         @forelse($collections as $index => $row)
-            <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
 
-                <td>{{ $row->display_receipt_no ?? $row->receipt_no }}</td>
+        @php
+            $status = strtolower($row->record_type ?? $row->status ?? 'saved');
+        @endphp
 
-                <td>{{ $row->customer_name }}</td>
+        <tr>
+            <td class="text-center">{{ $index + 1 }}</td>
 
-                <td class="small">
-                    @foreach($row->items as $item)
-                        {{ $item->description }}<br>
-                    @endforeach
-                </td>
+            <td>{{ $row->display_receipt_no ?? $row->receipt_no }}</td>
 
-                <td class="text-center small">
-                    @foreach($row->items as $item)
-                        {{ $item->qty }}<br>
-                    @endforeach
-                </td>
+            <td>{{ $row->customer_name }}</td>
 
-                <td class="text-right">
-                    @if(($row->record_type ?? '') == 'returned')
-                        -₱{{ number_format($row->total_amount, 2) }}
-                    @elseif(($row->record_type ?? '') == 'cancelled')
-                        ₱0.00
-                    @else
-                        ₱{{ number_format($row->total_amount, 2) }}
-                    @endif
-                </td>
+            <td class="small">
+                @foreach($row->items as $item)
+                    {{ $item->description }}<br>
+                @endforeach
+            </td>
 
-                <td>{{ $row->user->name ?? 'Cashier' }}</td>
-                <td>{{ $row->created_at->format('h:i A') }}</td>
-            </tr>
+            <td class="text-center small">
+                @foreach($row->items as $item)
+                    {{ $item->qty }}<br>
+                @endforeach
+            </td>
+
+            <td class="text-right">
+                ₱{{ number_format($row->total_amount, 2) }}
+            </td>
+
+            <td class="text-right">
+                ₱{{ number_format($row->paid_amount ?? 0, 2) }}
+            </td>
+
+            <td class="text-right">
+                ₱{{ number_format($row->balance ?? 0, 2) }}
+            </td>
+
+            <td class="text-center status">
+                {{ ucfirst($status) }}
+            </td>
+
+            <td class="small">
+                {{ $row->user->name ?? 'Cashier' }}<br>
+                {{ $row->created_at->format('h:i A') }}
+            </td>
+        </tr>
 
         @empty
-            <tr>
-                <td colspan="8" class="text-center">
-                    No collection records found.
-                </td>
-            </tr>
+        <tr>
+            <td colspan="10" class="text-center">
+                No collection records found.
+            </td>
+        </tr>
         @endforelse
 
         <tr class="total-row">
             <td colspan="5">TOTAL</td>
-            <td class="text-right">₱{{ number_format($total, 2) }}</td>
+            <td class="text-right">₱{{ number_format($totalSales, 2) }}</td>
+            <td class="text-right">₱{{ number_format($actualCollection, 2) }}</td>
+            <td class="text-right">-</td>
             <td colspan="2"></td>
         </tr>
 
