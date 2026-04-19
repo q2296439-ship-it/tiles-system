@@ -185,14 +185,27 @@ alert('Enter receipt number first.');
 return;
 }
 
-/*
-READY FOR BACKEND:
-fetch receipt details later
-*/
+fetch('/cashier/delivery/load/' + receipt)
+.then(response => response.json())
+.then(data => {
 
-document.getElementById('customerName').value = '';
-document.getElementById('address').value = '';
-alert('Backend load receipt next step.');
+    if(!data.success){
+        alert(data.message || 'Receipt not found.');
+        return;
+    }
+
+    document.getElementById('customerName').value =
+        data.customer_name ?? '';
+
+    document.getElementById('address').value =
+        data.address ?? '';
+
+})
+.catch(error => {
+    console.log(error);
+    alert('Unable to load receipt.');
+});
+
 }
 </script>
 
