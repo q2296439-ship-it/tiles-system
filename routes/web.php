@@ -348,6 +348,10 @@ Route::prefix('cashier')->group(function () {
     Route::post('/return-receipt', [CollectionController::class, 'returnStore'])
         ->name('cashier.return.store');
 
+    Route::get('/delivery-fee', function () {
+        return 'Delivery Fee Page';
+        })->name('cashier.delivery.fee');
+
     Route::get('/deposit', [CollectionController::class, 'deposit'])
         ->name('cashier.deposit');
 
