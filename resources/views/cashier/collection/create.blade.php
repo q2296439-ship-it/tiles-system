@@ -175,8 +175,8 @@ th{
     font-weight:700;
 }
 .small-input{
-    width:110px;
-    padding:6px 8px;
+    width:160px;
+    padding:8px 10px;
     border:1px solid #ccc;
     border-radius:6px;
 }
@@ -236,8 +236,15 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
 <div class="form-grid">
     <input type="text" name="customer_name" class="input" placeholder="SOLD TO">
     <input type="text" name="terms" class="input" placeholder="Terms">
-    <input type="text" name="tin" class="input" placeholder="TIN / SC-TIN">
-    <input type="text" name="pwd_id" class="input" placeholder="OSCA/PWD ID No.">
+
+    <select name="sales_type" id="salesType" class="input">
+        <option value="cash">Cash</option>
+        <option value="dp">DP</option>
+        <option value="partial">Partial</option>
+    </select>
+
+    <input type="number" step="0.01" name="paid_amount" id="paidAmount" class="input" placeholder="Paid Amount" value="0">
+
     <input type="text" name="business_style" class="input" placeholder="Business Style">
     <input type="text" name="address" class="input" placeholder="Address">
 </div>
@@ -275,6 +282,7 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
 <input type="hidden" name="discount_amount" id="hiddenDiscount">
 <input type="hidden" name="discount_type" id="hiddenDiscountType">
 <input type="hidden" name="total_amount" id="totalAmount">
+<input type="hidden" name="balance" id="balanceValue">
 
 <div class="footer-box">
 
@@ -284,8 +292,6 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
         <label><strong>Discount Type</strong></label><br>
         <select id="discountType" class="small-input">
             <option value="none">None</option>
-            <option value="senior">Senior (20%)</option>
-            <option value="pwd">PWD (20%)</option>
             <option value="custom">Custom</option>
         </select>
 
@@ -293,6 +299,11 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
 
         <label><strong>Custom Discount</strong></label><br>
         <input type="number" id="discountValue" class="small-input" value="0" min="0" step="0.01">
+
+        <br><br>
+
+        <label><strong>Balance</strong></label><br>
+        <input type="text" id="balanceDisplay" class="small-input" value="0.00" readonly>
     </div>
 
     <div class="total-box">
@@ -302,8 +313,13 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
         </div>
 
         <div class="total-line">
-            <span>Less SC/PWD Discount</span>
+            <span>Less Discount</span>
             <span id="discountAmount">₱0.00</span>
+        </div>
+
+        <div class="total-line">
+            <span>Paid Amount</span>
+            <span id="paidDisplay">₱0.00</span>
         </div>
 
         <div class="total-line total-final">
@@ -364,7 +380,8 @@ document.addEventListener('input', function(e){
     if(
         e.target.classList.contains('qty') ||
         e.target.classList.contains('price') ||
-        e.target.id === 'discountValue'
+        e.target.id === 'discountValue' ||
+        e.target.id === 'paidAmount'
     ){
         let row = e.target.closest('tr');
         if(row){
@@ -377,6 +394,7 @@ document.addEventListener('input', function(e){
 });
 
 document.getElementById('discountType').addEventListener('change', computeAll);
+document.getElementById('salesType').addEventListener('change', computeAll);
 
 function computeAll(){
     let total = 0;
@@ -389,10 +407,6 @@ function computeAll(){
     let type = document.getElementById('discountType').value;
     let custom = parseFloat(document.getElementById('discountValue').value) || 0;
 
-    if(type === 'senior' || type === 'pwd'){
-        discount = total * 0.20;
-    }
-
     if(type === 'custom'){
         discount = custom;
     }
@@ -403,13 +417,34 @@ function computeAll(){
 
     let grand = total - discount;
 
+    let paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+    if(paid > grand){
+        paid = grand;
+        document.getElementById('paidAmount').value = grand.toFixed(2);
+    }
+
+    let balance = grand - paid;
+
     document.getElementById('salesAmount').innerText = '₱' + total.toFixed(2);
     document.getElementById('discountAmount').innerText = '₱' + discount.toFixed(2);
+    document.getElementById('paidDisplay').innerText = '₱' + paid.toFixed(2);
     document.getElementById('grandTotal').innerText = '₱' + grand.toFixed(2);
+    document.getElementById('balanceDisplay').value = balance.toFixed(2);
+
     document.getElementById('grossAmount').value = total.toFixed(2);
     document.getElementById('hiddenDiscount').value = discount.toFixed(2);
     document.getElementById('hiddenDiscountType').value = type;
     document.getElementById('totalAmount').value = grand.toFixed(2);
+    document.getElementById('balanceValue').value = balance.toFixed(2);
+
+    let salesType = document.getElementById('salesType').value;
+
+    if(salesType === 'cash'){
+        document.getElementById('paidAmount').value = grand.toFixed(2);
+        document.getElementById('paidDisplay').innerText = '₱' + grand.toFixed(2);
+        document.getElementById('balanceDisplay').value = '0.00';
+        document.getElementById('balanceValue').value = '0.00';
+    }
 }
 
 computeAll();
