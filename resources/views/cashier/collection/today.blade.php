@@ -12,6 +12,11 @@
 
 @php
     $isAdmin = strtolower(auth()->user()->role) === 'admin';
+
+    $totalSales = $collections->sum('total_amount');
+    $actualCollection = $collections->sum(function($row){
+        return $row->paid_amount ?? 0;
+    });
 @endphp
 
 <style>
@@ -235,8 +240,13 @@ th{
     </div>
 
     <div class="card">
-        <div class="label">Total Collection</div>
-        <div class="value value-green">₱{{ number_format($total, 2) }}</div>
+        <div class="label">Total Sales</div>
+        <div class="value">₱{{ number_format($totalSales, 2) }}</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Actual Collection</div>
+        <div class="value value-green">₱{{ number_format($actualCollection, 2) }}</div>
     </div>
 </div>
 
