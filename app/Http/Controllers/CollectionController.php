@@ -413,118 +413,150 @@ class CollectionController extends Controller
 }
 
     public function store(Request $request)
-    {
-        try {
+{
+    try {
 
-            $request->validate([
-                'receipt_no'   => 'required|unique:collections,receipt_no',
-                'receipt_date' => 'required|date',
-                'items'        => 'required|array|min:1',
-            ]);
+        $request->validate([
+            'receipt_no'   => 'required|unique:collections,receipt_no',
+            'receipt_date' => 'required|date',
+            'items'        => 'required|array|min:1',
+        ]);
 
-           // ✅ NEW LOCK: bawal magsave kapag closed na deposit date
-$isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
-    ->where('branch_id', auth()->user()->branch_id)
-    ->where('status', 'closed')
-    ->exists();
+        // ✅ bawal magsave kapag closed na deposit date
+        $isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
+            ->where('branch_id', auth()->user()->branch_id)
+            ->where('status', 'closed')
+            ->exists();
 
-            if ($isClosed) {
-                return back()
-                    ->withInput()
-                    ->with('error', 'This date is already deposited and closed. Saving is disabled.');
-            }
-
-            DB::transaction(function () use ($request) {
-
-                $branchId = auth()->user()->branch_id;
-                $userId   = auth()->id();
-
-                $gross = $request->gross_amount ?? $request->total_amount ?? 0;
-                $discount = $request->discount_amount ?? 0;
-                $net = $request->total_amount ?? 0;
-
-                $collection = Collection::create([
-                    'receipt_no'      => $request->receipt_no,
-                    'receipt_date'    => $request->receipt_date,
-                    'customer_name'   => $request->customer_name ?? '',
-                    'address'         => $request->address ?? '',
-                    'terms'           => $request->terms ?? '',
-                    'gross_amount'    => $gross,
-                    'discount_type'   => $request->discount_type ?? null,
-                    'discount_amount' => $discount,
-                    'net_amount'      => $net,
-                    'total_amount'    => $net,
-                    'branch_id'       => $branchId,
-                    'user_id'         => $userId,
-                    'status'          => 'saved',
-                    'cancel_reason'   => null,
-                ]);
-
-                $sale = Sale::create([
-                    'total_amount' => $request->total_amount ?? 0,
-                    'branch_id'    => $branchId,
-                    'user_id'      => $userId,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ]);
-
-                foreach ($request->items as $item) {
-
-                    if (empty($item['description'])) {
-                        continue;
-                    }
-
-                    $qty    = (int) ($item['qty'] ?? 0);
-                    $price  = (float) ($item['unit_price'] ?? 0);
-                    $amount = $qty * $price;
-                    $desc   = trim($item['description']);
-
-                    CollectionItem::create([
-                        'collection_id' => $collection->id,
-                        'qty'           => $qty,
-                        'unit'          => $item['unit'] ?? '',
-                        'description'   => $desc,
-                        'unit_price'    => $price,
-                        'amount'        => $amount,
-                    ]);
-
-                    $product = Product::where('name', $desc)
-                        ->where('branch_id', $branchId)
-                        ->first();
-
-                    if (!$product) {
-                        throw new \Exception('Product not found: ' . $desc);
-                    }
-
-                    if ($product->stock < $qty) {
-                        throw new \Exception('Not enough stock: ' . $desc);
-                    }
-
-                    $product->stock -= $qty;
-                    $product->save();
-
-                    SaleItem::create([
-                        'sale_id'    => $sale->id,
-                        'product_id' => $product->id,
-                        'quantity'   => $qty,
-                        'price'      => $price,
-                        'subtotal'   => $amount,
-                    ]);
-                }
-            });
-
-            return redirect()
-                ->route('cashier.collection.create')
-                ->with('success', 'Receipt saved and reflected to sales!');
-
-        } catch (\Throwable $e) {
-
+        if ($isClosed) {
             return back()
                 ->withInput()
-                ->with('error', $e->getMessage());
+                ->with('error', 'This date is already deposited and closed. Saving is disabled.');
         }
-    }
 
+        DB::transaction(function () use ($request) {
+
+            $branchId = auth()->user()->branch_id;
+            $userId   = auth()->id();
+
+            $gross     = (float) ($request->gross_amount ?? $request->total_amount ?? 0);
+            $discount  = (float) ($request->discount_amount ?? 0);
+            $net       = (float) ($request->total_amount ?? 0);
+
+            $salesType = strtolower($request->sales_type ?? 'cash');
+            $paid      = (float) ($request->paid_amount ?? 0);
+            $balance   = (float) ($request->balance ?? 0);
+
+            // ✅ Cash auto full payment
+            if ($salesType === 'cash') {
+                $paid = $net;
+                $balance = 0;
+                $status = 'saved';
+            } else {
+                // DP / Partial
+                if ($paid > $net) {
+                    $paid = $net;
+                }
+
+                $balance = $net - $paid;
+
+                if ($balance <= 0) {
+                    $balance = 0;
+                    $status = 'saved';
+                } else {
+                    $status = 'pending';
+                }
+            }
+
+            $collection = Collection::create([
+                'receipt_no'      => $request->receipt_no,
+                'receipt_date'    => $request->receipt_date,
+                'customer_name'   => $request->customer_name ?? '',
+                'business_style'  => $request->business_style ?? '',
+                'address'         => $request->address ?? '',
+                'terms'           => $request->terms ?? '',
+                'gross_amount'    => $gross,
+                'discount_type'   => $request->discount_type ?? null,
+                'discount_amount' => $discount,
+                'net_amount'      => $net,
+                'total_amount'    => $net,
+
+                // ✅ New fields
+                'sales_type'      => $salesType,
+                'paid_amount'     => $paid,
+                'balance'         => $balance,
+
+                'branch_id'       => $branchId,
+                'user_id'         => $userId,
+                'status'          => $status,
+                'cancel_reason'   => null,
+            ]);
+
+            // ✅ sales record
+            $sale = Sale::create([
+                'total_amount' => $net,
+                'branch_id'    => $branchId,
+                'user_id'      => $userId,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+
+            foreach ($request->items as $item) {
+
+                if (empty($item['description'])) {
+                    continue;
+                }
+
+                $qty    = (int) ($item['qty'] ?? 0);
+                $price  = (float) ($item['unit_price'] ?? 0);
+                $amount = $qty * $price;
+                $desc   = trim($item['description']);
+
+                CollectionItem::create([
+                    'collection_id' => $collection->id,
+                    'qty'           => $qty,
+                    'unit'          => $item['unit'] ?? '',
+                    'description'   => $desc,
+                    'unit_price'    => $price,
+                    'amount'        => $amount,
+                ]);
+
+                $product = Product::where('name', $desc)
+                    ->where('branch_id', $branchId)
+                    ->first();
+
+                if (!$product) {
+                    throw new \Exception('Product not found: ' . $desc);
+                }
+
+                if ($product->stock < $qty) {
+                    throw new \Exception('Not enough stock: ' . $desc);
+                }
+
+                $product->stock -= $qty;
+                $product->save();
+
+                SaleItem::create([
+                    'sale_id'    => $sale->id,
+                    'product_id' => $product->id,
+                    'quantity'   => $qty,
+                    'price'      => $price,
+                    'subtotal'   => $amount,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('cashier.collection.create')
+            ->with('success', 'Receipt saved successfully!');
+
+    } catch (\Throwable $e) {
+
+        return back()
+            ->withInput()
+            ->with('error', $e->getMessage());
+    }
+}
 
     // ==========================
 // 🔓 MANAGER REQUEST ACCESS
