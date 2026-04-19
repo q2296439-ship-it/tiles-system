@@ -353,7 +353,7 @@ Route::prefix('cashier')->group(function () {
         ->name('cashier.return.store');
 
     Route::get('/delivery-fee', function () {
-         return view('cashier.delivery-fee');
+         return view('cashier.delivery_fee');
         })->name('cashier.delivery.fee');
 
     Route::post('/delivery-fee', [CollectionController::class, 'deliveryStore'])
