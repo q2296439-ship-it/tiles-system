@@ -877,4 +877,35 @@ public function requestAccessExcel(Request $request)
     );
 }
 
+public function deliveryStore(Request $request)
+{
+    $request->validate([
+        'delivery_no'   => 'required',
+        'delivery_date' => 'required|date',
+        'receipt_no'    => 'required',
+        'amount'        => 'required|numeric|min:0',
+        'status'        => 'required',
+    ]);
+
+    DB::table('delivery_fees')->insert([
+        'delivery_no'   => $request->delivery_no,
+        'delivery_date' => $request->delivery_date,
+        'receipt_no'    => $request->receipt_no,
+        'customer_name' => $request->customer_name,
+        'address'       => $request->address,
+        'rider_name'    => $request->rider_name,
+        'amount'        => $request->amount,
+        'notes'         => $request->notes,
+        'branch_id'     => auth()->user()->branch_id,
+        'user_id'       => auth()->id(),
+        'status'        => $request->status,
+        'created_at'    => now(),
+        'updated_at'    => now(),
+    ]);
+
+    return redirect()
+        ->route('cashier.delivery.fee')
+        ->with('success', 'Delivery fee saved successfully.');
+}
+
 }
