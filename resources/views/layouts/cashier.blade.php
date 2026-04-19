@@ -318,6 +318,16 @@
 
         <a href="{{ url('/cashier/deposit') }}" class="{{ request()->is('cashier/deposit*') ? 'active' : '' }}">🏦 Deposit</a>
 
+        <p>Cash Flow</p>
+
+        <a href="{{ route('cashier.cash.total') }}" class="{{ request()->is('cashier/cash-total*') ? 'active' : '' }}">💰 Total Cash</a>
+
+        <a href="{{ route('cashier.cash.transfer') }}" class="{{ request()->is('cashier/cash-transfer*') ? 'active' : '' }}">🔄 Transfer Cash to Other Branch</a>
+
+        <a href="{{ route('cashier.expenses') }}" class="{{ request()->is('cashier/expenses*') ? 'active' : '' }}">🧾 Store Expenses</a>
+
+        <a href="{{ route('cashier.salary') }}" class="{{ request()->is('cashier/salary*') ? 'active' : '' }}">👨‍💼 Employee Salary</a>
+
         <p>Inventory</p>
 
         <a href="{{ route('cashier.inventory.stock') }}" class="{{ request()->is('cashier/inventory-stock') ? 'active' : '' }}">📦 Inventory Stock</a>
