@@ -278,7 +278,7 @@ return;
 }
 
 try{
-let res = await fetch('/cashier/return/load/' + receipt);
+let res = await fetch("{{ url('/cashier/return/load') }}/" + receipt);
 let data = await res.json();
 
 if(!data.success){
