@@ -911,17 +911,30 @@ public function deliveryStore(Request $request)
 public function deliveryToday(Request $request)
 {
     $selectedDate = $request->date ?? date('Y-m-d');
+    $branchId = auth()->user()->branch_id;
 
     $rows = DB::table('delivery_fees')
         ->whereDate('delivery_date', $selectedDate)
-        ->where('branch_id', auth()->user()->branch_id)
-        ->orderByDesc('id')
+        ->where('branch_id', $branchId)
+        ->orderBy('id', 'desc')
         ->get();
 
-    $totalCount = $rows->count();
+    $totalCount = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->count();
 
-    $income = $rows->where('status', 'saved')->sum('amount');
-    $refund = $rows->where('status', 'returned')->sum('amount');
+    $income = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->where('status', 'saved')
+        ->sum('amount');
+
+    $refund = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->where('status', 'returned')
+        ->sum('amount');
 
     $totalIncome = $income - $refund;
 
