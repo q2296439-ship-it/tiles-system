@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\ExpenseController;
 
 
 // =====================
@@ -338,9 +339,11 @@ Route::prefix('cashier')->group(function () {
         return 'Transfer Cash to Other Branch Page';
     })->name('cashier.cash.transfer');
 
-    Route::get('/expenses', function () {
-        return 'Store Expenses Page';
-    })->name('cashier.expenses');
+   Route::get('/expenses', [ExpenseController::class, 'index'])
+    ->name('cashier.expenses');
+
+    Route::post('/expenses/store', [ExpenseController::class, 'store'])
+    ->name('cashier.expenses.store');
 
     Route::get('/salary', function () {
         return 'Employee Salary Page';
