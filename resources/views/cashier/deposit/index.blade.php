@@ -342,28 +342,56 @@ textarea{
     <h3 style="margin-top:0;">Deposit Breakdown</h3>
 
     <table>
-        <tr>
-            <th>Description</th>
-            <th>Amount</th>
-        </tr>
-        <tr>
-            <td>Gross Sales</td>
-            <td>₱{{ number_format($gross ?? 0,2) }}</td>
-        </tr>
-        <tr>
-            <td>Less Discounts</td>
-            <td>₱{{ number_format($discount ?? 0,2) }}</td>
-        </tr>
-        <tr>
-            <td>Total Accounted</td>
-            <td id="actualTable">₱{{ number_format($actual ?? 0,2) }}</td>
-        </tr>
-        <tr>
-            <td><strong>Variance</strong></td>
-            <td><strong id="varianceTable">₱{{ number_format($variance ?? 0,2) }}</strong></td>
-        </tr>
-    </table>
+    <tr>
+        <th>Description</th>
+        <th>Amount</th>
+    </tr>
 
+    <tr>
+        <td>Gross Collection</td>
+        <td>₱{{ number_format($gross ?? 0,2) }}</td>
+    </tr>
+
+    <tr>
+        <td>Less Discounts</td>
+        <td>₱{{ number_format($discount ?? 0,2) }}</td>
+    </tr>
+
+    <tr>
+        <td>A/R Balance</td>
+        <td id="arRow">₱0.00</td>
+    </tr>
+
+    <tr>
+        <td>Store Expenses</td>
+        <td id="expenseRow">₱0.00</td>
+    </tr>
+
+    <tr>
+        <td>Delivery Fee</td>
+        <td id="deliveryRow">₱0.00</td>
+    </tr>
+
+    <tr>
+        <td>Other Income</td>
+        <td id="otherRow">₱0.00</td>
+    </tr>
+
+    <tr>
+        <td><strong>Expected Deposit</strong></td>
+        <td><strong id="actualTable">₱{{ number_format($actual ?? 0,2) }}</strong></td>
+    </tr>
+
+    <tr>
+        <td><strong>Actual Cash Deposited</strong></td>
+        <td><strong id="actualTable2">₱{{ number_format($actual ?? 0,2) }}</strong></td>
+    </tr>
+
+    <tr>
+        <td><strong>Variance</strong></td>
+        <td><strong id="varianceTable">₱{{ number_format($variance ?? 0,2) }}</strong></td>
+    </tr>
+</table>
     <div class="sign-grid">
         <div class="sign-box">Prepared by (Cashier)</div>
         <div class="sign-box">Checked by (Manager)</div>
