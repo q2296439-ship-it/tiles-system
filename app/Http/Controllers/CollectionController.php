@@ -469,8 +469,6 @@ public function deposit(Request $request)
 
     public function store(Request $request)
 {
-    dd($request->all()); // ✅ test muna natin kung ano pumapasok values
-
     try {
 
         $request->validate([
@@ -479,7 +477,7 @@ public function deposit(Request $request)
             'items'        => 'required|array|min:1',
         ]);
 
-        // ✅ bawal magsave kapag closed na deposit date
+        // bawal magsave kapag closed na deposit date
         $isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
             ->where('branch_id', auth()->user()->branch_id)
             ->where('status', 'closed')
