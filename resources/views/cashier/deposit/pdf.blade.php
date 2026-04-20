@@ -126,6 +126,21 @@ $otherIncome = $delivery + $other;
 $netSales    = ($gross + $otherIncome) - $discount;
 $actual      = $row->actual_amount ?? 0;
 $variance    = $row->variance ?? 0;
+
+/* CASH ONLY FROM DENOMINATION */
+$cashOnly =
+($row->denom_1000 * 1000) +
+($row->denom_500  * 500) +
+($row->denom_200  * 200) +
+($row->denom_100  * 100) +
+($row->denom_50   * 50) +
+($row->denom_20   * 20) +
+($row->coin_10    * 10) +
+($row->coin_5     * 5) +
+($row->coin_1     * 1);
+
+/* FINAL RECONCILIATION */
+$finalVariance = $netSales - ($cashOnly + $ar + $expense);
 @endphp
 
 <div class="box">
@@ -178,10 +193,9 @@ $variance    = $row->variance ?? 0;
     </table>
 
     <div class="total-box">
-        TOTAL CASH DEPOSIT: PHP {{ number_format($actual,2) }}
+        TOTAL CASH DEPOSIT: PHP {{ number_format($cashOnly,2) }}
     </div>
 
-    {{-- BREAKDOWN SECTION --}}
     <table class="breakdown">
         <tr>
             <th width="65%">Deposit Breakdown</th>
@@ -194,8 +208,13 @@ $variance    = $row->variance ?? 0;
         </tr>
 
         <tr>
+            <td>Delivery Fee</td>
+            <td class="right">{{ number_format($delivery,2) }}</td>
+        </tr>
+
+        <tr>
             <td>Other Income</td>
-            <td class="right">{{ number_format($otherIncome,2) }}</td>
+            <td class="right">{{ number_format($other,2) }}</td>
         </tr>
 
         <tr>
@@ -204,8 +223,13 @@ $variance    = $row->variance ?? 0;
         </tr>
 
         <tr>
-            <td>Net Sales</td>
-            <td class="right">{{ number_format($netSales,2) }}</td>
+            <td><strong>Net Sales</strong></td>
+            <td class="right"><strong>{{ number_format($netSales,2) }}</strong></td>
+        </tr>
+
+        <tr>
+            <td>Cash Deposit</td>
+            <td class="right">{{ number_format($cashOnly,2) }}</td>
         </tr>
 
         <tr>
@@ -219,13 +243,8 @@ $variance    = $row->variance ?? 0;
         </tr>
 
         <tr>
-            <td><strong>Actual Deposit</strong></td>
-            <td class="right"><strong>{{ number_format($actual,2) }}</strong></td>
-        </tr>
-
-        <tr>
             <td><strong>Variance</strong></td>
-            <td class="right"><strong>{{ number_format($variance,2) }}</strong></td>
+            <td class="right"><strong>{{ number_format($finalVariance,2) }}</strong></td>
         </tr>
     </table>
 
