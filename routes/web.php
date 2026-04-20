@@ -321,9 +321,11 @@ Route::prefix('cashier')->group(function () {
     Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel'])
         ->name('cashier.delivery.excel');
 
-    Route::get('/ar-accounts', function () {
-        return 'A/R Accounts Page';
-    })->name('cashier.ar.accounts');
+  Route::get('/ar-accounts', [CollectionController::class, 'arAccounts'])
+    ->name('cashier.ar.accounts');
+
+  Route::post('/ar-accounts/payment/{id}', [CollectionController::class, 'payAr'])
+    ->name('cashier.ar.payment');
 
     Route::get('/deposit', [CollectionController::class, 'deposit'])->name('cashier.deposit');
     Route::post('/deposit', [CollectionController::class, 'depositStore'])->name('cashier.deposit.store');
