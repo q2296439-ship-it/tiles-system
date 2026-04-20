@@ -328,15 +328,37 @@ public function deposit(Request $request)
         $depositQuery->where('branch_id', $selectedBranch);
     }
 
-    $deposit = $depositQuery->where('status', 'closed')->first();
+    $deposit = $depositQuery
+        ->where('status', 'closed')
+        ->latest('id')
+        ->first();
 
     if ($deposit) {
+
+        $gross = $deposit->gross_amount;
+        $discount = $deposit->discount_amount;
+        $net = $deposit->net_amount;
+
         $actual = $deposit->actual_amount;
         $variance = $deposit->variance;
+
+        $ar_balance = $deposit->ar_balance ?? 0;
+        $store_expenses = $deposit->store_expenses ?? 0;
+        $delivery_fee = $deposit->delivery_fee ?? 0;
+        $other_income = $deposit->other_income ?? 0;
+
         $isClosed = true;
+
     } else {
+
         $actual = 0;
         $variance = 0 - $net;
+
+        $ar_balance = 0;
+        $store_expenses = 0;
+        $delivery_fee = 0;
+        $other_income = 0;
+
         $isClosed = false;
     }
 
@@ -351,11 +373,15 @@ public function deposit(Request $request)
         'selectedDate',
         'isClosed',
         'branches',
-        'selectedBranch'
+        'selectedBranch',
+        'ar_balance',
+        'store_expenses',
+        'delivery_fee',
+        'other_income'
     ));
 }
 
-    public function exportPdf(Request $request)
+public function exportPdf(Request $request)
 {
     $selectedDate = $request->date ?? date('Y-m-d');
     $status = $request->status ?? 'all';
@@ -443,7 +469,7 @@ public function deposit(Request $request)
     return $pdf->stream('collection_report_' . $selectedDate . '.pdf');
 }
 
-    public function exportExcel(Request $request)
+public function exportExcel(Request $request)
 {
     $selectedDate = $request->date ?? date('Y-m-d');
     $status = $request->status ?? 'all';
