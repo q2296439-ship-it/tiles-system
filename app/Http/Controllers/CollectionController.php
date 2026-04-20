@@ -677,47 +677,67 @@ public function depositStore(Request $request)
         ->where('status', 'saved')
         ->get();
 
+    $gross = $rows->sum('gross_amount');
+    $discount = $rows->sum('discount_amount');
     $net = $rows->sum('net_amount');
-    $actual = $request->actual_amount;
-    $variance = $actual - $net;
+
+    $actual = (float) $request->actual_amount;
+
+    $ar = (float) ($request->ar_balance ?? 0);
+    $expense = (float) ($request->store_expenses ?? 0);
+    $delivery = (float) ($request->delivery_fee ?? 0);
+    $other = (float) ($request->other_income ?? 0);
+
+    $otherIncome = $delivery + $other;
+
+    $expected = $gross + $otherIncome - $discount;
+    $variance = ($actual + $ar + $expense) - $expected;
 
     $existing = \App\Models\Deposit::where('deposit_date', $date)
-    ->where('branch_id', $branchId)
-    ->where('status', 'closed')
-    ->first();
+        ->where('branch_id', $branchId)
+        ->where('status', 'closed')
+        ->first();
 
-if ($existing) {
+    if ($existing) {
+        return redirect()
+            ->route('cashier.deposit')
+            ->with('error', 'Deposit already closed for this date.');
+    }
+
+    \App\Models\Deposit::create([
+        'deposit_date' => $date,
+        'branch_id' => $branchId,
+        'user_id' => auth()->id(),
+
+        'expected_amount' => $expected,
+        'gross_amount' => $gross,
+        'discount_amount' => $discount,
+        'net_amount' => $expected,
+        'actual_amount' => $actual,
+        'variance' => $variance,
+
+        'ar_balance' => $ar,
+        'store_expenses' => $expense,
+        'delivery_fee' => $delivery,
+        'other_income' => $other,
+
+        'denom_1000' => $request->denom_1000 ?? 0,
+        'denom_500'  => $request->denom_500 ?? 0,
+        'denom_200'  => $request->denom_200 ?? 0,
+        'denom_100'  => $request->denom_100 ?? 0,
+        'denom_50'   => $request->denom_50 ?? 0,
+        'denom_20'   => $request->denom_20 ?? 0,
+        'coin_10'    => $request->coin_10 ?? 0,
+        'coin_5'     => $request->coin_5 ?? 0,
+        'coin_1'     => $request->coin_1 ?? 0,
+
+        'remarks' => $request->remarks,
+        'status' => 'closed',
+    ]);
+
     return redirect()
         ->route('cashier.deposit')
-        ->with('error', 'Deposit already closed for this date.');
-}
-
-\App\Models\Deposit::create([
-    'deposit_date' => $date,
-    'branch_id' => $branchId,
-
-    'gross_amount' => $rows->sum('gross_amount'),
-    'discount_amount' => $rows->sum('discount_amount'),
-    'net_amount' => $net,
-    'actual_amount' => $actual,
-    'variance' => $variance,
-    'user_id' => auth()->id(),
-
-    'denom_1000' => $request->denom_1000 ?? 0,
-    'denom_500'  => $request->denom_500 ?? 0,
-    'denom_200'  => $request->denom_200 ?? 0,
-    'denom_100'  => $request->denom_100 ?? 0,
-    'denom_50'   => $request->denom_50 ?? 0,
-    'denom_20'   => $request->denom_20 ?? 0,
-    'coin_10'    => $request->coin_10 ?? 0,
-    'coin_5'     => $request->coin_5 ?? 0,
-    'coin_1'     => $request->coin_1 ?? 0,
-    'remarks'    => $request->remarks,
-]);
-
-return redirect()
-    ->route('cashier.deposit')
-    ->with('success', 'Deposit saved successfully.');
+        ->with('success', 'Deposit saved successfully.');
 }
 
 // ==========================

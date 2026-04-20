@@ -21,6 +21,11 @@ class Deposit extends Model
         'actual_amount',
         'variance',
 
+        'ar_balance',
+        'store_expenses',
+        'delivery_fee',
+        'other_income',
+
         'status',
         'reopened_by',
         'reopened_at',
