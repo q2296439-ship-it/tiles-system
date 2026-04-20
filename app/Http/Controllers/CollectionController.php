@@ -252,13 +252,13 @@ public function loadReceipt($receipt_no)
 
     } elseif ($status == 'saved') {
 
-        $total = $records->sum('total_amount');
-        $actualCollection = $records->sum('paid_amount');
+        $total = $records->where('record_type', 'saved')->sum('total_amount');
+        $actualCollection = $records->where('record_type', 'saved')->sum('paid_amount');
 
     } else {
 
         $savedTotal = $records
-            ->whereIn('record_type', ['saved', 'pending'])
+            ->where('record_type', 'saved')
             ->sum('total_amount');
 
         $returnTotal = $records
@@ -268,7 +268,7 @@ public function loadReceipt($receipt_no)
         $total = $savedTotal - $returnTotal;
 
         $actualCollection = $records
-            ->whereIn('record_type', ['saved', 'pending'])
+            ->where('record_type', 'saved')
             ->sum('paid_amount');
     }
 
