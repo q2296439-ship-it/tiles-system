@@ -305,7 +305,7 @@ public function deposit(Request $request)
     $selectedBranch = $request->branch_id;
 
     $query = Collection::whereDate('receipt_date', $selectedDate)
-        ->where('status', 'saved');
+        ->where('status', '!=', 'cancelled');
 
     if ($role === 'cashier') {
         $query->where('branch_id', $user->branch_id);
