@@ -1,114 +1,194 @@
 @extends('layouts.cashier')
 
 @section('content')
-<div class="max-w-5xl mx-auto mt-5 mb-8">
 
-    <div class="rounded-2xl border p-5 shadow"
-         style="background:#dbeafe; border-color:#60a5fa;">
+<style>
+.page{max-width:1100px;margin:auto;}
+.card{
+background:#dbeafe;
+border:2px solid #93c5fd;
+border-radius:14px;
+padding:25px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+.title{text-align:center;font-size:28px;font-weight:900;}
+.sub{text-align:center;font-size:12px;color:#475569;margin-bottom:15px;}
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:12px;
+}
+.input{
+width:100%;
+padding:10px 12px;
+border:1px solid #334155;
+border-radius:8px;
+background:#fff;
+font-size:14px;
+}
+textarea.input{height:100px;}
+.btn{
+border:none;
+padding:11px 16px;
+border-radius:10px;
+cursor:pointer;
+font-weight:700;
+text-decoration:none;
+display:inline-block;
+text-align:center;
+}
+.btn-blue{background:#2563eb;color:#fff;}
+.btn-green{background:#16a34a;color:#fff;}
+.btn-red{background:#dc2626;color:#fff;}
+.actions{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+.box{
+margin-top:15px;
+padding:14px;
+border:1px solid #334155;
+border-radius:10px;
+background:#fff;
+}
+.total{
+font-size:26px;
+font-weight:900;
+color:#0f172a;
+}
+.note{
+font-size:12px;
+color:#64748b;
+margin-top:4px;
+}
+.alert-success{
+background:#dcfce7;
+color:#166534;
+padding:12px;
+border-radius:8px;
+margin-bottom:15px;
+}
+.table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+font-size:14px;
+}
+.table th,.table td{
+padding:10px;
+border-bottom:1px solid #e5e7eb;
+text-align:left;
+}
+.table th:last-child,
+.table td:last-child{
+text-align:right;
+}
+.amount{font-weight:800;color:#b91c1c;}
+.empty{text-align:center;color:#64748b;padding:15px;}
+</style>
 
-        <div class="text-center mb-4">
-            <h1 class="text-3xl font-bold text-gray-800">STORE EXPENSES</h1>
-            <p class="text-xs text-gray-600">Connected to Cash Flow • Daily Expense Monitoring</p>
-        </div>
+<div class="page">
+<div class="card">
 
-        @if(session('success'))
-            <div class="mb-3 px-4 py-2 rounded-lg text-white bg-green-600">
-                {{ session('success') }}
-            </div>
-        @endif
+@if(session('success'))
+<div class="alert-success">{{ session('success') }}</div>
+@endif
 
-        <form action="{{ route('cashier.expenses.store') }}" method="POST">
-            @csrf
+<div class="title">STORE EXPENSES</div>
+<div class="sub">Connected to Cash Flow • Daily Expense Monitoring</div>
 
-            <div class="grid grid-cols-4 gap-2 mb-2">
-                <input type="date" name="expense_date"
-                    value="{{ date('Y-m-d') }}"
-                    class="border rounded-lg px-3 py-2 w-full">
+<form method="POST" action="{{ route('cashier.expenses.store') }}">
+@csrf
 
-                <select name="category_id"
-                    class="border rounded-lg px-3 py-2 w-full">
-                    <option value="">Category</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                    @endforeach
-                </select>
+<div class="grid">
+    <input type="date"
+           name="expense_date"
+           class="input"
+           value="{{ date('Y-m-d') }}"
+           required>
 
-                <input type="number" step="0.01" name="amount"
-                    placeholder="Expense Amount"
-                    class="border rounded-lg px-3 py-2 w-full">
+    <select name="category_id" class="input" required>
+        <option value="">Select Category</option>
+        @foreach($categories as $cat)
+            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+        @endforeach
+    </select>
 
-                <select name="payment_method"
-                    class="border rounded-lg px-3 py-2 w-full">
-                    <option value="cash">Cash</option>
-                    <option value="bank">Bank</option>
-                    <option value="gcash">GCash</option>
-                </select>
-            </div>
+    <input type="number"
+           step="0.01"
+           name="amount"
+           class="input"
+           placeholder="Expense Amount"
+           required>
 
-            <div class="mb-3">
-                <textarea name="description" rows="4"
-                    placeholder="Notes / Instructions"
-                    class="border rounded-lg px-3 py-2 w-full"></textarea>
-            </div>
-
-            <div class="flex gap-2 mb-3">
-                <button class="bg-green-600 text-white px-5 py-2 rounded-lg font-semibold">
-                    💾 Save Expense
-                </button>
-
-                <a href="{{ route('cashier.expenses') }}"
-                   class="bg-red-500 text-white px-5 py-2 rounded-lg font-semibold">
-                    ✖ Cancel
-                </a>
-
-                <a href="#records"
-                   class="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold">
-                    📋 Expense List
-                </a>
-            </div>
-        </form>
-
-        <div id="records" class="bg-white rounded-xl border p-4">
-            <div class="mb-2">
-                <p class="text-sm text-gray-600">Today Expense Total</p>
-                <h2 class="text-4xl font-bold text-red-600">
-                    ₱{{ number_format($expenses->sum('amount'),2) }}
-                </h2>
-                <p class="text-xs text-gray-500">Saved = recorded expense</p>
-            </div>
-
-            <div class="overflow-x-auto mt-3">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="text-left border-b">
-                            <th class="py-2">Date</th>
-                            <th class="py-2">Category</th>
-                            <th class="py-2">Description</th>
-                            <th class="py-2 text-right">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($expenses as $row)
-                        <tr class="border-b">
-                            <td class="py-2">{{ $row->expense_date }}</td>
-                            <td class="py-2">{{ $row->category->name ?? '' }}</td>
-                            <td class="py-2">{{ $row->description }}</td>
-                            <td class="py-2 text-right font-bold text-red-600">
-                                ₱{{ number_format($row->amount,2) }}
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="text-center py-4 text-gray-400">
-                                No expense records found
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-    </div>
+    <select name="payment_method" class="input">
+        <option value="cash">Cash</option>
+        <option value="bank">Bank</option>
+        <option value="gcash">GCash</option>
+    </select>
 </div>
+
+<div style="margin-top:12px;">
+    <textarea name="description"
+              class="input"
+              placeholder="Notes / Instructions"></textarea>
+</div>
+
+<div class="actions">
+    <button type="submit" class="btn btn-green">
+        💾 Save Expense
+    </button>
+
+    <a href="{{ route('cashier.expenses') }}" class="btn btn-red">
+        ❌ Clear
+    </a>
+
+    <a href="#records" class="btn btn-blue">
+        📋 Expense List
+    </a>
+</div>
+
+<div class="box" id="records">
+
+    <div>Today Expense Total</div>
+    <div class="total">
+        ₱{{ number_format($expenses->sum('amount'),2) }}
+    </div>
+    <div class="note">
+        Saved = recorded daily expense
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+        @forelse($expenses as $row)
+            <tr>
+                <td>{{ $row->expense_date }}</td>
+                <td>{{ $row->category->name ?? '' }}</td>
+                <td>{{ $row->description }}</td>
+                <td class="amount">₱{{ number_format($row->amount,2) }}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="4" class="empty">No expense records found</td>
+            </tr>
+        @endforelse
+        </tbody>
+    </table>
+
+</div>
+</form>
+
+</div>
+</div>
+
 @endsection
