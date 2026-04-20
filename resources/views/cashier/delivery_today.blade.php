@@ -94,7 +94,7 @@ pointer-events:none;
 ➕ New Delivery
 </a>
 
-<a href="{{ route('cashier.delivery.today') }}?date={{ $selectedDate }}&export=excel"
+<a href="{{ route('cashier.delivery.excel') }}?date={{ $selectedDate }}"
 class="btn btn-green">
 📗 Excel
 </a>

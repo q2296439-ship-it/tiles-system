@@ -376,6 +376,9 @@ Route::prefix('cashier')->group(function () {
     Route::post('/deposit', [CollectionController::class, 'depositStore'])
         ->name('cashier.deposit.store');
 
+    Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel'])
+    ->name('cashier.delivery.excel');
+
     // =====================
     // CASH FLOW
     // =====================
