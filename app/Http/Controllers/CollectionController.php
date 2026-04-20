@@ -469,6 +469,8 @@ public function deposit(Request $request)
 
     public function store(Request $request)
 {
+    dd($request->all()); // ✅ test muna natin kung ano pumapasok values
+
     try {
 
         $request->validate([
@@ -500,17 +502,14 @@ public function deposit(Request $request)
 
             $salesType = strtolower($request->sales_type ?? 'cash');
 
-            // ✅ get paid only, compute balance in backend
             $paid = (float) ($request->paid_amount ?? 0);
             $balance = 0;
             $status = 'saved';
 
-            // ✅ DP / Partial must have payment
             if (in_array($salesType, ['dp', 'partial']) && $paid <= 0) {
                 throw new \Exception('Paid amount is required for DP or Partial payment.');
             }
 
-            // ✅ Payment Logic
             if ($salesType === 'cash') {
 
                 $paid = $net;
