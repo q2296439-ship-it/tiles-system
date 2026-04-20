@@ -717,8 +717,7 @@ public function openTransaction(Request $request)
 public function depositStore(Request $request)
 {
     $request->validate([
-        'deposit_date'  => 'required|date',
-        'actual_amount' => 'required|numeric|min:0',
+        'deposit_date' => 'required|date',
     ]);
 
     $branchId = auth()->user()->branch_id;
@@ -735,9 +734,6 @@ public function depositStore(Request $request)
 
     $gross = $rows->sum('total_amount') - $returns->sum('total_amount');
     $discount = $rows->sum('discount_amount');
-    $net = $gross - $discount;
-
-    $actual = (float) $request->actual_amount;
 
     $ar = (float) ($request->ar_balance ?? 0);
     $expense = (float) ($request->store_expenses ?? 0);
@@ -746,7 +742,22 @@ public function depositStore(Request $request)
 
     $otherIncome = $delivery + $other;
 
+    // SALES EXPECTATION
     $expected = $gross + $otherIncome - $discount;
+
+    // ACTUAL CASH FROM DENOMINATIONS
+    $actual =
+        (($request->denom_1000 ?? 0) * 1000) +
+        (($request->denom_500 ?? 0) * 500) +
+        (($request->denom_200 ?? 0) * 200) +
+        (($request->denom_100 ?? 0) * 100) +
+        (($request->denom_50 ?? 0) * 50) +
+        (($request->denom_20 ?? 0) * 20) +
+        (($request->coin_10 ?? 0) * 10) +
+        (($request->coin_5 ?? 0) * 5) +
+        (($request->coin_1 ?? 0) * 1);
+
+    // VARIANCE CHECK
     $variance = ($actual + $ar + $expense) - $expected;
 
     $existing = \App\Models\Deposit::where('deposit_date', $date)
