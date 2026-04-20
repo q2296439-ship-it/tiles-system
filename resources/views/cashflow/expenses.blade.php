@@ -11,8 +11,18 @@ border-radius:14px;
 padding:25px;
 box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
-.title{text-align:center;font-size:28px;font-weight:900;}
-.sub{text-align:center;font-size:12px;color:#475569;margin-bottom:15px;}
+.title{
+text-align:center;
+font-size:28px;
+font-weight:900;
+color:#0f172a;
+}
+.sub{
+text-align:center;
+font-size:12px;
+color:#475569;
+margin-bottom:15px;
+}
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
@@ -25,8 +35,16 @@ border:1px solid #334155;
 border-radius:8px;
 background:#fff;
 font-size:14px;
+outline:none;
 }
-textarea.input{height:100px;}
+.input:focus{
+border-color:#2563eb;
+box-shadow:0 0 0 2px rgba(37,99,235,.15);
+}
+textarea.input{
+height:100px;
+resize:none;
+}
 .btn{
 border:none;
 padding:11px 16px;
@@ -36,7 +54,9 @@ font-weight:700;
 text-decoration:none;
 display:inline-block;
 text-align:center;
+transition:.2s ease;
 }
+.btn:hover{opacity:.92;transform:translateY(-1px);}
 .btn-blue{background:#2563eb;color:#fff;}
 .btn-green{background:#16a34a;color:#fff;}
 .btn-red{background:#dc2626;color:#fff;}
@@ -80,20 +100,37 @@ font-size:14px;
 padding:10px;
 border-bottom:1px solid #e5e7eb;
 text-align:left;
+vertical-align:top;
+}
+.table th{
+font-weight:800;
+color:#0f172a;
+}
+.table tr:hover{
+background:#f8fafc;
 }
 .table th:last-child,
 .table td:last-child{
 text-align:right;
 }
-.amount{font-weight:800;color:#b91c1c;}
-.empty{text-align:center;color:#64748b;padding:15px;}
+.amount{
+font-weight:800;
+color:#b91c1c;
+}
+.empty{
+text-align:center;
+color:#64748b;
+padding:15px;
+}
 </style>
 
 <div class="page">
 <div class="card">
 
 @if(session('success'))
-<div class="alert-success">{{ session('success') }}</div>
+<div class="alert-success" id="successAlert">
+    {{ session('success') }}
+</div>
 @endif
 
 <div class="title">STORE EXPENSES</div>
@@ -118,6 +155,7 @@ text-align:right;
 
     <input type="number"
            step="0.01"
+           min="0"
            name="amount"
            class="input"
            placeholder="Expense Amount"
@@ -141,9 +179,9 @@ text-align:right;
         💾 Save Expense
     </button>
 
-    <a href="{{ route('cashier.expenses') }}" class="btn btn-red">
+    <button type="reset" class="btn btn-red">
         ❌ Clear
-    </a>
+    </button>
 
     <a href="#records" class="btn btn-blue">
         📋 Expense List
@@ -154,7 +192,7 @@ text-align:right;
 
     <div>Today Expense Total</div>
     <div class="total">
-        ₱{{ number_format($expenses->sum('amount'),2) }}
+        ₱{{ number_format($totalToday ?? 0,2) }}
     </div>
     <div class="note">
         Saved = recorded daily expense
@@ -190,5 +228,16 @@ text-align:right;
 
 </div>
 </div>
+
+@if(session('success'))
+<script>
+setTimeout(function(){
+    let alertBox = document.getElementById('successAlert');
+    if(alertBox){
+        alertBox.style.display = 'none';
+    }
+}, 2500);
+</script>
+@endif
 
 @endsection

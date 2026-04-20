@@ -11,25 +11,50 @@ class ExpenseController extends Controller
 {
     public function index()
     {
-        $categories = ExpenseCategory::where('status', 'active')->get();
-        $expenses = Expense::with('category')->latest()->get();
+        $branchId = Auth::user()->branch_id;
 
-        return view('cashflow.expenses', compact('categories', 'expenses'));
+        $categories = ExpenseCategory::where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        $expenses = Expense::with('category')
+            ->where('branch_id', $branchId)
+            ->latest()
+            ->get();
+
+        $totalToday = Expense::where('branch_id', $branchId)
+            ->whereDate('expense_date', date('Y-m-d'))
+            ->sum('amount');
+
+        return view('cashflow.expenses', compact(
+            'categories',
+            'expenses',
+            'totalToday'
+        ));
     }
 
     public function store(Request $request)
     {
-        Expense::create([
-            'branch_id' => Auth::user()->branch_id,
-            'category_id' => $request->category_id,
-            'expense_date' => $request->expense_date,
-            'description' => $request->description,
-            'amount' => $request->amount,
-            'payment_method' => $request->payment_method,
-            'status' => 'approved',
-            'created_by' => Auth::id(),
+        $request->validate([
+            'expense_date'   => 'required|date',
+            'category_id'    => 'required',
+            'amount'         => 'required|numeric|min:0.01',
+            'payment_method' => 'required',
         ]);
 
-        return back()->with('success', 'Expense added successfully.');
+        Expense::create([
+            'branch_id'      => Auth::user()->branch_id,
+            'category_id'    => $request->category_id,
+            'expense_date'   => $request->expense_date,
+            'description'    => $request->description,
+            'amount'         => $request->amount,
+            'payment_method' => $request->payment_method,
+            'status'         => 'approved',
+            'created_by'     => Auth::id(),
+        ]);
+
+        return redirect()
+            ->route('cashier.expenses')
+            ->with('success', 'Expense saved successfully.');
     }
 }
