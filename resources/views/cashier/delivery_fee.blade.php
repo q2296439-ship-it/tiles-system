@@ -110,7 +110,7 @@ font-weight:700;
 
 <input type="text" name="delivery_no" class="input"
 placeholder="Delivery No"
-value="{{ 'DF-' . date('YmdHis') }}">
+value="{{ $deliveryNo }}">
 
 <input type="date" name="delivery_date" class="input"
 value="{{ date('Y-m-d') }}">
@@ -223,7 +223,6 @@ fetch('/cashier/delivery/load/' + receipt)
     console.log(error);
     alert('Unable to load receipt.');
 });
-
 }
 </script>
 

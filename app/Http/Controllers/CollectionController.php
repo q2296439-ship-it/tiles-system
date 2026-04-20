@@ -877,18 +877,42 @@ public function requestAccessExcel(Request $request)
     );
 }
 
+public function deliveryFeeForm()
+{
+    $today = date('Ymd');
+    $branchId = auth()->user()->branch_id;
+
+    $count = DB::table('delivery_fees')
+        ->whereDate('delivery_date', date('Y-m-d'))
+        ->where('branch_id', $branchId)
+        ->count() + 1;
+
+    $deliveryNo = 'DF-' . $today . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
+
+    return view('cashier.delivery_fee', compact('deliveryNo'));
+}
+
 public function deliveryStore(Request $request)
 {
     $request->validate([
-        'delivery_no'   => 'required',
         'delivery_date' => 'required|date',
         'receipt_no'    => 'required',
         'amount'        => 'required|numeric|min:0',
         'status'        => 'required',
     ]);
 
+    $branchId = auth()->user()->branch_id;
+    $today = date('Ymd');
+
+    $count = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $request->delivery_date)
+        ->where('branch_id', $branchId)
+        ->count() + 1;
+
+    $deliveryNo = 'DF-' . $today . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
+
     DB::table('delivery_fees')->insert([
-        'delivery_no'   => $request->delivery_no,
+        'delivery_no'   => $deliveryNo,
         'delivery_date' => $request->delivery_date,
         'receipt_no'    => $request->receipt_no,
         'customer_name' => $request->customer_name,
@@ -896,7 +920,7 @@ public function deliveryStore(Request $request)
         'rider_name'    => $request->rider_name,
         'amount'        => $request->amount,
         'notes'         => $request->notes,
-        'branch_id'     => auth()->user()->branch_id,
+        'branch_id'     => $branchId,
         'user_id'       => auth()->id(),
         'status'        => $request->status,
         'created_at'    => now(),
@@ -997,5 +1021,6 @@ public function deliveryExcel(Request $request)
 
     return response()->stream($callback, 200, $headers);
 }
+
 
 }

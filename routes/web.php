@@ -356,8 +356,8 @@ Route::prefix('cashier')->group(function () {
          return view('cashier.delivery_fee');
         })->name('cashier.delivery.fee');
 
-    Route::post('/delivery-fee', [CollectionController::class, 'deliveryStore'])
-        ->name('cashier.delivery.store');
+    Route::get('/delivery-fee', [CollectionController::class, 'deliveryFeeForm'])
+    ->name('cashier.delivery.fee');
 
     Route::get('/delivery/load/{receipt_no}', [CollectionController::class, 'loadReceipt'])
         ->middleware('auth')
