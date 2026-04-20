@@ -357,6 +357,9 @@ Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accep
     Route::get('/expenses/excel', [ExpenseController::class, 'excel'])
     ->name('cashier.expenses.excel');
 
+    Route::get('/total-cash', [CashierController::class, 'totalCash'])
+    ->name('cashier.total.cash');
+
     Route::get('/salary', function () {
         return 'Employee Salary Page';
     })->name('cashier.salary');

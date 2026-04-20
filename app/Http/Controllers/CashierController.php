@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\Collection;
+use App\Models\Deposit;
+use App\Models\Expense;
+use App\Models\CashTransfer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -17,15 +21,13 @@ class CashierController extends Controller
         $branchId = $user->branch_id;
         $today = now()->toDateString();
 
-        // ✅ sariling branch lang products
         $products = Product::where('branch_id', $branchId)->get();
 
-        // ✅ Dashboard Stats
         $todaySales = Sale::whereDate('created_at', $today)
             ->where('branch_id', $branchId)
             ->sum('total_amount');
 
-        $receiptCount = \App\Models\Collection::whereDate('receipt_date', $today)
+        $receiptCount = Collection::whereDate('receipt_date', $today)
             ->where('branch_id', $branchId)
             ->count();
 
@@ -35,8 +37,7 @@ class CashierController extends Controller
             ->take(5)
             ->get();
 
-        // ✅ UPDATED: complete recent sales details from collections
-        $recentSales = \App\Models\Collection::where('branch_id', $branchId)
+        $recentSales = Collection::where('branch_id', $branchId)
             ->latest()
             ->take(5)
             ->get();
@@ -50,7 +51,51 @@ class CashierController extends Controller
         ));
     }
 
-    // 🔥 CHECKOUT (REALTIME FIXED + SAFE)
+    public function totalCash()
+    {
+        $branchId = Auth::user()->branch_id;
+
+        // CASH IN
+        $collections = Collection::where('branch_id', $branchId)
+            ->where('status', 'saved')
+            ->sum('paid_amount');
+
+        $incomingTransfers = CashTransfer::where('to_branch_id', $branchId)
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        // CASH OUT
+        $deposits = Deposit::where('branch_id', $branchId)
+            ->where('status', 'closed')
+            ->sum('actual_amount');
+
+        $expenses = Expense::where('branch_id', $branchId)
+            ->where('status', 'approved')
+            ->sum('amount');
+
+        $outgoingTransfers = CashTransfer::where('from_branch_id', $branchId)
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        $totalCash = (
+            $collections +
+            $incomingTransfers
+        ) - (
+            $deposits +
+            $expenses +
+            $outgoingTransfers
+        );
+
+        return view('cashflow.total-cash', compact(
+            'collections',
+            'incomingTransfers',
+            'deposits',
+            'expenses',
+            'outgoingTransfers',
+            'totalCash'
+        ));
+    }
+
     public function checkout(Request $request)
     {
         try {
@@ -63,7 +108,6 @@ class CashierController extends Controller
                 ], 401);
             }
 
-            // ✅ VALIDATION
             $request->validate([
                 'total' => 'required|numeric|min:0',
                 'items' => 'required|array|min:1'
@@ -71,7 +115,6 @@ class CashierController extends Controller
 
             DB::beginTransaction();
 
-            // ✅ CREATE SALE
             $sale = Sale::create([
                 'user_id' => $user->id,
                 'branch_id' => $user->branch_id,
