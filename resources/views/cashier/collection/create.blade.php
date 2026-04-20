@@ -399,7 +399,7 @@ document.getElementById('salesType').addEventListener('change', computeAll);
 function computeAll(){
     let total = 0;
 
-    document.querySelectorAll('.amount').forEach(item=>{
+    document.querySelectorAll('.amount').forEach(item => {
         total += parseFloat(item.value) || 0;
     });
 
@@ -417,34 +417,39 @@ function computeAll(){
 
     let grand = total - discount;
 
-    let paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+    let salesType = document.getElementById('salesType').value;
+    let paidInput = document.getElementById('paidAmount');
+
+    let paid = parseFloat(paidInput.value) || 0;
+
+    // Cash = auto fully paid
+    if(salesType === 'cash'){
+        paid = grand;
+        paidInput.value = grand.toFixed(2);
+    }
+
+    // Prevent overpayment
     if(paid > grand){
         paid = grand;
-        document.getElementById('paidAmount').value = grand.toFixed(2);
+        paidInput.value = grand.toFixed(2);
     }
 
     let balance = grand - paid;
 
+    // Display values
     document.getElementById('salesAmount').innerText = '₱' + total.toFixed(2);
     document.getElementById('discountAmount').innerText = '₱' + discount.toFixed(2);
     document.getElementById('paidDisplay').innerText = '₱' + paid.toFixed(2);
     document.getElementById('grandTotal').innerText = '₱' + grand.toFixed(2);
     document.getElementById('balanceDisplay').value = balance.toFixed(2);
 
+    // Hidden fields for submit
     document.getElementById('grossAmount').value = total.toFixed(2);
     document.getElementById('hiddenDiscount').value = discount.toFixed(2);
     document.getElementById('hiddenDiscountType').value = type;
     document.getElementById('totalAmount').value = grand.toFixed(2);
     document.getElementById('balanceValue').value = balance.toFixed(2);
-
-    let salesType = document.getElementById('salesType').value;
-
-    if(salesType === 'cash'){
-        document.getElementById('paidAmount').value = grand.toFixed(2);
-        document.getElementById('paidDisplay').innerText = '₱' + grand.toFixed(2);
-        document.getElementById('balanceDisplay').value = '0.00';
-        document.getElementById('balanceValue').value = '0.00';
-    }
+}
 }
 
 computeAll();
