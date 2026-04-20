@@ -1133,6 +1133,20 @@ public function payAr(Request $request, $id)
 
     $row = Collection::findOrFail($id);
 
+    if ($request->payment > $row->balance) {
+        return back()->with('error', 'Payment exceeds remaining balance.');
+    }
+
+    // SAVE TO AR PAYMENTS TABLE
+    \App\Models\ArPayment::create([
+        'collection_id' => $row->id,
+        'branch_id'     => $row->branch_id,
+        'payment_date'  => date('Y-m-d'),
+        'amount'        => $request->payment,
+        'created_by'    => auth()->id(),
+    ]);
+
+    // UPDATE COLLECTION BALANCE
     $row->paid_amount += $request->payment;
     $row->balance = $row->total_amount - $row->paid_amount;
 

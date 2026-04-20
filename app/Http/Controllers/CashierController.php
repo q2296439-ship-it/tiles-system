@@ -10,6 +10,7 @@ use App\Models\Collection;
 use App\Models\Deposit;
 use App\Models\Expense;
 use App\Models\CashTransfer;
+use App\Models\ArPayment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -60,10 +61,8 @@ class CashierController extends Controller
             ->where('status', 'closed')
             ->sum('actual_amount');
 
-        // DP / Partial Payments = A/R Payments
-        $arPayments = Collection::where('branch_id', $branchId)
-            ->where('sales_type', 'dp')
-            ->sum('paid_amount');
+        $arPayments = ArPayment::where('branch_id', $branchId)
+            ->sum('amount');
 
         $incomingTransfers = CashTransfer::where('to_branch_id', $branchId)
             ->where('status', 'completed')
