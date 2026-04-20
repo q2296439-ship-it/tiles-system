@@ -49,6 +49,7 @@ display:flex;
 gap:10px;
 margin-bottom:15px;
 flex-wrap:wrap;
+align-items:center;
 }
 .input{
 padding:10px;
@@ -63,6 +64,19 @@ background:#2563eb;
 color:#fff;
 font-weight:700;
 text-decoration:none;
+cursor:pointer;
+display:inline-block;
+}
+.btn-green{background:#16a34a;}
+.pagination{
+margin-top:15px;
+display:flex;
+justify-content:space-between;
+gap:10px;
+}
+.disabled{
+opacity:.5;
+pointer-events:none;
 }
 </style>
 
@@ -73,10 +87,16 @@ text-decoration:none;
 
 <form method="GET" class="filter">
 <input type="date" name="date" value="{{ $selectedDate }}" class="input">
+
 <button class="btn">Filter</button>
 
 <a href="{{ route('cashier.delivery.fee') }}" class="btn">
 ➕ New Delivery
+</a>
+
+<a href="{{ route('cashier.delivery.today') }}?date={{ $selectedDate }}&export=excel"
+class="btn btn-green">
+📗 Excel
 </a>
 </form>
 
@@ -104,16 +124,20 @@ text-decoration:none;
 <th>Date</th>
 </tr>
 </thead>
-<tbody>
 
-@forelse($rows as $i => $row)
+<tbody>
+@forelse($rows as $row)
 <tr>
-<td>{{ $i + 1 }}</td>
+<td>{{ $loop->iteration + (($rows->currentPage()-1) * $rows->perPage()) }}</td>
 <td>{{ $row->delivery_no }}</td>
 <td>{{ $row->receipt_no }}</td>
 <td>{{ $row->customer_name }}</td>
 <td>₱{{ number_format($row->amount,2) }}</td>
-<td><span class="badge {{ $row->status }}">{{ $row->status }}</span></td>
+<td>
+<span class="badge {{ $row->status }}">
+{{ $row->status }}
+</span>
+</td>
 <td>{{ $row->delivery_date }}</td>
 </tr>
 @empty
@@ -121,9 +145,24 @@ text-decoration:none;
 <td colspan="7" style="text-align:center;">No records found.</td>
 </tr>
 @endforelse
-
 </tbody>
 </table>
+
+<div class="pagination">
+
+@if($rows->onFirstPage())
+<span class="btn disabled">⬅ Previous</span>
+@else
+<a href="{{ $rows->previousPageUrl() }}" class="btn">⬅ Previous</a>
+@endif
+
+@if($rows->hasMorePages())
+<a href="{{ $rows->nextPageUrl() }}" class="btn">Next ➡</a>
+@else
+<span class="btn disabled">Next ➡</span>
+@endif
+
+</div>
 
 </div>
 </div>

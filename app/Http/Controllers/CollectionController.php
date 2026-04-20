@@ -917,7 +917,10 @@ public function deliveryToday(Request $request)
         ->whereDate('delivery_date', $selectedDate)
         ->where('branch_id', $branchId)
         ->orderBy('id', 'desc')
-        ->get();
+        ->paginate(10)
+        ->appends([
+            'date' => $selectedDate
+        ]);
 
     $totalCount = DB::table('delivery_fees')
         ->whereDate('delivery_date', $selectedDate)
