@@ -316,9 +316,19 @@ public function deposit(Request $request)
 
     $rows = $query->get();
 
-    $gross = $rows->sum('gross_amount');
+    $returnRows = ReturnModel::whereDate('return_date', $selectedDate);
+
+    if ($role === 'cashier') {
+        $returnRows->where('branch_id', $user->branch_id);
+    } elseif (!empty($selectedBranch)) {
+        $returnRows->where('branch_id', $selectedBranch);
+    }
+
+    $returns = $returnRows->get();
+
+    $gross = $rows->sum('total_amount') - $returns->sum('total_amount');
     $discount = $rows->sum('discount_amount');
-    $net = $rows->sum('net_amount');
+    $net = $gross - $discount;
 
     $depositQuery = \App\Models\Deposit::where('deposit_date', $selectedDate);
 
@@ -703,9 +713,13 @@ public function depositStore(Request $request)
         ->where('status', '!=', 'cancelled')
         ->get();
 
-    $gross = $rows->sum('total_amount');
+    $returns = ReturnModel::whereDate('return_date', $date)
+        ->where('branch_id', $branchId)
+        ->get();
+
+    $gross = $rows->sum('total_amount') - $returns->sum('total_amount');
     $discount = $rows->sum('discount_amount');
-    $net = $rows->sum('net_amount');
+    $net = $gross - $discount;
 
     $actual = (float) $request->actual_amount;
 
