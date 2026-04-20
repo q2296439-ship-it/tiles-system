@@ -230,9 +230,9 @@ public function loadReceipt($receipt_no)
             $row->status = 'returned';
             $row->record_type = 'returned';
 
-            // force negative para bawas sa totals
+            // negative para automatic bawas
             $row->total_amount = -abs($row->total_amount);
-            $row->paid_amount = 0;
+            $row->paid_amount = -abs($row->total_amount);
             $row->balance = 0;
 
             return $row;
@@ -252,7 +252,7 @@ public function loadReceipt($receipt_no)
     if ($status == 'returned') {
 
         $total = $returnOnly->sum('total_amount');
-        $actualCollection = 0;
+        $actualCollection = $returnOnly->sum('paid_amount');
 
     } elseif ($status == 'cancelled') {
 
@@ -275,13 +275,17 @@ public function loadReceipt($receipt_no)
             ->whereIn('record_type', ['saved', 'pending'])
             ->sum('total_amount');
 
-        $returnTotal = $returnOnly->sum('total_amount'); // negative na ito
+        $returnTotal = $returnOnly->sum('total_amount');
 
         $total = $salesTotal + $returnTotal;
 
-        $actualCollection = $collectionOnly
+        $paidTotal = $collectionOnly
             ->whereIn('record_type', ['saved', 'pending'])
             ->sum('paid_amount');
+
+        $returnPaid = $returnOnly->sum('paid_amount');
+
+        $actualCollection = $paidTotal + $returnPaid;
     }
 
     $page = LengthAwarePaginator::resolveCurrentPage();
