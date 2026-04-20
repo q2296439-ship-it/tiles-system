@@ -339,10 +339,10 @@ Route::prefix('cashier')->group(function () {
     Route::get('/cash-transfer', [CashTransferController::class, 'index'])
     ->name('cashier.transfer.cash');
 
-    Route::post('/cash-transfer/store', [CashTransferController::class, 'store'])
+Route::post('/cash-transfer/store', [CashTransferController::class, 'store'])
     ->name('cashier.transfer.cash.store');
 
-    Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accept'])
+Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accept'])
     ->name('cashier.transfer.cash.accept');
 
    Route::get('/expenses', [ExpenseController::class, 'index'])
