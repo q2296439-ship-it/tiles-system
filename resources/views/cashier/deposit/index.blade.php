@@ -68,7 +68,7 @@ $isCashier = strtolower(auth()->user()->role) === 'cashier';
 
 .stats{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
     gap:16px;
     margin-bottom:20px;
 }
@@ -121,7 +121,6 @@ textarea{
 }
 .right{text-align:right;}
 
-/* COMPACT DEPOSIT PANEL */
 #depositPanel{
     display:none;
     margin-top:20px;
@@ -233,13 +232,20 @@ textarea{
     </div>
 
     <div class="card">
+        <div class="label">Other Income</div>
+        <div class="value blue" id="otherIncomeText">₱0.00</div>
+    </div>
+
+    <div class="card">
         <div class="label">Total Discount</div>
         <div class="value blue">₱{{ number_format($discount ?? 0,2) }}</div>
     </div>
 
     <div class="card">
         <div class="label">Net Sales</div>
-        <div class="value green">₱{{ number_format($net ?? 0,2) }}</div>
+        <div class="value green" id="netSalesText">
+            ₱{{ number_format($net ?? 0,2) }}
+        </div>
     </div>
 
     <div class="card">
@@ -274,7 +280,7 @@ textarea{
 @csrf
 
 <input type="hidden" name="deposit_date" value="{{ request('date', date('Y-m-d')) }}">
-<input type="hidden" name="expected_amount" value="{{ $gross ?? 0 }}">
+<input type="hidden" name="expected_amount" id="expectedAmount" value="{{ $gross ?? 0 }}">
 <input type="hidden" name="actual_amount" id="actualAmount" value="{{ $actual ?? 0 }}">
 <input type="hidden" name="variance" id="varianceInput" value="{{ $variance ?? 0 }}">
 
@@ -342,56 +348,52 @@ textarea{
     <h3 style="margin-top:0;">Deposit Breakdown</h3>
 
     <table>
-    <tr>
-        <th>Description</th>
-        <th>Amount</th>
-    </tr>
+        <tr>
+            <th>Description</th>
+            <th>Amount</th>
+        </tr>
 
-    <tr>
-        <td>Gross Collection</td>
-        <td>₱{{ number_format($gross ?? 0,2) }}</td>
-    </tr>
+        <tr>
+            <td>Gross Collection</td>
+            <td>₱{{ number_format($gross ?? 0,2) }}</td>
+        </tr>
 
-    <tr>
-        <td>Less Discounts</td>
-        <td>₱{{ number_format($discount ?? 0,2) }}</td>
-    </tr>
+        <tr>
+            <td>Other Income</td>
+            <td id="otherIncomeRow">₱0.00</td>
+        </tr>
 
-    <tr>
-        <td>A/R Balance</td>
-        <td id="arRow">₱0.00</td>
-    </tr>
+        <tr>
+            <td>Less Discounts</td>
+            <td>₱{{ number_format($discount ?? 0,2) }}</td>
+        </tr>
 
-    <tr>
-        <td>Store Expenses</td>
-        <td id="expenseRow">₱0.00</td>
-    </tr>
+        <tr>
+            <td>A/R Balance</td>
+            <td id="arRow">₱0.00</td>
+        </tr>
 
-    <tr>
-        <td>Delivery Fee</td>
-        <td id="deliveryRow">₱0.00</td>
-    </tr>
+        <tr>
+            <td>Store Expenses</td>
+            <td id="expenseRow">₱0.00</td>
+        </tr>
 
-    <tr>
-        <td>Other Income</td>
-        <td id="otherRow">₱0.00</td>
-    </tr>
+        <tr>
+            <td><strong>Expected Deposit</strong></td>
+            <td><strong id="expectedTable">₱{{ number_format($gross ?? 0,2) }}</strong></td>
+        </tr>
 
-    <tr>
-        <td><strong>Expected Deposit</strong></td>
-        <td><strong id="actualTable">₱{{ number_format($actual ?? 0,2) }}</strong></td>
-    </tr>
+        <tr>
+            <td><strong>Actual Cash Deposited</strong></td>
+            <td><strong id="actualTable">₱{{ number_format($actual ?? 0,2) }}</strong></td>
+        </tr>
 
-    <tr>
-        <td><strong>Actual Cash Deposited</strong></td>
-        <td><strong id="actualTable2">₱{{ number_format($actual ?? 0,2) }}</strong></td>
-    </tr>
+        <tr>
+            <td><strong>Variance</strong></td>
+            <td><strong id="varianceTable">₱{{ number_format($variance ?? 0,2) }}</strong></td>
+        </tr>
+    </table>
 
-    <tr>
-        <td><strong>Variance</strong></td>
-        <td><strong id="varianceTable">₱{{ number_format($variance ?? 0,2) }}</strong></td>
-    </tr>
-</table>
     <div class="sign-grid">
         <div class="sign-box">Prepared by (Cashier)</div>
         <div class="sign-box">Checked by (Manager)</div>
@@ -430,17 +432,28 @@ function computeDeposit(){
     let delivery = parseFloat(document.getElementById('deliveryAdd').value) || 0;
     let other    = parseFloat(document.getElementById('otherAdd').value) || 0;
 
-    let total = cashTotal + ar + expense + delivery + other;
+    let otherIncome = delivery + other;
 
-    let expected = parseFloat('{{ $gross ?? 0 }}');
+    let gross = parseFloat('{{ $gross ?? 0 }}');
+    let discount = parseFloat('{{ $discount ?? 0 }}');
+
+    let expected = gross + otherIncome - discount;
+    let total = cashTotal + ar + expense;
     let variance = total - expected;
 
+    document.getElementById('otherIncomeText').innerText = '₱' + otherIncome.toFixed(2);
+    document.getElementById('netSalesText').innerText = '₱' + expected.toFixed(2);
     document.getElementById('actualText').innerText = '₱' + total.toFixed(2);
     document.getElementById('varianceText').innerText = '₱' + variance.toFixed(2);
 
+    document.getElementById('otherIncomeRow').innerText = '₱' + otherIncome.toFixed(2);
+    document.getElementById('arRow').innerText = '₱' + ar.toFixed(2);
+    document.getElementById('expenseRow').innerText = '₱' + expense.toFixed(2);
+    document.getElementById('expectedTable').innerText = '₱' + expected.toFixed(2);
     document.getElementById('actualTable').innerText = '₱' + total.toFixed(2);
     document.getElementById('varianceTable').innerText = '₱' + variance.toFixed(2);
 
+    document.getElementById('expectedAmount').value = expected.toFixed(2);
     document.getElementById('actualAmount').value = total.toFixed(2);
     document.getElementById('varianceInput').value = variance.toFixed(2);
 }
@@ -453,6 +466,8 @@ document.addEventListener('input', function(e){
         computeDeposit();
     }
 });
+
+computeDeposit();
 </script>
 
 @endsection
