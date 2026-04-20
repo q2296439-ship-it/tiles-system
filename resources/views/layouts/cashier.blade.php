@@ -334,7 +334,7 @@
 
         <p>Cash Flow</p>
 
-        <a href="{{ route('cashier.cash.total') }}" class="{{ request()->is('cashier/cash-total*') ? 'active' : '' }}">💰 Total Cash</a>
+        <a href="{{ route('cashier.total.cash') }}" class="{{ request()->is('cashier/cash-total*') ? 'active' : '' }}">💰 Total Cash</a>
 
         <a href="{{ route('cashier.transfer.cash') }}" class="{{ request()->is('cashier/cash-transfer*') ? 'active' : '' }}">🔄 B2B Cash Transfer</a>
 
