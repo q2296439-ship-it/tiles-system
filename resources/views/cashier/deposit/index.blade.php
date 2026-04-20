@@ -161,6 +161,13 @@ textarea{
     padding:9px 14px;
     border-radius:8px;
 }
+
+.adjust-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:12px;
+    margin-top:18px;
+}
 </style>
 
 <div class="page">
@@ -200,12 +207,12 @@ textarea{
                class="btn btn-green">📗 Excel</a>
 
             <a href="{{ auth()->user()->role === 'manager'
-    ? route('manager.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')])
-    : route('cashier.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
-   class="btn btn-red"
-   target="_blank">
-   📄 PDF
-</a>
+                ? route('manager.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')])
+                : route('cashier.deposit.pdf', ['date' => request('date'), 'branch_id' => request('branch_id')]) }}"
+               class="btn btn-red"
+               target="_blank">
+               📄 PDF
+            </a>
 
             @if($isCashier)
             <button type="button" class="btn btn-dark" onclick="toggleDeposit()">
@@ -221,7 +228,7 @@ textarea{
 <div class="stats">
 
     <div class="card">
-        <div class="label">Gross Collection</div>
+        <div class="label">Gross Sales</div>
         <div class="value">₱{{ number_format($gross ?? 0,2) }}</div>
     </div>
 
@@ -231,12 +238,12 @@ textarea{
     </div>
 
     <div class="card">
-        <div class="label">Net Collection</div>
+        <div class="label">Net Sales</div>
         <div class="value green">₱{{ number_format($net ?? 0,2) }}</div>
     </div>
 
     <div class="card">
-        <div class="label">Actual Deposit</div>
+        <div class="label">Actual Total</div>
         <div class="value" id="actualText">
             ₱{{ number_format($actual ?? 0,2) }}
         </div>
@@ -267,7 +274,7 @@ textarea{
 @csrf
 
 <input type="hidden" name="deposit_date" value="{{ request('date', date('Y-m-d')) }}">
-<input type="hidden" name="expected_amount" value="{{ $net ?? 0 }}">
+<input type="hidden" name="expected_amount" value="{{ $gross ?? 0 }}">
 <input type="hidden" name="actual_amount" id="actualAmount" value="{{ $actual ?? 0 }}">
 <input type="hidden" name="variance" id="varianceInput" value="{{ $variance ?? 0 }}">
 
@@ -293,6 +300,30 @@ textarea{
         <tr><td>1 Coin</td><td><input type="number" name="coin_1" class="input denom" data-val="1" value="0"></td><td class="right lineTotal">0.00</td></tr>
     </table>
 
+    <div class="adjust-grid">
+
+        <div>
+            <label class="label">A/R Balance</label>
+            <input type="number" step="0.01" name="ar_balance" class="input addon" id="arAdd" value="0">
+        </div>
+
+        <div>
+            <label class="label">Store Expenses</label>
+            <input type="number" step="0.01" name="store_expenses" class="input addon" id="expenseAdd" value="0">
+        </div>
+
+        <div>
+            <label class="label">Delivery Fee</label>
+            <input type="number" step="0.01" name="delivery_fee" class="input addon" id="deliveryAdd" value="0">
+        </div>
+
+        <div>
+            <label class="label">Other Add-ons</label>
+            <input type="number" step="0.01" name="other_income" class="input addon" id="otherAdd" value="0">
+        </div>
+
+    </div>
+
     <div style="margin-top:15px;">
         <label class="label">Remarks</label>
         <textarea name="remarks" placeholder="Enter remarks..."></textarea>
@@ -316,7 +347,7 @@ textarea{
             <th>Amount</th>
         </tr>
         <tr>
-            <td>Gross Collection</td>
+            <td>Gross Sales</td>
             <td>₱{{ number_format($gross ?? 0,2) }}</td>
         </tr>
         <tr>
@@ -324,11 +355,7 @@ textarea{
             <td>₱{{ number_format($discount ?? 0,2) }}</td>
         </tr>
         <tr>
-            <td><strong>Expected Deposit</strong></td>
-            <td><strong>₱{{ number_format($net ?? 0,2) }}</strong></td>
-        </tr>
-        <tr>
-            <td>Actual Cash Deposited</td>
+            <td>Total Accounted</td>
             <td id="actualTable">₱{{ number_format($actual ?? 0,2) }}</td>
         </tr>
         <tr>
@@ -359,7 +386,7 @@ function toggleDeposit() {
 }
 
 function computeDeposit(){
-    let total = 0;
+    let cashTotal = 0;
 
     document.querySelectorAll('.denom').forEach(input => {
         let qty = parseFloat(input.value) || 0;
@@ -367,10 +394,17 @@ function computeDeposit(){
         let line = qty * val;
 
         input.closest('tr').querySelector('.lineTotal').innerText = line.toFixed(2);
-        total += line;
+        cashTotal += line;
     });
 
-    let expected = parseFloat('{{ $net ?? 0 }}');
+    let ar       = parseFloat(document.getElementById('arAdd').value) || 0;
+    let expense  = parseFloat(document.getElementById('expenseAdd').value) || 0;
+    let delivery = parseFloat(document.getElementById('deliveryAdd').value) || 0;
+    let other    = parseFloat(document.getElementById('otherAdd').value) || 0;
+
+    let total = cashTotal + ar + expense + delivery + other;
+
+    let expected = parseFloat('{{ $gross ?? 0 }}');
     let variance = total - expected;
 
     document.getElementById('actualText').innerText = '₱' + total.toFixed(2);
@@ -384,7 +418,10 @@ function computeDeposit(){
 }
 
 document.addEventListener('input', function(e){
-    if(e.target.classList.contains('denom')){
+    if(
+        e.target.classList.contains('denom') ||
+        e.target.classList.contains('addon')
+    ){
         computeDeposit();
     }
 });
