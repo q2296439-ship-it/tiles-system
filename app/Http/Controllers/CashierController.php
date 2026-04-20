@@ -60,8 +60,10 @@ class CashierController extends Controller
             ->where('status', 'closed')
             ->sum('actual_amount');
 
+        // DP / Partial Payments = A/R Payments
         $arPayments = Collection::where('branch_id', $branchId)
-            ->sum('ar_balance');
+            ->where('sales_type', 'dp')
+            ->sum('paid_amount');
 
         $incomingTransfers = CashTransfer::where('to_branch_id', $branchId)
             ->where('status', 'completed')
@@ -78,7 +80,6 @@ class CashierController extends Controller
 
         $cashIn = $actualDeposit + $arPayments + $incomingTransfers;
         $cashOut = $expenses + $outgoingTransfers;
-
         $totalCash = $cashIn - $cashOut;
 
         return view('cashflow.total-cash', compact(
