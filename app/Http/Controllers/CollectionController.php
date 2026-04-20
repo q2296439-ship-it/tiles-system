@@ -229,6 +229,12 @@ public function loadReceipt($receipt_no)
             $row->receipt_date = $row->return_date;
             $row->status = 'returned';
             $row->record_type = 'returned';
+
+            // force negative para bawas sa totals
+            $row->total_amount = -abs($row->total_amount);
+            $row->paid_amount = 0;
+            $row->balance = 0;
+
             return $row;
         });
 
@@ -245,7 +251,7 @@ public function loadReceipt($receipt_no)
 
     if ($status == 'returned') {
 
-        $total = -abs($returnOnly->sum('total_amount'));
+        $total = $returnOnly->sum('total_amount');
         $actualCollection = 0;
 
     } elseif ($status == 'cancelled') {
@@ -269,9 +275,9 @@ public function loadReceipt($receipt_no)
             ->whereIn('record_type', ['saved', 'pending'])
             ->sum('total_amount');
 
-        $returnTotal = $returnOnly->sum('total_amount');
+        $returnTotal = $returnOnly->sum('total_amount'); // negative na ito
 
-        $total = $salesTotal - $returnTotal;
+        $total = $salesTotal + $returnTotal;
 
         $actualCollection = $collectionOnly
             ->whereIn('record_type', ['saved', 'pending'])
