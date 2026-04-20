@@ -949,4 +949,53 @@ public function deliveryToday(Request $request)
     ));
 }
 
+public function deliveryExcel(Request $request)
+{
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $branchId = auth()->user()->branch_id;
+
+    $rows = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate)
+        ->where('branch_id', $branchId)
+        ->orderBy('id', 'desc')
+        ->get();
+
+    $filename = 'delivery-report-' . $selectedDate . '.csv';
+
+    $headers = [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+    ];
+
+    $callback = function () use ($rows) {
+        $file = fopen('php://output', 'w');
+
+        fputcsv($file, [
+            '#',
+            'Delivery No',
+            'Receipt No',
+            'Customer',
+            'Amount',
+            'Status',
+            'Date'
+        ]);
+
+        foreach ($rows as $index => $row) {
+            fputcsv($file, [
+                $index + 1,
+                $row->delivery_no,
+                $row->receipt_no,
+                $row->customer_name,
+                $row->amount,
+                $row->status,
+                $row->delivery_date
+            ]);
+        }
+
+        fclose($file);
+    };
+
+    return response()->stream($callback, 200, $headers);
+}
+
 }
