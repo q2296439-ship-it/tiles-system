@@ -192,7 +192,7 @@ public function loadReceipt($receipt_no)
         }
     }
 
-    public function today(Request $request)
+   public function today(Request $request)
 {
     $selectedDate = $request->date ?? date('Y-m-d');
     $status       = $request->status ?? 'all';
@@ -240,9 +240,12 @@ public function loadReceipt($receipt_no)
 
     $records = $records->sortByDesc('created_at')->values();
 
+    $collectionOnly = $collections;
+    $returnOnly = $returns;
+
     if ($status == 'returned') {
 
-        $total = -abs($records->sum('total_amount'));
+        $total = -abs($returnOnly->sum('total_amount'));
         $actualCollection = 0;
 
     } elseif ($status == 'cancelled') {
@@ -252,25 +255,26 @@ public function loadReceipt($receipt_no)
 
     } elseif ($status == 'saved') {
 
-        $total = $records->where('record_type', 'saved')->sum('total_amount')
-               - $records->where('record_type', 'returned')->sum('total_amount');
+        $total = $collectionOnly
+            ->where('record_type', 'saved')
+            ->sum('total_amount');
 
-        $actualCollection = $records->where('record_type', 'saved')->sum('paid_amount');
+        $actualCollection = $collectionOnly
+            ->where('record_type', 'saved')
+            ->sum('paid_amount');
 
     } else {
 
-        $salesTotal = $records
-            ->where('record_type', 'saved')
+        $salesTotal = $collectionOnly
+            ->whereIn('record_type', ['saved', 'pending'])
             ->sum('total_amount');
 
-        $returnTotal = $records
-            ->where('record_type', 'returned')
-            ->sum('total_amount');
+        $returnTotal = $returnOnly->sum('total_amount');
 
         $total = $salesTotal - $returnTotal;
 
-        $actualCollection = $records
-            ->where('record_type', 'saved')
+        $actualCollection = $collectionOnly
+            ->whereIn('record_type', ['saved', 'pending'])
             ->sum('paid_amount');
     }
 
