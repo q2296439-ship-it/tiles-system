@@ -1022,5 +1022,29 @@ public function deliveryExcel(Request $request)
     return response()->stream($callback, 200, $headers);
 }
 
+public function arAccounts(Request $request)
+{
+    $branchId = auth()->user()->branch_id;
+
+    $query = Collection::where('branch_id', $branchId)
+        ->whereIn('sales_type', ['dp', 'partial'])
+        ->where('balance', '>', 0);
+
+    if ($request->search) {
+        $query->where(function ($q) use ($request) {
+            $q->where('receipt_no', 'like', '%' . $request->search . '%')
+              ->orWhere('customer_name', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    if ($request->date) {
+        $query->whereDate('receipt_date', $request->date);
+    }
+
+    $rows = $query->latest()->paginate(10);
+
+    return view('cashier.ar_accounts', compact('rows'));
+}
+
 
 }
