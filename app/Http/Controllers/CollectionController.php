@@ -703,7 +703,7 @@ public function depositStore(Request $request)
         ->where('status', '!=', 'cancelled')
         ->get();
 
-    $gross = $rows->sum('gross_amount');
+    $gross = $rows->sum('total_amount');
     $discount = $rows->sum('discount_amount');
     $net = $rows->sum('net_amount');
 
