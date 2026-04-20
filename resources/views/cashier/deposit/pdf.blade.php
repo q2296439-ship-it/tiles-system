@@ -47,6 +47,7 @@ body{
 .field-line.small{
     min-width:170px;
 }
+
 table.main{
     width:100%;
     border-collapse:collapse;
@@ -61,17 +62,32 @@ table.main td{
 table.main th{
     background:#f2f2f2;
 }
+
+table.breakdown{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:18px;
+}
+table.breakdown th,
+table.breakdown td{
+    border:1px solid #000;
+    padding:6px;
+}
+table.breakdown th{
+    background:#f2f2f2;
+    text-align:left;
+}
 .right{
     text-align:right !important;
 }
 .total-box{
-    margin-top:15px;
+    margin-top:12px;
     text-align:right;
     font-size:15px;
     font-weight:bold;
 }
 .signatures{
-    margin-top:45px;
+    margin-top:35px;
     width:100%;
 }
 .sign{
@@ -85,15 +101,32 @@ table.main th{
     padding-top:4px;
 }
 .note{
-    margin-top:15px;
+    margin-top:12px;
     font-size:11px;
     color:#444;
+}
+.page-break{
+    page-break-after:always;
 }
 </style>
 </head>
 <body>
 
 @foreach($rows as $row)
+
+@php
+$gross       = $row->gross_amount ?? $row->expected_amount ?? 0;
+$discount    = $row->discount_amount ?? 0;
+$ar          = $row->ar_balance ?? 0;
+$expense     = $row->store_expenses ?? 0;
+$delivery    = $row->delivery_fee ?? 0;
+$other       = $row->other_income ?? 0;
+
+$otherIncome = $delivery + $other;
+$netSales    = ($gross + $otherIncome) - $discount;
+$actual      = $row->actual_amount ?? 0;
+$variance    = $row->variance ?? 0;
+@endphp
 
 <div class="box">
 
@@ -113,6 +146,7 @@ table.main th{
                 <span class="field-line small">{{ $row->deposit_date }}</span>
             </td>
         </tr>
+
         <tr>
             <td colspan="2">
                 <strong>Deposited By:</strong>
@@ -129,6 +163,7 @@ table.main th{
                 <th>Amount</th>
             </tr>
         </thead>
+
         <tbody>
             <tr><td>1000</td><td>{{ $row->denom_1000 }}</td><td>{{ number_format($row->denom_1000 * 1000,2) }}</td></tr>
             <tr><td>500</td><td>{{ $row->denom_500 }}</td><td>{{ number_format($row->denom_500 * 500,2) }}</td></tr>
@@ -143,8 +178,56 @@ table.main th{
     </table>
 
     <div class="total-box">
-        TOTAL CASH DEPOSIT: PHP {{ number_format($row->actual_amount,2) }}
+        TOTAL CASH DEPOSIT: PHP {{ number_format($actual,2) }}
     </div>
+
+    {{-- BREAKDOWN SECTION --}}
+    <table class="breakdown">
+        <tr>
+            <th width="65%">Deposit Breakdown</th>
+            <th width="35%">Amount</th>
+        </tr>
+
+        <tr>
+            <td>Gross Sales</td>
+            <td class="right">{{ number_format($gross,2) }}</td>
+        </tr>
+
+        <tr>
+            <td>Other Income</td>
+            <td class="right">{{ number_format($otherIncome,2) }}</td>
+        </tr>
+
+        <tr>
+            <td>Less Discount</td>
+            <td class="right">{{ number_format($discount,2) }}</td>
+        </tr>
+
+        <tr>
+            <td>Net Sales</td>
+            <td class="right">{{ number_format($netSales,2) }}</td>
+        </tr>
+
+        <tr>
+            <td>A/R Balance</td>
+            <td class="right">{{ number_format($ar,2) }}</td>
+        </tr>
+
+        <tr>
+            <td>Store Expenses</td>
+            <td class="right">{{ number_format($expense,2) }}</td>
+        </tr>
+
+        <tr>
+            <td><strong>Actual Deposit</strong></td>
+            <td class="right"><strong>{{ number_format($actual,2) }}</strong></td>
+        </tr>
+
+        <tr>
+            <td><strong>Variance</strong></td>
+            <td class="right"><strong>{{ number_format($variance,2) }}</strong></td>
+        </tr>
+    </table>
 
     <div class="signatures">
         <div class="sign">
@@ -157,10 +240,14 @@ table.main th{
     </div>
 
     <div class="note">
-        Variance: PHP {{ number_format($row->variance,2) }}
+        Generated Deposit Slip Report
     </div>
 
 </div>
+
+@if(!$loop->last)
+<div class="page-break"></div>
+@endif
 
 @endforeach
 
