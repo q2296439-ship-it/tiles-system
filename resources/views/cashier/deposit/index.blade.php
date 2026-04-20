@@ -467,7 +467,21 @@ document.addEventListener('input', function(e){
     }
 });
 
+@if(!($isClosed ?? false))
 computeDeposit();
+@else
+document.getElementById('otherIncomeText').innerText = '₱{{ number_format(($delivery_fee ?? 0)+($other_income ?? 0),2) }}';
+document.getElementById('netSalesText').innerText    = '₱{{ number_format($net ?? 0,2) }}';
+document.getElementById('actualText').innerText      = '₱{{ number_format($actual ?? 0,2) }}';
+document.getElementById('varianceText').innerText    = '₱{{ number_format($variance ?? 0,2) }}';
+
+document.getElementById('otherIncomeRow').innerText = '₱{{ number_format(($delivery_fee ?? 0)+($other_income ?? 0),2) }}';
+document.getElementById('arRow').innerText          = '₱{{ number_format($ar_balance ?? 0,2) }}';
+document.getElementById('expenseRow').innerText     = '₱{{ number_format($store_expenses ?? 0,2) }}';
+document.getElementById('expectedTable').innerText  = '₱{{ number_format($net ?? 0,2) }}';
+document.getElementById('actualTable').innerText    = '₱{{ number_format($actual ?? 0,2) }}';
+document.getElementById('varianceTable').innerText  = '₱{{ number_format($variance ?? 0,2) }}';
+@endif
 </script>
 
 @endsection
