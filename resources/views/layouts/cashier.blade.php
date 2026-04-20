@@ -4,6 +4,9 @@
     <title>Cashier Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- ✅ Bootstrap Added -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         *{
             box-sizing:border-box;
@@ -61,6 +64,7 @@
             font-weight:800;
             margin-bottom:20px;
             white-space:nowrap;
+            color:#fff;
         }
 
         .sidebar p{
@@ -114,6 +118,10 @@
             cursor:pointer;
         }
 
+        .logout button:hover{
+            background:#dc2626;
+        }
+
         /* MAIN */
         .main{
             margin-left:240px;
@@ -161,12 +169,14 @@
             font-size:18px;
             font-weight:800;
             line-height:1.2;
+            margin:0;
         }
 
         .topbar-left p{
             font-size:12px;
             color:#6b7280;
             margin-top:2px;
+            margin-bottom:0;
         }
 
         .user-box{
@@ -204,7 +214,7 @@
 
         /* CONTENT */
         .content{
-            padding:18px;
+            padding:24px;
             width:100%;
             max-width:100%;
         }
@@ -351,7 +361,7 @@
     <div class="logout">
         <form method="POST" action="{{ url('/logout') }}">
             @csrf
-            <button>🚪 Logout</button>
+            <button type="submit">🚪 Logout</button>
         </form>
     </div>
 
@@ -401,6 +411,9 @@ function closeSidebar(){
     document.getElementById('overlay').classList.remove('show');
 }
 </script>
+
+<!-- ✅ Bootstrap JS Added -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 @yield('scripts')
 
