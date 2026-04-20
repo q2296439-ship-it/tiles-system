@@ -153,9 +153,11 @@ onclick="setStatus('returned')">
 ↩ Return
 </button>
 
-<a href="{{ route('cashier.delivery.today') }}" class="btn btn-blue">
+<button type="button"
+class="btn btn-blue"
+onclick="window.location.href='{{ route('cashier.delivery.today') }}'">
 📋 Delivery List
-</a>
+</button>
 </div>
 
 <div class="box">
