@@ -1046,5 +1046,28 @@ public function arAccounts(Request $request)
     return view('cashier.ar_accounts', compact('rows'));
 }
 
+public function payAr(Request $request, $id)
+{
+    $request->validate([
+        'payment' => 'required|numeric|min:1'
+    ]);
+
+    $row = Collection::findOrFail($id);
+
+    $row->paid_amount += $request->payment;
+    $row->balance = $row->total_amount - $row->paid_amount;
+
+    if ($row->balance <= 0) {
+        $row->balance = 0;
+        $row->status = 'saved';
+    } else {
+        $row->status = 'pending';
+    }
+
+    $row->save();
+
+    return back()->with('success', 'Payment saved successfully.');
+}
+
 
 }
