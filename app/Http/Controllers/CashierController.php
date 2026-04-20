@@ -55,8 +55,14 @@ class CashierController extends Controller
     public function totalCash()
     {
         $branchId = Auth::user()->branch_id;
+        $today = now()->toDateString();
 
-        // CASH IN
+        /*
+        |--------------------------------------------------------------------------
+        | ALL TIME TOTALS
+        |--------------------------------------------------------------------------
+        */
+
         $actualDeposit = Deposit::where('branch_id', $branchId)
             ->where('status', 'closed')
             ->sum('actual_amount');
@@ -68,7 +74,6 @@ class CashierController extends Controller
             ->where('status', 'completed')
             ->sum('amount');
 
-        // CASH OUT
         $expenses = Expense::where('branch_id', $branchId)
             ->where('status', 'approved')
             ->sum('amount');
@@ -81,6 +86,47 @@ class CashierController extends Controller
         $cashOut = $expenses + $outgoingTransfers;
         $totalCash = $cashIn - $cashOut;
 
+        /*
+        |--------------------------------------------------------------------------
+        | TODAY TOTALS
+        |--------------------------------------------------------------------------
+        */
+
+        $todayDeposit = Deposit::where('branch_id', $branchId)
+            ->where('status', 'closed')
+            ->whereDate('deposit_date', $today)
+            ->sum('actual_amount');
+
+        $todayArPayments = ArPayment::where('branch_id', $branchId)
+            ->whereDate('payment_date', $today)
+            ->sum('amount');
+
+        $todayIncomingTransfers = CashTransfer::where('to_branch_id', $branchId)
+            ->where('status', 'completed')
+            ->whereDate('transfer_date', $today)
+            ->sum('amount');
+
+        $todayExpenses = Expense::where('branch_id', $branchId)
+            ->where('status', 'approved')
+            ->whereDate('expense_date', $today)
+            ->sum('amount');
+
+        $todayOutgoingTransfers = CashTransfer::where('from_branch_id', $branchId)
+            ->where('status', 'completed')
+            ->whereDate('transfer_date', $today)
+            ->sum('amount');
+
+        $todayCashIn = $todayDeposit + $todayArPayments + $todayIncomingTransfers;
+        $todayCashOut = $todayExpenses + $todayOutgoingTransfers;
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVIOUS BALANCE
+        |--------------------------------------------------------------------------
+        */
+
+        $previousBalance = $totalCash - ($todayCashIn - $todayCashOut);
+
         return view('cashflow.total-cash', compact(
             'actualDeposit',
             'arPayments',
@@ -89,7 +135,17 @@ class CashierController extends Controller
             'outgoingTransfers',
             'cashIn',
             'cashOut',
-            'totalCash'
+            'totalCash',
+
+            'todayDeposit',
+            'todayArPayments',
+            'todayIncomingTransfers',
+            'todayExpenses',
+            'todayOutgoingTransfers',
+            'todayCashIn',
+            'todayCashOut',
+
+            'previousBalance'
         ));
     }
 

@@ -51,7 +51,6 @@ background:#fff;
 border:1px solid #334155;
 border-radius:14px;
 padding:22px;
-text-align:center;
 margin-bottom:18px;
 }
 .hero-label{
@@ -59,6 +58,7 @@ font-size:14px;
 color:#64748b;
 text-transform:uppercase;
 letter-spacing:.5px;
+text-align:center;
 }
 .hero-amount{
 font-size:46px;
@@ -66,12 +66,31 @@ font-weight:900;
 color:#16a34a;
 margin-top:8px;
 line-height:1;
+text-align:center;
 }
 .hero-note{
 font-size:12px;
 color:#64748b;
 margin-top:8px;
+text-align:center;
 }
+.hero-breakdown{
+margin-top:18px;
+border-top:1px solid #e5e7eb;
+padding-top:14px;
+}
+.hero-row{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+font-size:15px;
+font-weight:700;
+}
+.hero-left{color:#334155;}
+.hero-right{font-weight:900;}
+.green{color:#15803d;}
+.red{color:#b91c1c;}
+.blue{color:#2563eb;}
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
@@ -161,11 +180,45 @@ As of {{ date('F d, Y') }}
 
 <div class="hero">
     <div class="hero-label">Available Cash</div>
+
     <div class="hero-amount">
         ₱{{ number_format($totalCash,2) }}
     </div>
+
     <div class="hero-note">
         Current usable cash balance of selected branch
+    </div>
+
+    <div class="hero-breakdown">
+
+        <div class="hero-row">
+            <span class="hero-left">Beginning Balance</span>
+            <span class="hero-right blue">
+                ₱{{ number_format($previousBalance,2) }}
+            </span>
+        </div>
+
+        <div class="hero-row">
+            <span class="hero-left">Today Cash In</span>
+            <span class="hero-right green">
+                ₱{{ number_format($todayCashIn,2) }}
+            </span>
+        </div>
+
+        <div class="hero-row">
+            <span class="hero-left">Today Cash Out</span>
+            <span class="hero-right red">
+                ₱{{ number_format($todayCashOut,2) }}
+            </span>
+        </div>
+
+        <div class="hero-row" style="border-top:1px dashed #cbd5e1; margin-top:8px; padding-top:12px;">
+            <span class="hero-left">Running Balance</span>
+            <span class="hero-right blue">
+                ₱{{ number_format($totalCash,2) }}
+            </span>
+        </div>
+
     </div>
 </div>
 
