@@ -15,6 +15,7 @@ use App\Http\Controllers\CashierController;
 use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\CashTransferController;
 
 
 // =====================
@@ -335,9 +336,14 @@ Route::prefix('cashier')->group(function () {
         return 'Total Cash Page';
     })->name('cashier.cash.total');
 
-    Route::get('/cash-transfer', function () {
-        return 'Transfer Cash to Other Branch Page';
-    })->name('cashier.cash.transfer');
+    Route::get('/cash-transfer', [CashTransferController::class, 'index'])
+    ->name('cashier.transfer.cash');
+
+    Route::post('/cash-transfer/store', [CashTransferController::class, 'store'])
+    ->name('cashier.transfer.cash.store');
+
+    Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accept'])
+    ->name('cashier.transfer.cash.accept');
 
    Route::get('/expenses', [ExpenseController::class, 'index'])
     ->name('cashier.expenses');
