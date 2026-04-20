@@ -348,6 +348,9 @@ Route::prefix('cashier')->group(function () {
     Route::get('/expenses/list', [ExpenseController::class, 'list'])
     ->name('cashier.expenses.list');
 
+    Route::get('/expenses/excel', [ExpenseController::class, 'excel'])
+    ->name('cashier.expenses.excel');
+
     Route::get('/salary', function () {
         return 'Employee Salary Page';
     })->name('cashier.salary');

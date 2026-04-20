@@ -106,6 +106,10 @@ padding:20px;
     <a href="{{ route('cashier.expenses') }}" class="btn btn-blue">
         ➕ Add Expense
     </a>
+
+    <a href="{{ route('cashier.expenses.excel') }}" class="btn btn-green">
+        📥 Download Excel
+    </a>
 </div>
 
 <div class="box">

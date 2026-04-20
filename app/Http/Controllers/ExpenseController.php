@@ -76,4 +76,45 @@ class ExpenseController extends Controller
             'totalToday'
         ));
     }
+
+    public function excel()
+    {
+        $expenses = Expense::with('category')
+            ->where('branch_id', Auth::user()->branch_id)
+            ->latest()
+            ->get();
+
+        $filename = 'expenses_' . date('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$filename}",
+        ];
+
+        $callback = function () use ($expenses) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'Date',
+                'Category',
+                'Description',
+                'Payment Method',
+                'Amount'
+            ]);
+
+            foreach ($expenses as $row) {
+                fputcsv($file, [
+                    $row->expense_date,
+                    $row->category->name ?? '',
+                    $row->description,
+                    strtoupper($row->payment_method),
+                    $row->amount
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
