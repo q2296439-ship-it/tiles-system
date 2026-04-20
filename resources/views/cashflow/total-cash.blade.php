@@ -175,8 +175,13 @@ As of {{ date('F d, Y') }}
         <div class="box-title">💰 CASH IN</div>
 
         <div class="row">
-            <span class="label">Received Payments</span>
-            <span class="value in">₱{{ number_format($collections,2) }}</span>
+            <span class="label">Actual Deposit Amount</span>
+            <span class="value in">₱{{ number_format($actualDeposit,2) }}</span>
+        </div>
+
+        <div class="row">
+            <span class="label">A/R Payment</span>
+            <span class="value in">₱{{ number_format($arPayments,2) }}</span>
         </div>
 
         <div class="row">
@@ -187,7 +192,7 @@ As of {{ date('F d, Y') }}
         <div class="row">
             <span class="label"><strong>Total Cash In</strong></span>
             <span class="value in">
-                ₱{{ number_format($collections + $incomingTransfers,2) }}
+                ₱{{ number_format($cashIn,2) }}
             </span>
         </div>
     </div>
@@ -208,7 +213,7 @@ As of {{ date('F d, Y') }}
         <div class="row">
             <span class="label"><strong>Total Cash Out</strong></span>
             <span class="value out">
-                ₱{{ number_format($expenses + $outgoingTransfers,2) }}
+                ₱{{ number_format($cashOut,2) }}
             </span>
         </div>
     </div>
@@ -227,7 +232,7 @@ As of {{ date('F d, Y') }}
 </div>
 
 <div class="footer-note">
-This report is computed from Actual Received Payments, Approved Expenses, and Completed Cash Transfers.
+This report is computed from Deposits, A/R Payments, Approved Expenses, and Completed Cash Transfers.
 </div>
 
 </div>
