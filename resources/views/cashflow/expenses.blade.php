@@ -183,7 +183,7 @@ padding:15px;
         ❌ Clear
     </button>
 
-    <a href="#records" class="btn btn-blue">
+    <a href="{{ route('cashier.expenses.list') }}" class="btn btn-blue">
         📋 Expense List
     </a>
 </div>

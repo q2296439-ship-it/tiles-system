@@ -57,4 +57,23 @@ class ExpenseController extends Controller
             ->route('cashier.expenses')
             ->with('success', 'Expense saved successfully.');
     }
+
+    public function list()
+    {
+        $branchId = Auth::user()->branch_id;
+
+        $expenses = Expense::with('category')
+            ->where('branch_id', $branchId)
+            ->latest()
+            ->get();
+
+        $totalToday = Expense::where('branch_id', $branchId)
+            ->whereDate('expense_date', date('Y-m-d'))
+            ->sum('amount');
+
+        return view('cashflow.expense-list', compact(
+            'expenses',
+            'totalToday'
+        ));
+    }
 }
