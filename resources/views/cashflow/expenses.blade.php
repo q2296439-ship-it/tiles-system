@@ -101,6 +101,7 @@ padding:10px;
 border-bottom:1px solid #e5e7eb;
 text-align:left;
 vertical-align:top;
+white-space:nowrap;
 }
 .table th{
 font-weight:800;
@@ -202,8 +203,10 @@ padding:15px;
         <thead>
             <tr>
                 <th>Date</th>
+                <th>Branch</th>
                 <th>Category</th>
                 <th>Description</th>
+                <th>Encoded By</th>
                 <th>Amount</th>
             </tr>
         </thead>
@@ -211,13 +214,15 @@ padding:15px;
         @forelse($expenses as $row)
             <tr>
                 <td>{{ $row->expense_date }}</td>
+                <td>{{ $row->branch->name ?? '' }}</td>
                 <td>{{ $row->category->name ?? '' }}</td>
                 <td>{{ $row->description }}</td>
+                <td>{{ $row->user->name ?? '' }}</td>
                 <td class="amount">₱{{ number_format($row->amount,2) }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="4" class="empty">No expense records found</td>
+                <td colspan="6" class="empty">No expense records found</td>
             </tr>
         @endforelse
         </tbody>

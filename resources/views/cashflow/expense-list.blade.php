@@ -72,6 +72,7 @@ overflow:hidden;
 padding:10px;
 border-bottom:1px solid #e5e7eb;
 text-align:left;
+white-space:nowrap;
 }
 .table th{
 background:#eff6ff;
@@ -128,8 +129,10 @@ padding:20px;
             <thead>
                 <tr>
                     <th>Date</th>
+                    <th>Branch</th>
                     <th>Category</th>
                     <th>Description</th>
+                    <th>Encoded By</th>
                     <th>Payment</th>
                     <th>Amount</th>
                 </tr>
@@ -138,14 +141,16 @@ padding:20px;
             @forelse($expenses as $row)
                 <tr>
                     <td>{{ $row->expense_date }}</td>
+                    <td>{{ $row->branch->name ?? '' }}</td>
                     <td>{{ $row->category->name ?? '' }}</td>
                     <td>{{ $row->description }}</td>
+                    <td>{{ $row->user->name ?? '' }}</td>
                     <td>{{ strtoupper($row->payment_method) }}</td>
                     <td class="amount">₱{{ number_format($row->amount,2) }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="empty">
+                    <td colspan="7" class="empty">
                         No expense records found
                     </td>
                 </tr>

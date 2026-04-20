@@ -17,7 +17,7 @@ class ExpenseController extends Controller
             ->orderBy('name')
             ->get();
 
-        $expenses = Expense::with('category')
+        $expenses = Expense::with(['category', 'user', 'branch'])
             ->where('branch_id', $branchId)
             ->latest()
             ->get();
@@ -62,7 +62,7 @@ class ExpenseController extends Controller
     {
         $branchId = Auth::user()->branch_id;
 
-        $expenses = Expense::with('category')
+        $expenses = Expense::with(['category', 'user', 'branch'])
             ->where('branch_id', $branchId)
             ->latest()
             ->get();
@@ -79,7 +79,7 @@ class ExpenseController extends Controller
 
     public function excel()
     {
-        $expenses = Expense::with('category')
+        $expenses = Expense::with(['category', 'user', 'branch'])
             ->where('branch_id', Auth::user()->branch_id)
             ->latest()
             ->get();
@@ -96,8 +96,10 @@ class ExpenseController extends Controller
 
             fputcsv($file, [
                 'Date',
+                'Branch',
                 'Category',
                 'Description',
+                'Encoded By',
                 'Payment Method',
                 'Amount'
             ]);
@@ -105,8 +107,10 @@ class ExpenseController extends Controller
             foreach ($expenses as $row) {
                 fputcsv($file, [
                     $row->expense_date,
+                    $row->branch->name ?? '',
                     $row->category->name ?? '',
                     $row->description,
+                    $row->user->name ?? '',
                     strtoupper($row->payment_method),
                     $row->amount
                 ]);
