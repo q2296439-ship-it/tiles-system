@@ -55,9 +55,8 @@ class CashierController extends Controller
     {
         $branchId = Auth::user()->branch_id;
 
-        // CASH IN
+        // CASH IN = actual received money
         $collections = Collection::where('branch_id', $branchId)
-            ->where('status', 'saved')
             ->sum('paid_amount');
 
         $incomingTransfers = CashTransfer::where('to_branch_id', $branchId)
@@ -65,10 +64,6 @@ class CashierController extends Controller
             ->sum('amount');
 
         // CASH OUT
-        $deposits = Deposit::where('branch_id', $branchId)
-            ->where('status', 'closed')
-            ->sum('actual_amount');
-
         $expenses = Expense::where('branch_id', $branchId)
             ->where('status', 'approved')
             ->sum('amount');
@@ -81,7 +76,6 @@ class CashierController extends Controller
             $collections +
             $incomingTransfers
         ) - (
-            $deposits +
             $expenses +
             $outgoingTransfers
         );
@@ -89,7 +83,6 @@ class CashierController extends Controller
         return view('cashflow.total-cash', compact(
             'collections',
             'incomingTransfers',
-            'deposits',
             'expenses',
             'outgoingTransfers',
             'totalCash'
