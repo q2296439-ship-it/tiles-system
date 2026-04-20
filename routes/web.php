@@ -332,9 +332,8 @@ Route::prefix('cashier')->group(function () {
     Route::get('/deposit', [CollectionController::class, 'deposit'])->name('cashier.deposit');
     Route::post('/deposit', [CollectionController::class, 'depositStore'])->name('cashier.deposit.store');
 
-    Route::get('/cash-total', function () {
-        return 'Total Cash Page';
-    })->name('cashier.cash.total');
+   Route::get('/cash-total', [CashierController::class, 'totalCash'])
+    ->name('cashier.total.cash');
 
     Route::get('/cash-transfer', [CashTransferController::class, 'index'])
     ->name('cashier.transfer.cash');
