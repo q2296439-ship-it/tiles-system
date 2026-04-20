@@ -13,6 +13,7 @@ class Collection extends Model
         'receipt_no',
         'receipt_date',
         'customer_name',
+        'business_style',
         'address',
         'terms',
 
@@ -20,8 +21,12 @@ class Collection extends Model
         'discount_type',
         'discount_amount',
         'net_amount',
-
         'total_amount',
+
+        'sales_type',
+        'paid_amount',
+        'balance',
+
         'branch_id',
         'user_id',
         'status',
@@ -33,6 +38,8 @@ class Collection extends Model
         'gross_amount' => 0,
         'discount_amount' => 0,
         'net_amount' => 0,
+        'paid_amount' => 0,
+        'balance' => 0,
     ];
 
     public function items()
