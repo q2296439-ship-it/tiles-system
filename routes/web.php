@@ -135,38 +135,22 @@ Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->mid
 Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutManager'])->middleware('auth');
 Route::post('/manager/release/{id}', [InventoryController::class, 'release'])->middleware('auth');
 
-// ✅ DAILY SALES MANAGER
 Route::get('/manager/daily-sales', [SalesReportController::class, 'daily'])->middleware('auth')->name('manager.daily.sales');
-
-// ✅ SALES REPORT MANAGER
 Route::get('/manager/sales-report', [SalesReportController::class, 'perBranch'])->middleware('auth')->name('manager.sales.report');
-
-// ✅ BRANCH STOCK MANAGER
 Route::get('/manager/inventory', [ProductController::class, 'index'])->middleware('auth')->name('manager.inventory');
-
-// ✅ INVENTORY REPORT MANAGER
 Route::get('/manager/inventory-report', [InventoryController::class, 'overviewStock'])->middleware('auth')->name('manager.inventory.report');
 
-// ✅ ADD STOCK MANAGER
 Route::get('/manager/add-stock', [InventoryController::class, 'create'])->middleware('auth')->name('manager.add.stock');
 Route::post('/manager/add-stock', [InventoryController::class, 'store'])->middleware('auth')->name('manager.add.stock.store');
 
-// ✅ TRANSFER IN MANAGER
-Route::get('/manager/transfer-in', [InventoryController::class, 'transferInAdmin'])
-    ->middleware('auth')
-    ->name('manager.transfer.in');
-
-// ✅ TRANSFER OUT MANAGER
-Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutAdmin'])
-    ->middleware('auth')
-    ->name('manager.transfer.out');
+Route::get('/manager/transfer-in', [InventoryController::class, 'transferInAdmin'])->middleware('auth')->name('manager.transfer.in');
+Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutAdmin'])->middleware('auth')->name('manager.transfer.out');
 
 Route::get('/manager/change-password', function () {
     return view('cashier.change-password');
 })->middleware('auth');
 
-Route::post('/manager/change-password', [UserController::class, 'changePassword'])
-    ->middleware('auth');
+Route::post('/manager/change-password', [UserController::class, 'changePassword'])->middleware('auth');
 
 Route::get('/manager/request-access', [CollectionController::class, 'requestAccess'])
     ->middleware('auth')
@@ -176,11 +160,8 @@ Route::post('/manager/request-access/open', [CollectionController::class, 'openT
     ->middleware('auth')
     ->name('manager.request.open');
 
-Route::get('/manager/deposit', [CollectionController::class, 'deposit'])
-    ->middleware('auth');
-
-Route::post('/manager/deposit', [CollectionController::class, 'depositStore'])
-    ->middleware('auth');
+Route::get('/manager/deposit', [CollectionController::class, 'deposit'])->middleware('auth');
+Route::post('/manager/deposit', [CollectionController::class, 'depositStore'])->middleware('auth');
 
 Route::get('/cashier/deposit/excel', [CollectionController::class, 'depositExcel'])
     ->middleware('auth')
@@ -234,15 +215,12 @@ Route::prefix('admin')->group(function () {
     Route::post('/branches/delete/{id}', [BranchController::class, 'delete']);
 
     Route::prefix('products')->group(function () {
-
         Route::get('/', [ProductController::class, 'index']);
         Route::get('/create', [ProductController::class, 'create']);
         Route::post('/', [ProductController::class, 'store']);
-
         Route::get('/{id}/edit', [ProductController::class, 'edit']);
         Route::post('/update/{id}', [ProductController::class, 'update']);
         Route::get('/{id}/delete', [ProductController::class, 'delete']);
-
         Route::get('/export', [ProductController::class, 'export']);
     });
 
@@ -258,7 +236,6 @@ Route::prefix('admin')->group(function () {
 
     Route::post('/inventory/transfer-out', [InventoryController::class, 'transferOutStore']);
     Route::post('/inventory/transfer-accept/{id}', [InventoryController::class, 'acceptTransfer']);
-
     Route::post('/inventory/transfer-in-old', [InventoryController::class, 'transferInStore']);
 
     Route::post('/manager/approve/{id}', [InventoryController::class, 'approve']);
@@ -284,18 +261,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/sales/branch/excel', [SalesReportController::class, 'exportBranchExcel']);
 
     Route::get('/sales/brand', [SalesReportController::class, 'perBrand']);
+    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])->name('report.brand.pdf');
+    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])->name('report.brand.excel');
 
-    Route::get('/sales/brand/pdf', [SalesReportController::class, 'brandPdf'])
-        ->name('report.brand.pdf');
-
-    Route::get('/sales/brand/excel', [SalesReportController::class, 'brandExcel'])
-        ->name('report.brand.excel');
-
-    Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])
-        ->name('admin.collection.export.pdf');
-
-    Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])
-        ->name('admin.collection.export.excel');
+    Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])->name('admin.collection.export.pdf');
+    Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])->name('admin.collection.export.excel');
 });
 
 
@@ -304,84 +274,60 @@ Route::prefix('admin')->group(function () {
 // =====================
 Route::prefix('cashier')->group(function () {
 
-    Route::get('/', [CashierController::class, 'index'])
-        ->name('cashier.dashboard');
-
+    Route::get('/', [CashierController::class, 'index'])->name('cashier.dashboard');
     Route::post('/checkout', [CashierController::class, 'checkout']);
 
-    Route::get('/inventory-stock', [InventoryController::class, 'overviewStock'])
-        ->name('cashier.inventory.stock');
+    Route::get('/inventory-stock', [InventoryController::class, 'overviewStock'])->name('cashier.inventory.stock');
 
-    Route::get('/collection-receipt', [CollectionController::class, 'create'])
-        ->name('cashier.collection.create');
+    Route::get('/collection-receipt', [CollectionController::class, 'create'])->name('cashier.collection.create');
+    Route::post('/collection-receipt', [CollectionController::class, 'store'])->name('cashier.collection.store');
 
-    Route::post('/collection-receipt', [CollectionController::class, 'store'])
-        ->name('cashier.collection.store');
-
-    Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])
-        ->name('cashier.transfer.in');
-
-    Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])
-        ->name('cashier.transfer.in.store');
+    Route::get('/transfer-in', [InventoryController::class, 'transferInForm'])->name('cashier.transfer.in');
+    Route::post('/transfer-in', [InventoryController::class, 'transferInStore'])->name('cashier.transfer.in.store');
 
     Route::get('/incoming', [InventoryController::class, 'incoming']);
     Route::post('/receive/{id}', [InventoryController::class, 'receive']);
 
-    Route::get('/collection-today', [CollectionController::class, 'today'])
-        ->name('cashier.collection.today');
+    Route::get('/collection-today', [CollectionController::class, 'today'])->name('cashier.collection.today');
 
-    Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])
-        ->name('cashier.collection.export.pdf');
+    Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])->name('cashier.collection.export.pdf');
+    Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])->name('cashier.collection.export.excel');
 
-    Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])
-        ->name('cashier.collection.export.excel');
+    Route::get('/collection-cancel', [CollectionController::class, 'cancelForm'])->name('cashier.collection.cancel');
+    Route::post('/collection-cancel', [CollectionController::class, 'cancelStore'])->name('cashier.collection.cancel.store');
 
-    Route::get('/collection-cancel', [CollectionController::class, 'cancelForm'])
-        ->name('cashier.collection.cancel');
-
-    Route::post('/collection-cancel', [CollectionController::class, 'cancelStore'])
-        ->name('cashier.collection.cancel.store');
-
-    Route::get('/return-receipt', [CollectionController::class, 'returnForm'])
-        ->name('cashier.return.create');
+    Route::get('/return-receipt', [CollectionController::class, 'returnForm'])->name('cashier.return.create');
 
     Route::get('/return/load/{receipt_no}', [CollectionController::class, 'loadReceipt'])
-         ->middleware('auth')
+        ->middleware('auth')
         ->name('cashier.return.load');
 
-    Route::post('/return-receipt', [CollectionController::class, 'returnStore'])
-        ->name('cashier.return.store');
+    Route::post('/return-receipt', [CollectionController::class, 'returnStore'])->name('cashier.return.store');
 
-    Route::get('/delivery-fee', function () {
-         return view('cashier.delivery_fee');
-        })->name('cashier.delivery.fee');
-
+    // ✅ FIXED DELIVERY ROUTES
     Route::get('/delivery-fee', [CollectionController::class, 'deliveryFeeForm'])
-    ->name('cashier.delivery.fee');
+        ->name('cashier.delivery.fee');
+
+    Route::post('/delivery-fee/store', [CollectionController::class, 'deliveryStore'])
+        ->name('cashier.delivery.store');
 
     Route::get('/delivery/load/{receipt_no}', [CollectionController::class, 'loadReceipt'])
         ->middleware('auth')
         ->name('cashier.delivery.load');
 
     Route::get('/delivery-today', [CollectionController::class, 'deliveryToday'])
-    ->name('cashier.delivery.today');
+        ->name('cashier.delivery.today');
+
+    Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel'])
+        ->name('cashier.delivery.excel');
 
     Route::get('/ar-accounts', function () {
         return 'A/R Accounts Page';
-        })->name('cashier.ar.accounts');
+    })->name('cashier.ar.accounts');
 
-    Route::get('/deposit', [CollectionController::class, 'deposit'])
-        ->name('cashier.deposit');
+    Route::get('/deposit', [CollectionController::class, 'deposit'])->name('cashier.deposit');
+    Route::post('/deposit', [CollectionController::class, 'depositStore'])->name('cashier.deposit.store');
 
-    Route::post('/deposit', [CollectionController::class, 'depositStore'])
-        ->name('cashier.deposit.store');
-
-    Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel'])
-    ->name('cashier.delivery.excel');
-
-    // =====================
-    // CASH FLOW
-    // =====================
     Route::get('/cash-total', function () {
         return 'Total Cash Page';
     })->name('cashier.cash.total');
