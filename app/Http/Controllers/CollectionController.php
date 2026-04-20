@@ -494,24 +494,29 @@ public function deposit(Request $request)
             $branchId = auth()->user()->branch_id;
             $userId   = auth()->id();
 
-            $gross     = (float) ($request->gross_amount ?? $request->total_amount ?? 0);
-            $discount  = (float) ($request->discount_amount ?? 0);
-            $net       = (float) ($request->total_amount ?? 0);
+            $gross    = (float) ($request->gross_amount ?? $request->total_amount ?? 0);
+            $discount = (float) ($request->discount_amount ?? 0);
+            $net      = (float) ($request->total_amount ?? 0);
 
             $salesType = strtolower($request->sales_type ?? 'cash');
-            $paid      = (float) ($request->paid_amount ?? 0);
-            $balance   = (float) ($request->balance ?? 0);
 
-            // ✅ NEW VALIDATION
+            // ✅ get paid only, compute balance in backend
+            $paid = (float) ($request->paid_amount ?? 0);
+            $balance = 0;
+            $status = 'saved';
+
+            // ✅ DP / Partial must have payment
             if (in_array($salesType, ['dp', 'partial']) && $paid <= 0) {
                 throw new \Exception('Paid amount is required for DP or Partial payment.');
             }
 
-            // ✅ Cash auto full payment
+            // ✅ Payment Logic
             if ($salesType === 'cash') {
+
                 $paid = $net;
                 $balance = 0;
                 $status = 'saved';
+
             } else {
 
                 if ($paid > $net) {
@@ -520,11 +525,11 @@ public function deposit(Request $request)
 
                 $balance = $net - $paid;
 
-                if ($balance <= 0) {
+                if ($balance > 0) {
+                    $status = 'pending';
+                } else {
                     $balance = 0;
                     $status = 'saved';
-                } else {
-                    $status = 'pending';
                 }
             }
 
@@ -535,6 +540,7 @@ public function deposit(Request $request)
                 'business_style'  => $request->business_style ?? '',
                 'address'         => $request->address ?? '',
                 'terms'           => $request->terms ?? '',
+
                 'gross_amount'    => $gross,
                 'discount_type'   => $request->discount_type ?? null,
                 'discount_amount' => $discount,
