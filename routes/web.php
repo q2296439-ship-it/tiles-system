@@ -346,32 +346,29 @@ Route::prefix('cashier')->group(function () {
         ->name('cashier.return.create');
 
     Route::get('/return/load/{receipt_no}', [CollectionController::class, 'loadReceipt'])
-        ->middleware('auth')
+         ->middleware('auth')
         ->name('cashier.return.load');
 
     Route::post('/return-receipt', [CollectionController::class, 'returnStore'])
         ->name('cashier.return.store');
 
-    // DELIVERY FEE
-    Route::get('/delivery-fee', [CollectionController::class, 'deliveryFeeForm'])
-        ->name('cashier.delivery.fee');
+    Route::get('/delivery-fee', function () {
+         return view('cashier.delivery_fee');
+        })->name('cashier.delivery.fee');
 
-    Route::post('/delivery-fee', [CollectionController::class, 'deliveryStore'])
-        ->name('cashier.delivery.store');
+    Route::get('/delivery-fee', [CollectionController::class, 'deliveryFeeForm'])
+    ->name('cashier.delivery.fee');
 
     Route::get('/delivery/load/{receipt_no}', [CollectionController::class, 'loadReceipt'])
         ->middleware('auth')
         ->name('cashier.delivery.load');
 
     Route::get('/delivery-today', [CollectionController::class, 'deliveryToday'])
-        ->name('cashier.delivery.today');
-
-    Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel'])
-        ->name('cashier.delivery.excel');
+    ->name('cashier.delivery.today');
 
     Route::get('/ar-accounts', function () {
         return 'A/R Accounts Page';
-    })->name('cashier.ar.accounts');
+        })->name('cashier.ar.accounts');
 
     Route::get('/deposit', [CollectionController::class, 'deposit'])
         ->name('cashier.deposit');
@@ -379,31 +376,8 @@ Route::prefix('cashier')->group(function () {
     Route::post('/deposit', [CollectionController::class, 'depositStore'])
         ->name('cashier.deposit.store');
 
-    // =====================
-    // CASH FLOW
-    // =====================
-    Route::get('/cash-total', function () {
-        return 'Total Cash Page';
-    })->name('cashier.cash.total');
-
-    Route::get('/cash-transfer', function () {
-        return 'Transfer Cash to Other Branch Page';
-    })->name('cashier.cash.transfer');
-
-    Route::get('/expenses', function () {
-        return 'Store Expenses Page';
-    })->name('cashier.expenses');
-
-    Route::get('/salary', function () {
-        return 'Employee Salary Page';
-    })->name('cashier.salary');
-
-    Route::get('/change-password', [AuthController::class, 'showChangePassword'])
-        ->name('cashier.password');
-
-    Route::post('/change-password', [AuthController::class, 'changePassword'])
-        ->name('cashier.password.update');
-});
+    Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel'])
+    ->name('cashier.delivery.excel');
 
     // =====================
     // CASH FLOW
