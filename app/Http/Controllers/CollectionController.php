@@ -700,7 +700,7 @@ public function depositStore(Request $request)
 
     $rows = Collection::whereDate('receipt_date', $date)
         ->where('branch_id', $branchId)
-        ->where('status', 'saved')
+        ->where('status', '!=', 'cancelled')
         ->get();
 
     $gross = $rows->sum('gross_amount');
