@@ -349,11 +349,11 @@ th{
         </table>
     </div>
 
-    @if($collections->hasPages())
-        <div class="pagination-wrap">
-            {{ $collections->links() }}
-        </div>
-    @endif
+   @if($collections->hasPages())
+    <div class="pagination-wrap">
+        {{ $collections->onEachSide(1)->links('pagination::bootstrap-4') }}
+    </div>
+@endif
 
 </div>
 
