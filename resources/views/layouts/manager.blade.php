@@ -308,6 +308,22 @@
         💰 Deposit
     </a>
 
+    <p>Cash Flow</p>
+
+    <a href="/manager/total-cash" class="{{ request()->is('manager/total-cash*') ? 'active' : '' }}">
+        💰 Total Cash
+    </a>
+
+    <a href="/manager/cash-transfer" class="{{ request()->is('manager/cash-transfer*') ? 'active' : '' }}">
+        💸 B2B Cash Transfer
+    </a>
+
+    <a href="/manager/store-expenses" class="{{ request()->is('manager/store-expenses*') ? 'active' : '' }}">
+          🧾 Store Expenses
+    </a>
+
+    <hr>
+
     <p>Sales</p>
 
     <a href="/manager/daily-sales" class="{{ request()->is('manager/daily-sales') ? 'active' : '' }}">
@@ -320,6 +336,14 @@
 
     <a href="/manager/collection" class="{{ request()->is('manager/collection') ? 'active' : '' }}">
         🧾 Collection
+    </a>
+
+    <a href="/manager/delivery-fee" class="{{ request()->is('manager/delivery-fee*') ? 'active' : '' }}">
+        🚚 Delivery Fee
+    </a>
+
+    <a href="/manager/ar-accounts" class="{{ request()->is('manager/ar-accounts*') ? 'active' : '' }}">
+         📒 A/R Accounts
     </a>
 
     <p>Inventory</p>
