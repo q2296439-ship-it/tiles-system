@@ -88,12 +88,15 @@
 }
 table{
     width:100%;
-    border-collapse:collapse;
+    border-collapse:separate;
+    border-spacing:0;
 }
 th,td{
-    padding:13px 12px;
+    padding:14px 12px;
     border-bottom:1px solid #eef2f7;
     font-size:14px;
+    vertical-align:middle;
+    line-height:1.4;
 }
 th{
     background:#f8fafc;
@@ -101,8 +104,12 @@ th{
     font-size:13px;
     font-weight:700;
 }
-.center{text-align:center;}
-.right{text-align:right;}
+.center{
+    text-align:center;
+}
+.right{
+    text-align:right;
+}
 .badge{
     background:#dcfce7;
     color:#166534;
@@ -110,6 +117,10 @@ th{
     border-radius:999px;
     font-size:12px;
     font-weight:700;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:88px;
 }
 .empty{
     text-align:center;
