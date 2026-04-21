@@ -820,4 +820,14 @@ private function getProducts()
 
     return back()->with('success', 'Stock received successfully!');
 }
+public function deliveryReport()
+{
+    $rows = StockMovement::with(['product', 'branch'])
+        ->whereNotNull('dr_number')
+        ->where('type', 'IN')
+        ->latest()
+        ->get();
+
+    return view('manager.delivery-report', compact('rows'));
+}
 }

@@ -346,6 +346,11 @@
         ➡️ Transfer Out
     </a>
 
+    <a href="{{ route('manager.delivery.report') }}"
+   class="{{ request()->is('manager/delivery-report') ? 'active' : '' }}">
+   🚚 Delivery Report
+    </a>
+
     <hr>
 
     <p>Account</p>
