@@ -65,28 +65,16 @@ $layout = match(auth()->user()->role) {
         border-radius: 6px;
         margin-bottom: 15px;
     }
-
-    .back {
-        display: inline-block;
-        margin-bottom: 15px;
-        font-size: 13px;
-        text-decoration: none;
-        color: #3b82f6;
-    }
 </style>
 
 <div class="card">
 
     <h2>➕ Add New Stock</h2>
 
-    {{-- SUCCESS --}}
     @if(session('success'))
-        <div class="success">
-            {{ session('success') }}
-        </div>
+        <div class="success">{{ session('success') }}</div>
     @endif
 
-    {{-- ERRORS --}}
     @if($errors->any())
         <div class="error">
             <ul>
@@ -100,14 +88,12 @@ $layout = match(auth()->user()->role) {
     <form method="POST" action="{{ route('inventory.store') }}">
         @csrf
 
-        {{-- 🔥 MODE SELECT --}}
         <label>Mode</label>
         <select id="modeSelect">
             <option value="existing">Select Existing Product</option>
             <option value="new">Add New Product</option>
         </select>
 
-        {{-- BRANCH --}}
         <label>Select Branch</label>
         <select name="branch_id" required>
             <option value="">-- Select Branch --</option>
@@ -126,7 +112,8 @@ $layout = match(auth()->user()->role) {
                 <option value="">-- Select Product --</option>
                 @foreach($products as $product)
                     <option value="{{ $product->id }}"
-                            data-stock="{{ $product->stock }}">
+                        data-stock="{{ $product->stock }}"
+                        data-price="{{ $product->price }}">
                         {{ $product->name }} (Stock: {{ $product->stock }})
                     </option>
                 @endforeach
@@ -134,6 +121,12 @@ $layout = match(auth()->user()->role) {
 
             <label>Current Stock</label>
             <input type="text" id="currentStock" readonly>
+
+            <label>Update Price</label>
+            <input type="number" step="0.01" name="price" id="priceInput">
+
+            <label>D.R Number</label>
+            <input type="text" name="dr_number">
 
         </div>
 
@@ -149,9 +142,11 @@ $layout = match(auth()->user()->role) {
             <label>Price</label>
             <input type="number" step="0.01" name="new_price">
 
+            <label>D.R Number</label>
+            <input type="text" name="dr_number_new">
+
         </div>
 
-        {{-- QUANTITY --}}
         <label>Quantity</label>
         <input type="number" name="quantity" required>
 
@@ -161,28 +156,30 @@ $layout = match(auth()->user()->role) {
 </div>
 
 <script>
-    const modeSelect = document.getElementById('modeSelect');
-    const existingDiv = document.getElementById('existingProduct');
-    const newDiv = document.getElementById('newProduct');
+const modeSelect = document.getElementById('modeSelect');
+const existingDiv = document.getElementById('existingProduct');
+const newDiv = document.getElementById('newProduct');
 
-    modeSelect.addEventListener('change', function () {
-        if (this.value === 'new') {
-            existingDiv.style.display = 'none';
-            newDiv.style.display = 'block';
-        } else {
-            existingDiv.style.display = 'block';
-            newDiv.style.display = 'none';
-        }
-    });
+modeSelect.addEventListener('change', function () {
+    if (this.value === 'new') {
+        existingDiv.style.display = 'none';
+        newDiv.style.display = 'block';
+    } else {
+        existingDiv.style.display = 'block';
+        newDiv.style.display = 'none';
+    }
+});
 
-    // stock preview
-    const productSelect = document.getElementById('productSelect');
-    const currentStock = document.getElementById('currentStock');
+const productSelect = document.getElementById('productSelect');
+const currentStock = document.getElementById('currentStock');
+const priceInput = document.getElementById('priceInput');
 
-    productSelect.addEventListener('change', function () {
-        const stock = this.options[this.selectedIndex].getAttribute('data-stock');
-        currentStock.value = stock ?? '';
-    });
+productSelect.addEventListener('change', function () {
+    const selected = this.options[this.selectedIndex];
+
+    currentStock.value = selected.getAttribute('data-stock') || '';
+    priceInput.value = selected.getAttribute('data-price') || '';
+});
 </script>
 
 @endsection
