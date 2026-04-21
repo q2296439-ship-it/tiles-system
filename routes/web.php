@@ -465,6 +465,18 @@ Route::get('/inventory-dashboard', function () {
     return view('inventory.dashboard');
 });
 
+Route::get('/announcements', [AnnouncementController::class, 'index'])
+    ->middleware('auth')
+    ->name('announcements.index');
+
+Route::post('/announcements/store', [AnnouncementController::class, 'store'])
+    ->middleware('auth')
+    ->name('announcements.store');
+
+Route::delete('/announcements/delete/{id}', [AnnouncementController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('announcements.delete');
+
 
 // =====================
 // FIX MANAGER PASSWORD
