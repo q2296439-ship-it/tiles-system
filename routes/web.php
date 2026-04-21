@@ -202,6 +202,22 @@ Route::get('/defective-stock', [InventoryController::class, 'defectiveIndex'])
 Route::post('/defective-stock/store', [InventoryController::class, 'defectiveStore'])
     ->name('manager.defective.store');
 
+Route::get('/manager/delivery-fee', [CollectionController::class, 'deliveryFeeForm'])
+    ->middleware('auth')
+    ->name('manager.delivery.fee');
+
+Route::post('/manager/delivery-fee/store', [CollectionController::class, 'deliveryStore'])
+    ->middleware('auth')
+    ->name('manager.delivery.store');
+
+Route::get('/manager/delivery-today', [CollectionController::class, 'deliveryToday'])
+    ->middleware('auth')
+    ->name('manager.delivery.today');
+
+Route::get('/manager/delivery-today/excel', [CollectionController::class, 'deliveryExcel'])
+    ->middleware('auth')
+    ->name('manager.delivery.excel');
+
 
 // =====================
 // ADMIN GROUP
@@ -276,6 +292,11 @@ Route::prefix('admin')->group(function () {
     Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])->name('admin.collection.export.pdf');
     Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])->name('admin.collection.export.excel');
     
+    Route::get('/delivery-fee', [CollectionController::class, 'deliveryFeeForm']);
+Route::post('/delivery-fee/store', [CollectionController::class, 'deliveryStore']);
+
+Route::get('/delivery-today', [CollectionController::class, 'deliveryToday']);
+Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel']);
 });// end admin group
 
     Route::post('/stock/store', [InventoryController::class, 'store'])

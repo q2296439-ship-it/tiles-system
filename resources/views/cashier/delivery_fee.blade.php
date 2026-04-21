@@ -1,7 +1,15 @@
-@extends('layouts.cashier')
+@php
+$layout = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'layouts.admin',
+    'manager' => 'layouts.manager',
+    'audit'   => 'layouts.manager',
+    default   => 'layouts.cashier',
+};
+@endphp
+
+@extends($layout)
 
 @section('content')
-
 <style>
 .page{max-width:1100px;margin:auto;}
 .card{

@@ -311,13 +311,20 @@
     <a href="/admin/dashboard" class="{{ request()->is('admin') || request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
 
     <div class="menu-title">POS / Sales</div>
-    <a href="/admin/collection" class="{{ request()->is('admin/collection') ? 'active' : '' }}">💰 Collection</a>
-    <a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">📈 Per Brand</a>
-    <a href="/admin/sales/branch" class="{{ request()->is('admin/sales/branch') ? 'active' : '' }}">🏬 Per Branch</a>
-    <a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
+<a href="/admin/collection" class="{{ request()->is('admin/collection') ? 'active' : '' }}">💰 Collection</a>
+<a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">📈 Per Brand</a>
+<a href="/admin/sales/branch" class="{{ request()->is('admin/sales/branch') ? 'active' : '' }}">🏬 Per Branch</a>
+<a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
+<a href="/admin/delivery-fee" class="{{ request()->is('admin/delivery-fee') ? 'active' : '' }}">🚚 Delivery Fee</a>
+<a href="/admin/ar-accounts" class="{{ request()->is('admin/ar-accounts') ? 'active' : '' }}">📒 A/R Accounts</a>
 
-    <div class="menu-title">Product</div>
-    <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
+<div class="menu-title">Cash Flow</div>
+<a href="/admin/cashflow" class="{{ request()->is('admin/cashflow') ? 'active' : '' }}">💰 Total Cash</a>
+<a href="/admin/cash-transfer" class="{{ request()->is('admin/cash-transfer') ? 'active' : '' }}">🔄 B2B Cash Transfer</a>
+<a href="/admin/store-expenses" class="{{ request()->is('admin/store-expenses') ? 'active' : '' }}">🧾 Store Expenses</a>
+
+<div class="menu-title">Product</div>
+<a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
 
     <div class="menu-title">Inventory</div>
     <a href="{{ url('/admin/inventory') }}" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
