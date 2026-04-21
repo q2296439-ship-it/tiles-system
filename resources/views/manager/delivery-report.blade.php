@@ -16,10 +16,10 @@
 .topbar{
     display:flex;
     justify-content:space-between;
-    align-items:end;
+    align-items:center;
     gap:15px;
     flex-wrap:wrap;
-    margin-bottom:20px;
+    margin-bottom:18px;
 }
 .title{
     font-size:30px;
@@ -60,6 +60,7 @@
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:15px;
+    margin-top:10px;
     margin-bottom:22px;
 }
 .box{
@@ -67,6 +68,10 @@
     border:1px solid #e2e8f0;
     border-radius:14px;
     padding:16px;
+    min-height:92px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
 }
 .box small{
     display:block;
