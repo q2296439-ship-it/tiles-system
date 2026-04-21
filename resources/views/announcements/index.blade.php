@@ -1,6 +1,8 @@
+@if(auth()->user()->role === 'manager')
+@extends('layouts.manager')
+@else
 @extends('layouts.admin')
-
-@section('content')
+@endif
 
 <style>
 .wrap{max-width:1100px;margin:auto;}
