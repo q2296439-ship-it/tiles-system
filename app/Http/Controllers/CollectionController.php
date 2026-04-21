@@ -17,6 +17,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\CollectionExport;
 use App\Exports\DepositExport;
 use App\Exports\RequestAccessExport;
+use App\Models\Branch;
 
 class CollectionController extends Controller
 {
@@ -969,8 +970,11 @@ public function requestAccessExcel(Request $request)
 
 public function deliveryFeeForm()
 {
+    $user = auth()->user();
+    $role = strtolower($user->role);
+    $branchId = $user->branch_id;
+
     $today = date('Ymd');
-    $branchId = auth()->user()->branch_id;
 
     $count = DB::table('delivery_fees')
         ->whereDate('delivery_date', date('Y-m-d'))
@@ -979,7 +983,13 @@ public function deliveryFeeForm()
 
     $deliveryNo = 'DF-' . $today . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
 
-    return view('cashier.delivery_fee', compact('deliveryNo'));
+    $branches = Branch::orderBy('name')->get();
+
+    return view('cashier.delivery_fee', compact(
+        'deliveryNo',
+        'branches',
+        'role'
+    ));
 }
 
 public function deliveryStore(Request $request)
@@ -1024,55 +1034,78 @@ public function deliveryStore(Request $request)
 
 public function deliveryToday(Request $request)
 {
+    $user = auth()->user();
+    $role = strtolower($user->role);
+
     $selectedDate = $request->date ?? date('Y-m-d');
-    $branchId = auth()->user()->branch_id;
+    $selectedBranch = $request->branch_id;
 
-    $rows = DB::table('delivery_fees')
-        ->whereDate('delivery_date', $selectedDate)
-        ->where('branch_id', $branchId)
-        ->orderBy('id', 'desc')
+    $query = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate);
+
+    if ($role === 'cashier') {
+        $query->where('branch_id', $user->branch_id);
+        $selectedBranch = $user->branch_id;
+    } elseif (!empty($selectedBranch)) {
+        $query->where('branch_id', $selectedBranch);
+    }
+
+    $rows = $query->orderByDesc('id')
         ->paginate(10)
-        ->appends([
-            'date' => $selectedDate
-        ]);
+        ->appends($request->query());
 
-    $totalCount = DB::table('delivery_fees')
-        ->whereDate('delivery_date', $selectedDate)
-        ->where('branch_id', $branchId)
-        ->count();
+    $summary = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate);
 
-    $income = DB::table('delivery_fees')
-        ->whereDate('delivery_date', $selectedDate)
-        ->where('branch_id', $branchId)
+    if ($role === 'cashier') {
+        $summary->where('branch_id', $user->branch_id);
+    } elseif (!empty($selectedBranch)) {
+        $summary->where('branch_id', $selectedBranch);
+    }
+
+    $totalCount = (clone $summary)->count();
+
+    $income = (clone $summary)
         ->where('status', 'saved')
         ->sum('amount');
 
-    $refund = DB::table('delivery_fees')
-        ->whereDate('delivery_date', $selectedDate)
-        ->where('branch_id', $branchId)
+    $refund = (clone $summary)
         ->where('status', 'returned')
         ->sum('amount');
 
     $totalIncome = $income - $refund;
 
+    $branches = Branch::orderBy('name')->get();
+
     return view('cashier.delivery_today', compact(
         'rows',
         'selectedDate',
         'totalCount',
-        'totalIncome'
+        'totalIncome',
+        'branches',
+        'selectedBranch',
+        'role'
     ));
 }
 
 public function deliveryExcel(Request $request)
 {
-    $selectedDate = $request->date ?? date('Y-m-d');
-    $branchId = auth()->user()->branch_id;
+    $user = auth()->user();
+    $role = strtolower($user->role);
 
-    $rows = DB::table('delivery_fees')
-        ->whereDate('delivery_date', $selectedDate)
-        ->where('branch_id', $branchId)
-        ->orderBy('id', 'desc')
-        ->get();
+    $selectedDate = $request->date ?? date('Y-m-d');
+    $selectedBranch = $request->branch_id;
+
+    $query = DB::table('delivery_fees')
+        ->whereDate('delivery_date', $selectedDate);
+
+    if ($role === 'cashier') {
+        $query->where('branch_id', $user->branch_id);
+    } elseif (!empty($selectedBranch)) {
+        $query->where('branch_id', $selectedBranch);
+    }
+
+    $rows = $query->orderByDesc('id')->get();
 
     $filename = 'delivery-report-' . $selectedDate . '.csv';
 
@@ -1085,13 +1118,8 @@ public function deliveryExcel(Request $request)
         $file = fopen('php://output', 'w');
 
         fputcsv($file, [
-            '#',
-            'Delivery No',
-            'Receipt No',
-            'Customer',
-            'Amount',
-            'Status',
-            'Date'
+            '#','Delivery No','Receipt No','Customer',
+            'Amount','Status','Date'
         ]);
 
         foreach ($rows as $index => $row) {
@@ -1111,7 +1139,6 @@ public function deliveryExcel(Request $request)
 
     return response()->stream($callback, 200, $headers);
 }
-
 public function arAccounts(Request $request)
 {
     $branchId = auth()->user()->branch_id;
