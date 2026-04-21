@@ -124,7 +124,11 @@ $layout = match(auth()->user()->role) {
             <input type="text" id="currentStock" readonly>
 
             <label>Update Price</label>
-            <input type="number" step="0.01" name="price" id="priceInput">
+            @if(strtolower(auth()->user()->role) === 'cashier')
+<input type="number" step="0.01" name="price" id="priceInput" readonly>
+@else
+<input type="number" step="0.01" name="price" id="priceInput">
+@endif
 
             <label>D.R Number</label>
             <input type="text" name="dr_number">
@@ -141,7 +145,11 @@ $layout = match(auth()->user()->role) {
             <input type="text" name="new_size">
 
             <label>Price</label>
-            <input type="number" step="0.01" name="new_price">
+            @if(strtolower(auth()->user()->role) === 'cashier')
+<input type="number" step="0.01" name="new_price" readonly>
+@else
+<input type="number" step="0.01" name="new_price">
+@endif
 
             <label>D.R Number</label>
             <input type="text" name="dr_number_new">
