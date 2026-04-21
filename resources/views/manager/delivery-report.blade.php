@@ -97,6 +97,7 @@ th,td{
     font-size:14px;
     vertical-align:middle;
     line-height:1.4;
+    text-align:center;
 }
 th{
     background:#f8fafc;
@@ -108,7 +109,7 @@ th{
     text-align:center;
 }
 .right{
-    text-align:right;
+    text-align:center;
 }
 .badge{
     background:#dcfce7;
@@ -201,11 +202,11 @@ th{
                     <th>Date</th>
                     <th>Branch</th>
                     <th>Product</th>
-                    <th class="center">Qty</th>
-                    <th class="right">Price</th>
-                    <th class="right">Total</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
                     <th>D.R Number</th>
-                    <th class="center">Status</th>
+                    <th>Status</th>
                 </tr>
 
                 @forelse($rows as $row)
@@ -213,13 +214,13 @@ th{
                     <td>{{ $row->created_at->format('Y-m-d') }}</td>
                     <td>{{ $row->branch->name ?? '-' }}</td>
                     <td>{{ $row->product->name ?? '-' }}</td>
-                    <td class="center">{{ number_format($row->quantity) }}</td>
-                    <td class="right">₱{{ number_format($row->unit_price,2) }}</td>
-                    <td class="right">
+                    <td>{{ number_format($row->quantity) }}</td>
+                    <td>₱{{ number_format($row->unit_price,2) }}</td>
+                    <td>
                         ₱{{ number_format($row->quantity * $row->unit_price,2) }}
                     </td>
                     <td>{{ $row->dr_number }}</td>
-                    <td class="center">
+                    <td>
                         <span class="badge">Delivered</span>
                     </td>
                 </tr>
