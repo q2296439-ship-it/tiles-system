@@ -95,14 +95,15 @@ $layout = match(auth()->user()->role) {
         </select>
 
         <label>Select Branch</label>
-<select name="branch_id" id="branchSelect" required>
-    <option value="">-- Select Branch --</option>
-    @foreach($branches as $branch)
-        <option value="{{ $branch->id }}">
-            {{ $branch->name }}
-        </option>
-    @endforeach
-</select>
+        <select name="branch_id" id="branchSelect" required>
+            <option value="">-- Select Branch --</option>
+            @foreach($branches as $branch)
+                <option value="{{ $branch->id }}">
+                    {{ $branch->name }}
+                </option>
+            @endforeach
+        </select>
+
         {{-- EXISTING PRODUCT --}}
         <div id="existingProduct">
 
@@ -112,7 +113,8 @@ $layout = match(auth()->user()->role) {
                 @foreach($products as $product)
                     <option value="{{ $product->id }}"
                         data-stock="{{ $product->stock }}"
-                        data-price="{{ $product->price }}">
+                        data-price="{{ $product->price }}"
+                        data-branch="{{ $product->branch_id }}">
                         {{ $product->name }} (Stock: {{ $product->stock }})
                     </option>
                 @endforeach
@@ -159,6 +161,12 @@ const modeSelect = document.getElementById('modeSelect');
 const existingDiv = document.getElementById('existingProduct');
 const newDiv = document.getElementById('newProduct');
 
+const branchSelect = document.getElementById('branchSelect');
+const productSelect = document.getElementById('productSelect');
+const currentStock = document.getElementById('currentStock');
+const priceInput = document.getElementById('priceInput');
+
+// mode switch
 modeSelect.addEventListener('change', function () {
     if (this.value === 'new') {
         existingDiv.style.display = 'none';
@@ -169,15 +177,58 @@ modeSelect.addEventListener('change', function () {
     }
 });
 
-const productSelect = document.getElementById('productSelect');
-const currentStock = document.getElementById('currentStock');
-const priceInput = document.getElementById('priceInput');
+// save all products
+const allProducts = [];
 
+for (let i = 1; i < productSelect.options.length; i++) {
+    const opt = productSelect.options[i];
+
+    allProducts.push({
+        value: opt.value,
+        text: opt.text,
+        stock: opt.getAttribute('data-stock'),
+        price: opt.getAttribute('data-price'),
+        branch: opt.getAttribute('data-branch')
+    });
+}
+
+// filter by branch
+branchSelect.addEventListener('change', function () {
+
+    const selectedBranch = this.value;
+
+    productSelect.innerHTML =
+        '<option value="">-- Select Product --</option>';
+
+    currentStock.value = '';
+    priceInput.value = '';
+
+    allProducts.forEach(item => {
+        if (item.branch === selectedBranch) {
+
+            const option = document.createElement('option');
+
+            option.value = item.value;
+            option.textContent = item.text;
+            option.setAttribute('data-stock', item.stock);
+            option.setAttribute('data-price', item.price);
+            option.setAttribute('data-branch', item.branch);
+
+            productSelect.appendChild(option);
+        }
+    });
+});
+
+// product select
 productSelect.addEventListener('change', function () {
+
     const selected = this.options[this.selectedIndex];
 
-    currentStock.value = selected.getAttribute('data-stock') || '';
-    priceInput.value = selected.getAttribute('data-price') || '';
+    currentStock.value =
+        selected.getAttribute('data-stock') || '';
+
+    priceInput.value =
+        selected.getAttribute('data-price') || '';
 });
 </script>
 
