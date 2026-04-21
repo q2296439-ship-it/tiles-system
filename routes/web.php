@@ -228,6 +228,10 @@ Route::post('/manager/cash-transfer/{id}/accept', [CashTransferController::class
 
 Route::get('/manager/store-expenses', [ExpenseController::class, 'index'])->middleware('auth');
 
+Route::get('/manager/store-expenses', [ExpenseController::class, 'index'])->middleware('auth')->name('manager.expenses');
+Route::post('/manager/store-expenses/store', [ExpenseController::class, 'store'])->middleware('auth')->name('manager.expenses.store');
+Route::get('/manager/store-expenses/list', [ExpenseController::class, 'list'])->middleware('auth')->name('manager.expenses.list');
+Route::get('/manager/store-expenses/excel', [ExpenseController::class, 'excel'])->middleware('auth')->name('manager.expenses.excel');
 
 // =====================
 // ADMIN GROUP
@@ -323,8 +327,12 @@ Route::post('/store-expenses/store', [ExpenseController::class, 'store']);
 Route::get('/store-expenses/list', [ExpenseController::class, 'list']);
 Route::get('/store-expenses/excel', [ExpenseController::class, 'excel']);
 
-
-    });// end admin group
+Route::get('/store-expenses', [ExpenseController::class, 'index'])->name('admin.expenses');
+Route::post('/store-expenses/store', [ExpenseController::class, 'store'])->name('admin.expenses.store');
+Route::get('/store-expenses/list', [ExpenseController::class, 'list'])->name('admin.expenses.list');
+Route::get('/store-expenses/excel', [ExpenseController::class, 'excel'])->name('admin.expenses.excel');
+    
+});// end admin group
 
     Route::post('/stock/store', [InventoryController::class, 'store'])
     ->middleware('auth')
@@ -433,6 +441,10 @@ Route::prefix('cashier')->group(function () {
 Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 });
 
+Route::get('/store-expenses', [ExpenseController::class, 'index'])->name('cashier.expenses');
+Route::post('/store-expenses/store', [ExpenseController::class, 'store'])->name('cashier.expenses.store');
+Route::get('/store-expenses/list', [ExpenseController::class, 'list')->name('cashier.expenses.list');
+Route::get('/store-expenses/excel', [ExpenseController::class, 'excel'])->name('cashier.expenses.excel');
 
 // =====================
 // OTHER

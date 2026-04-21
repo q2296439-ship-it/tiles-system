@@ -1,4 +1,20 @@
-@extends('layouts.cashier')
+@php
+$layout = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'layouts.admin',
+    'manager' => 'layouts.manager',
+    'audit'   => 'layouts.manager',
+    default   => 'layouts.cashier',
+};
+
+$routePrefix = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'admin',
+    'manager' => 'manager',
+    'audit'   => 'manager',
+    default   => 'cashier',
+};
+@endphp
+
+@extends($layout)
 
 @section('content')
 
@@ -130,103 +146,149 @@ padding:15px;
 
 @if(session('success'))
 <div class="alert-success" id="successAlert">
-    {{ session('success') }}
+{{ session('success') }}
 </div>
 @endif
 
 <div class="title">STORE EXPENSES</div>
 <div class="sub">Connected to Cash Flow • Daily Expense Monitoring</div>
 
-<form method="POST" action="{{ route('cashier.expenses.store') }}">
+<form method="GET" action="/{{ $routePrefix }}/store-expenses">
+<div class="actions">
+
+@if($role !== 'cashier')
+<select name="branch_id" class="input">
+<option value="">All Branches</option>
+@foreach($branches as $branch)
+<option value="{{ $branch->id }}"
+{{ $branchId == $branch->id ? 'selected' : '' }}>
+{{ $branch->name }}
+</option>
+@endforeach
+</select>
+@endif
+
+<button class="btn btn-blue">Filter</button>
+
+</div>
+</form>
+
+<form method="POST" action="/{{ $routePrefix }}/store-expenses/store">
 @csrf
 
 <div class="grid">
-    <input type="date"
-           name="expense_date"
-           class="input"
-           value="{{ date('Y-m-d') }}"
-           required>
 
-    <select name="category_id" class="input" required>
-        <option value="">Select Category</option>
-        @foreach($categories as $cat)
-            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-        @endforeach
-    </select>
+@if($role !== 'cashier')
+<select name="branch_id" class="input" required>
+<option value="">Select Branch</option>
+@foreach($branches as $branch)
+<option value="{{ $branch->id }}"
+{{ $branchId == $branch->id ? 'selected' : '' }}>
+{{ $branch->name }}
+</option>
+@endforeach
+</select>
+@endif
 
-    <input type="number"
-           step="0.01"
-           min="0"
-           name="amount"
-           class="input"
-           placeholder="Expense Amount"
-           required>
+<input type="date"
+name="expense_date"
+class="input"
+value="{{ date('Y-m-d') }}"
+required>
 
-    <select name="payment_method" class="input">
-        <option value="cash">Cash</option>
-        <option value="bank">Bank</option>
-        <option value="gcash">GCash</option>
-    </select>
+<select name="category_id" class="input" required>
+<option value="">Select Category</option>
+@foreach($categories as $cat)
+<option value="{{ $cat->id }}">{{ $cat->name }}</option>
+@endforeach
+</select>
+
+<input type="number"
+step="0.01"
+min="0"
+name="amount"
+class="input"
+placeholder="Expense Amount"
+required>
+
+<select name="payment_method" class="input">
+<option value="cash">Cash</option>
+<option value="bank">Bank</option>
+<option value="gcash">GCash</option>
+</select>
+
 </div>
 
 <div style="margin-top:12px;">
-    <textarea name="description"
-              class="input"
-              placeholder="Notes / Instructions"></textarea>
+<textarea name="description"
+class="input"
+placeholder="Notes / Instructions"></textarea>
 </div>
 
 <div class="actions">
-    <button type="submit" class="btn btn-green">
-        💾 Save Expense
-    </button>
 
-    <button type="reset" class="btn btn-red">
-        ❌ Clear
-    </button>
+<button type="submit" class="btn btn-green">
+💾 Save Expense
+</button>
 
-    <a href="{{ route('cashier.expenses.list') }}" class="btn btn-blue">
-        📋 Expense List
-    </a>
+<button type="reset" class="btn btn-red">
+❌ Clear
+</button>
+
+<a href="/{{ $routePrefix }}/store-expenses/list@if($role !== 'cashier' && $branchId)?branch_id={{ $branchId }}@endif"
+class="btn btn-blue">
+📋 Expense List
+</a>
+
+<a href="/{{ $routePrefix }}/store-expenses/excel@if($role !== 'cashier' && $branchId)?branch_id={{ $branchId }}@endif"
+class="btn btn-blue">
+📄 Excel
+</a>
+
 </div>
 
 <div class="box" id="records">
 
-    <div>Today Expense Total</div>
-    <div class="total">
-        ₱{{ number_format($totalToday ?? 0,2) }}
-    </div>
-    <div class="note">
-        Saved = recorded daily expense
-    </div>
+<div>Today Expense Total</div>
+<div class="total">
+₱{{ number_format($totalToday ?? 0,2) }}
+</div>
+<div class="note">
+Saved = recorded daily expense
+</div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Branch</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Encoded By</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-        @forelse($expenses as $row)
-            <tr>
-                <td>{{ $row->expense_date }}</td>
-                <td>{{ $row->branch->name ?? '' }}</td>
-                <td>{{ $row->category->name ?? '' }}</td>
-                <td>{{ $row->description }}</td>
-                <td>{{ $row->user->name ?? '' }}</td>
-                <td class="amount">₱{{ number_format($row->amount,2) }}</td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="6" class="empty">No expense records found</td>
-            </tr>
-        @endforelse
-        </tbody>
-    </table>
+<div style="overflow-x:auto;">
+<table class="table">
+<thead>
+<tr>
+<th>Date</th>
+<th>Branch</th>
+<th>Category</th>
+<th>Description</th>
+<th>Encoded By</th>
+<th>Amount</th>
+</tr>
+</thead>
+
+<tbody>
+@forelse($expenses as $row)
+<tr>
+<td>{{ $row->expense_date }}</td>
+<td>{{ $row->branch->name ?? '' }}</td>
+<td>{{ $row->category->name ?? '' }}</td>
+<td>{{ $row->description }}</td>
+<td>{{ $row->user->name ?? '' }}</td>
+<td class="amount">₱{{ number_format($row->amount,2) }}</td>
+</tr>
+@empty
+<tr>
+<td colspan="6" class="empty">No expense records found</td>
+</tr>
+@endforelse
+</tbody>
+
+</table>
+</div>
 
 </div>
 </form>
@@ -237,11 +299,11 @@ padding:15px;
 @if(session('success'))
 <script>
 setTimeout(function(){
-    let alertBox = document.getElementById('successAlert');
-    if(alertBox){
-        alertBox.style.display = 'none';
-    }
-}, 2500);
+let alertBox = document.getElementById('successAlert');
+if(alertBox){
+alertBox.style.display='none';
+}
+},2500);
 </script>
 @endif
 

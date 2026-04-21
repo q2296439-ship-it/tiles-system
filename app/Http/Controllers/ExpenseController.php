@@ -5,28 +5,44 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Branch;
 use Illuminate\Support\Facades\Auth;
 
 class ExpenseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $branchId = Auth::user()->branch_id;
+        $user = Auth::user();
+        $role = strtolower($user->role);
+
+        $branchId = $request->branch_id;
+
+        if ($role === 'cashier') {
+            $branchId = $user->branch_id;
+        }
 
         $categories = ExpenseCategory::where('status', 'active')
             ->orderBy('name')
             ->get();
 
-        $expenses = Expense::with(['category', 'user', 'branch'])
-            ->where('branch_id', $branchId)
-            ->latest()
-            ->get();
+        $branches = Branch::orderBy('name')->get();
 
-        $totalToday = Expense::where('branch_id', $branchId)
-            ->whereDate('expense_date', date('Y-m-d'))
-            ->sum('amount');
+        $expenses = Expense::with(['category', 'user', 'branch']);
+
+        $totalTodayQuery = Expense::whereDate('expense_date', date('Y-m-d'));
+
+        if (!empty($branchId)) {
+            $expenses->where('branch_id', $branchId);
+            $totalTodayQuery->where('branch_id', $branchId);
+        }
+
+        $expenses = $expenses->latest()->get();
+        $totalToday = $totalTodayQuery->sum('amount');
 
         return view('cashflow.expenses', compact(
+            'role',
+            'branchId',
+            'branches',
             'categories',
             'expenses',
             'totalToday'
@@ -42,8 +58,17 @@ class ExpenseController extends Controller
             'payment_method' => 'required',
         ]);
 
+        $user = Auth::user();
+        $role = strtolower($user->role);
+
+        $branchId = $user->branch_id;
+
+        if ($role !== 'cashier') {
+            $branchId = $request->branch_id;
+        }
+
         Expense::create([
-            'branch_id'      => Auth::user()->branch_id,
+            'branch_id'      => $branchId,
             'category_id'    => $request->category_id,
             'expense_date'   => $request->expense_date,
             'description'    => $request->description,
@@ -53,36 +78,32 @@ class ExpenseController extends Controller
             'created_by'     => Auth::id(),
         ]);
 
-        return redirect()
-            ->route('cashier.expenses')
-            ->with('success', 'Expense saved successfully.');
+        return back()->with('success', 'Expense saved successfully.');
     }
 
-    public function list()
+    public function list(Request $request)
     {
-        $branchId = Auth::user()->branch_id;
-
-        $expenses = Expense::with(['category', 'user', 'branch'])
-            ->where('branch_id', $branchId)
-            ->latest()
-            ->get();
-
-        $totalToday = Expense::where('branch_id', $branchId)
-            ->whereDate('expense_date', date('Y-m-d'))
-            ->sum('amount');
-
-        return view('cashflow.expense-list', compact(
-            'expenses',
-            'totalToday'
-        ));
+        return $this->index($request);
     }
 
-    public function excel()
+    public function excel(Request $request)
     {
-        $expenses = Expense::with(['category', 'user', 'branch'])
-            ->where('branch_id', Auth::user()->branch_id)
-            ->latest()
-            ->get();
+        $user = Auth::user();
+        $role = strtolower($user->role);
+
+        $branchId = $request->branch_id;
+
+        if ($role === 'cashier') {
+            $branchId = $user->branch_id;
+        }
+
+        $expenses = Expense::with(['category', 'user', 'branch']);
+
+        if (!empty($branchId)) {
+            $expenses->where('branch_id', $branchId);
+        }
+
+        $expenses = $expenses->latest()->get();
 
         $filename = 'expenses_' . date('Ymd_His') . '.csv';
 
