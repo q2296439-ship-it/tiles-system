@@ -74,15 +74,6 @@ border-radius:8px;
 cursor:pointer;
 margin-top:10px;
 }
-.view{
-background:#16a34a;
-color:#fff;
-border:none;
-padding:8px 12px;
-border-radius:8px;
-cursor:pointer;
-margin-top:10px;
-}
 .empty{
 text-align:center;
 padding:20px;
@@ -126,6 +117,7 @@ $isAdmin = request()->is('admin/*') || request()->is('announcements');
 
 @forelse($announcements as $row)
 <div class="item">
+
     <div class="head">{{ $row->title }}</div>
 
     <div class="meta">
@@ -134,18 +126,12 @@ $isAdmin = request()->is('admin/*') || request()->is('announcements');
 
     <div>{{ $row->message }}</div>
 
-    {{-- ADMIN MAIN PAGE = REMOVE --}}
+    {{-- REMOVE BUTTON ONLY SA ADMIN MAIN PAGE --}}
     @if($isAdmin && !request()->has('view'))
     <form method="POST" action="{{ route('announcements.delete',$row->id) }}">
         @csrf
         @method('DELETE')
         <button class="del">🗑 Remove</button>
-    </form>
-
-    {{-- VIEW ALL / OTHER USERS = VIEW --}}
-    @else
-    <form method="GET" action="{{ url()->current() }}">
-        <button class="view">👁 View</button>
     </form>
     @endif
 

@@ -192,7 +192,6 @@
             font-weight:700;
         }
 
-        /* FIXED DROPDOWN PARA LAGING NASA IBABAW */
         .bell-dropdown{
             display:none;
             position:fixed;
@@ -390,14 +389,12 @@ $notes = \App\Models\Announcement::where('is_active',1)
     ->take(5)
     ->get();
 
-/* unread only once */
 $seenIds = session('seen_announcements', []);
 $unreadCount = $notes->whereNotIn('id', $seenIds)->count();
 @endphp
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
 
     <div class="brand">🏢 Admin Panel</div>
@@ -441,7 +438,6 @@ $unreadCount = $notes->whereNotIn('id', $seenIds)->count();
 
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
 <div class="topbar">
@@ -475,7 +471,7 @@ $unreadCount = $notes->whereNotIn('id', $seenIds)->count();
             <div class="bell-empty">No announcements</div>
         @endforelse
 
-        <a href="/announcements?view=1" class="bell-view">View All</a>
+        <a href="/announcements?view=1" class="bell-view" onclick="clearBellCount()">View All</a>
     </div>
 </div>
 
@@ -510,28 +506,31 @@ function closeSidebar(){
     document.getElementById('overlay').classList.remove('show');
 }
 
+function clearBellCount(){
+    let badge = document.getElementById('bellCount');
+
+    if(badge){
+        badge.remove();
+    }
+
+    fetch('/announcements/read', {
+        method:'POST',
+        headers:{
+            'X-CSRF-TOKEN':'{{ csrf_token() }}',
+            'Content-Type':'application/json'
+        }
+    });
+}
+
 function toggleBell(event){
     event.stopPropagation();
 
     let box = document.getElementById('bellDropdown');
-    let badge = document.getElementById('bellCount');
 
     if(box.style.display === 'block'){
         box.style.display = 'none';
     }else{
         box.style.display = 'block';
-
-        if(badge){
-            badge.remove();
-        }
-
-        fetch('/announcements/read', {
-            method:'POST',
-            headers:{
-                'X-CSRF-TOKEN':'{{ csrf_token() }}',
-                'Content-Type':'application/json'
-            }
-        });
     }
 }
 
