@@ -9,7 +9,8 @@
     font-family:'Segoe UI',Tahoma,sans-serif;
 }
 
-.topbar{
+/* FIXED NAME */
+.dashboard-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -173,13 +174,18 @@ tr:hover{
     .page-title{
         font-size:28px;
     }
+
+    .dashboard-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
 }
 </style>
 
 <div class="dashboard-wrap">
 
     <!-- HEADER -->
-    <div class="topbar">
+    <div class="dashboard-header">
 
         <div>
             <h1 class="page-title">📊 Admin Dashboard</h1>
