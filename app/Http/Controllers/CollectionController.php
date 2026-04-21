@@ -1141,11 +1141,20 @@ public function deliveryExcel(Request $request)
 }
 public function arAccounts(Request $request)
 {
-    $branchId = auth()->user()->branch_id;
+    $user = auth()->user();
+    $role = strtolower($user->role);
 
-    $query = Collection::where('branch_id', $branchId)
-        ->whereIn('sales_type', ['dp', 'partial'])
+    $selectedBranch = $request->branch_id;
+
+    $query = Collection::whereIn('sales_type', ['dp', 'partial'])
         ->where('balance', '>', 0);
+
+    if ($role === 'cashier') {
+        $query->where('branch_id', $user->branch_id);
+        $selectedBranch = $user->branch_id;
+    } elseif (!empty($selectedBranch)) {
+        $query->where('branch_id', $selectedBranch);
+    }
 
     if ($request->search) {
         $query->where(function ($q) use ($request) {
@@ -1158,11 +1167,19 @@ public function arAccounts(Request $request)
         $query->whereDate('receipt_date', $request->date);
     }
 
-    $rows = $query->latest()->paginate(10);
+    $rows = $query->latest()
+        ->paginate(10)
+        ->appends($request->query());
 
-    return view('cashier.ar_accounts', compact('rows'));
+    $branches = Branch::orderBy('name')->get();
+
+    return view('cashier.ar_accounts', compact(
+        'rows',
+        'branches',
+        'selectedBranch',
+        'role'
+    ));
 }
-
 public function payAr(Request $request, $id)
 {
     $request->validate([
