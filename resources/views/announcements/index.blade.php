@@ -82,7 +82,8 @@ color:#64748b;
 </style>
 
 @php
-$isAdmin = request()->is('admin/*') || request()->is('announcements');
+$role = strtolower(auth()->user()->role ?? '');
+$isAdmin = $role === 'admin';
 @endphp
 
 <div class="wrap">
