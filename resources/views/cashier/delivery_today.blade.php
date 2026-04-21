@@ -148,7 +148,7 @@ $routePrefix = match(strtolower(auth()->user()->role)) {
     <option value="">All Branches</option>
     @foreach($branches as $branch)
         <option value="{{ $branch->id }}"
-            {{ $branchId == $branch->id ? 'selected' : '' }}>
+            {{ $selectedBranch == $branch->id ? 'selected' : '' }}
             {{ $branch->name }}
         </option>
     @endforeach
@@ -161,7 +161,7 @@ $routePrefix = match(strtolower(auth()->user()->role)) {
 ➕ New Delivery
 </a>
 
-<a href="/{{ $routePrefix }}/delivery-today/excel?date={{ $selectedDate }}@if($role !== 'cashier')&branch_id={{ $branchId }}@endif"
+<a href="/{{ $routePrefix }}/delivery-today/excel?date={{ $selectedDate }}@if($role !== 'cashier')&branch_id={{ $selectedBranch }}@endif"
    class="btn btn-green">
 📗 Excel
 </a>
