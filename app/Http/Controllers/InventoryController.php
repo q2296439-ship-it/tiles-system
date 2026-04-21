@@ -37,7 +37,7 @@ class InventoryController extends Controller
 
         try {
 
-            if ($request->new_name) {
+           if ($request->mode === 'new') {
 
                 $request->validate([
                     'new_name'  => 'required|string',

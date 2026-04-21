@@ -89,7 +89,7 @@ $layout = match(auth()->user()->role) {
         @csrf
 
         <label>Mode</label>
-        <select id="modeSelect">
+        <select id="modeSelect" name="mode">
             <option value="existing">Select Existing Product</option>
             <option value="new">Add New Product</option>
         </select>
