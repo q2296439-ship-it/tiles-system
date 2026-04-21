@@ -74,12 +74,25 @@ border-radius:8px;
 cursor:pointer;
 margin-top:10px;
 }
+.view{
+background:#16a34a;
+color:#fff;
+border:none;
+padding:8px 12px;
+border-radius:8px;
+cursor:pointer;
+margin-top:10px;
+}
 .empty{
 text-align:center;
 padding:20px;
 color:#64748b;
 }
 </style>
+
+@php
+$isAdmin = request()->is('admin/*') || request()->is('announcements');
+@endphp
 
 <div class="wrap">
 <div class="card">
@@ -93,6 +106,8 @@ color:#64748b;
 </div>
 @endif
 
+{{-- FORM ONLY FOR ADMIN MAIN PAGE --}}
+@if($isAdmin && !request()->has('view'))
 <form method="POST" action="{{ route('announcements.store') }}">
 @csrf
 
@@ -106,6 +121,8 @@ color:#64748b;
 </form>
 
 <hr style="margin:20px 0;">
+@endif
+
 
 @forelse($announcements as $row)
 <div class="item">
@@ -117,11 +134,21 @@ color:#64748b;
 
     <div>{{ $row->message }}</div>
 
+    {{-- ADMIN MAIN PAGE = REMOVE --}}
+    @if($isAdmin && !request()->has('view'))
     <form method="POST" action="{{ route('announcements.delete',$row->id) }}">
         @csrf
         @method('DELETE')
         <button class="del">🗑 Remove</button>
     </form>
+
+    {{-- VIEW ALL / OTHER USERS = VIEW --}}
+    @else
+    <form method="GET" action="{{ url()->current() }}">
+        <button class="view">👁 View</button>
+    </form>
+    @endif
+
 </div>
 @empty
 <div class="empty">No announcements yet.</div>
