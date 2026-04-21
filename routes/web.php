@@ -190,8 +190,13 @@ Route::get('/manager/request-access/pdf', [CollectionController::class, 'request
 Route::get('/manager/collection', [CollectionController::class, 'managerCollection'])
     ->name('manager.collection');
 
-Route::get('/ar-accounts', [CollectionController::class, 'arAccounts'])->name('manager.ar.accounts');
-Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr'])->name('manager.ar.pay');
+Route::get('/manager/ar-accounts', [CollectionController::class, 'arAccounts'])
+    ->middleware('auth')
+    ->name('manager.ar.accounts');
+
+Route::post('/manager/ar-payment/{id}', [CollectionController::class, 'payAr'])
+    ->middleware('auth')
+    ->name('manager.ar.pay');
 
 Route::get('/manager/delivery-report', [InventoryController::class, 'deliveryReport'])
     ->name('manager.delivery.report');
