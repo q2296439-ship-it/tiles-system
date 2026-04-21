@@ -146,12 +146,14 @@ $routePrefix = match(strtolower(auth()->user()->role)) {
 @if($role !== 'cashier')
 <select name="branch_id" class="input">
     <option value="">All Branches</option>
+
     @foreach($branches as $branch)
         <option value="{{ $branch->id }}"
-            {{ $selectedBranch == $branch->id ? 'selected' : '' }}
+            {{ $selectedBranch == $branch->id ? 'selected' : '' }}>
             {{ $branch->name }}
         </option>
     @endforeach
+
 </select>
 @endif
 
