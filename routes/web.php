@@ -222,6 +222,12 @@ Route::get('/manager/total-cash', [CashierController::class, 'totalCash'])
     ->middleware('auth')
     ->name('manager.total.cash');
 
+Route::get('/manager/cash-transfer', [CashTransferController::class, 'index'])->middleware('auth');
+Route::post('/manager/cash-transfer/store', [CashTransferController::class, 'store'])->middleware('auth');
+Route::post('/manager/cash-transfer/{id}/accept', [CashTransferController::class, 'accept'])->middleware('auth');
+
+Route::get('/manager/store-expenses', [ExpenseController::class, 'index'])->middleware('auth');
+
 
 // =====================
 // ADMIN GROUP
@@ -307,6 +313,15 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/total-cash', [CashierController::class, 'totalCash'])
     ->name('admin.total.cash');
+
+    Route::get('/cash-transfer', [CashTransferController::class, 'index']);
+Route::post('/cash-transfer/store', [CashTransferController::class, 'store']);
+Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accept']);
+
+Route::get('/store-expenses', [ExpenseController::class, 'index']);
+Route::post('/store-expenses/store', [ExpenseController::class, 'store']);
+Route::get('/store-expenses/list', [ExpenseController::class, 'list']);
+Route::get('/store-expenses/excel', [ExpenseController::class, 'excel']);
 
 
     });// end admin group

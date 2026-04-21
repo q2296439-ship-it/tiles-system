@@ -9,32 +9,58 @@ use Illuminate\Support\Facades\Auth;
 
 class CashTransferController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $branchId = Auth::user()->branch_id;
+        $user = Auth::user();
+        $role = strtolower($user->role);
 
-        $branches = Branch::where('id', '!=', $branchId)
+        $branchId = $request->branch_id;
+
+        if ($role === 'cashier') {
+            $branchId = $user->branch_id;
+        }
+
+        $branches = Branch::orderBy('name')->get();
+
+        $receiverBranches = Branch::query();
+
+        if (!empty($branchId)) {
+            $receiverBranches->where('id', '!=', $branchId);
+        }
+
+        $receiverBranches = $receiverBranches
             ->orderBy('name')
             ->get();
 
-        $outgoing = CashTransfer::with(['fromBranch', 'toBranch', 'user'])
-            ->where('from_branch_id', $branchId)
-            ->latest()
-            ->get();
+        $outgoing = CashTransfer::with(['fromBranch', 'toBranch', 'user']);
+        $incoming = CashTransfer::with(['fromBranch', 'toBranch', 'user']);
 
-        $incoming = CashTransfer::with(['fromBranch', 'toBranch', 'user'])
-            ->where('to_branch_id', $branchId)
-            ->where('status', 'pending')
-            ->latest()
-            ->get();
+        $totalTodayQuery = CashTransfer::whereDate('transfer_date', date('Y-m-d'))
+            ->where('status', 'completed');
 
-        $totalToday = CashTransfer::where('from_branch_id', $branchId)
-            ->whereDate('transfer_date', date('Y-m-d'))
-            ->where('status', 'completed')
-            ->sum('amount');
+        if (!empty($branchId)) {
+
+            $outgoing->where('from_branch_id', $branchId);
+
+            $incoming->where('to_branch_id', $branchId)
+                ->where('status', 'pending');
+
+            $totalTodayQuery->where('from_branch_id', $branchId);
+
+        } else {
+
+            $incoming->where('status', 'pending');
+        }
+
+        $outgoing = $outgoing->latest()->get();
+        $incoming = $incoming->latest()->get();
+        $totalToday = $totalTodayQuery->sum('amount');
 
         return view('cashflow.transfer-cash', compact(
+            'role',
+            'branchId',
             'branches',
+            'receiverBranches',
             'outgoing',
             'incoming',
             'totalToday'

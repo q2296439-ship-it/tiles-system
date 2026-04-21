@@ -1,4 +1,20 @@
-@extends('layouts.cashier')
+@php
+$layout = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'layouts.admin',
+    'manager' => 'layouts.manager',
+    'audit'   => 'layouts.manager',
+    default   => 'layouts.cashier',
+};
+
+$routePrefix = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'admin',
+    'manager' => 'manager',
+    'audit'   => 'manager',
+    default   => 'cashier',
+};
+@endphp
+
+@extends($layout)
 
 @section('content')
 
@@ -142,132 +158,164 @@ color:#0f172a;
 <div class="title">TRANSFER CASH TO OTHER BRANCH</div>
 <div class="sub">Outgoing / Incoming Cash Transfer Monitoring</div>
 
-<form method="POST" action="{{ route('cashier.transfer.cash.store') }}">
+<form method="GET" action="/{{ $routePrefix }}/cash-transfer">
+<div class="actions">
+
+@if($role !== 'cashier')
+<select name="branch_id" class="input">
+<option value="">All Branches</option>
+@foreach($branches as $branch)
+<option value="{{ $branch->id }}"
+{{ $branchId == $branch->id ? 'selected' : '' }}>
+{{ $branch->name }}
+</option>
+@endforeach
+</select>
+@endif
+
+<button class="btn btn-blue">Filter</button>
+
+</div>
+</form>
+
+<form method="POST" action="/{{ $routePrefix }}/cash-transfer/store">
 @csrf
 
-<div class="grid">
-    <input type="date"
-           name="transfer_date"
-           class="input"
-           value="{{ date('Y-m-d') }}"
-           required>
+<div class="grid" style="margin-top:12px;">
 
-    <select name="to_branch_id" class="input" required>
-        <option value="">Select Receiving Branch</option>
-        @foreach($branches as $branch)
-            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-        @endforeach
-    </select>
+<input type="date"
+name="transfer_date"
+class="input"
+value="{{ date('Y-m-d') }}"
+required>
 
-    <input type="number"
-           step="0.01"
-           min="1"
-           name="amount"
-           class="input"
-           placeholder="Transfer Amount"
-           required>
+<select name="to_branch_id" class="input" required>
+<option value="">Select Receiving Branch</option>
+@foreach($receiverBranches as $branch)
+<option value="{{ $branch->id }}">{{ $branch->name }}</option>
+@endforeach
+</select>
 
-    <input type="text"
-           name="notes"
-           class="input"
-           placeholder="Notes / Reason">
+<input type="number"
+step="0.01"
+min="1"
+name="amount"
+class="input"
+placeholder="Transfer Amount"
+required>
+
+<input type="text"
+name="notes"
+class="input"
+placeholder="Notes / Reason">
+
 </div>
 
 <div class="actions">
-    <button type="submit" class="btn btn-green">
-        💸 Send Cash
-    </button>
+<button type="submit" class="btn btn-green">
+💸 Send Cash
+</button>
 
-    <button type="reset" class="btn btn-red">
-        ❌ Clear
-    </button>
+<button type="reset" class="btn btn-red">
+❌ Clear
+</button>
 </div>
 
 </form>
 
 <div class="box">
-    <div>Today Total Sent</div>
-    <div class="total">
-        ₱{{ number_format($totalToday ?? 0,2) }}
-    </div>
-    <div class="note">
-        Counted only completed accepted transfers
-    </div>
+<div>Today Total Sent</div>
+<div class="total">
+₱{{ number_format($totalToday ?? 0,2) }}
+</div>
+<div class="note">
+Counted only completed accepted transfers
+</div>
 </div>
 
 <div class="box">
-    <div class="section-title">OUTGOING</div>
+<div class="section-title">OUTGOING</div>
 
-    <div style="overflow-x:auto;">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>To Branch</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Encoded By</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($outgoing as $row)
-                <tr>
-                    <td>{{ $row->transfer_date }}</td>
-                    <td>{{ $row->toBranch->name ?? '' }}</td>
-                    <td class="amount">₱{{ number_format($row->amount,2) }}</td>
-                    <td>{{ strtoupper($row->status) }}</td>
-                    <td>{{ $row->user->name ?? '' }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="empty">No outgoing transfers</td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
-    </div>
+<div style="overflow-x:auto;">
+<table class="table">
+<thead>
+<tr>
+<th>Date</th>
+<th>From</th>
+<th>To</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Encoded By</th>
+</tr>
+</thead>
+<tbody>
+
+@forelse($outgoing as $row)
+<tr>
+<td>{{ $row->transfer_date }}</td>
+<td>{{ $row->fromBranch->name ?? '' }}</td>
+<td>{{ $row->toBranch->name ?? '' }}</td>
+<td class="amount">₱{{ number_format($row->amount,2) }}</td>
+<td>{{ strtoupper($row->status) }}</td>
+<td>{{ $row->user->name ?? '' }}</td>
+</tr>
+@empty
+<tr>
+<td colspan="6" class="empty">No outgoing transfers</td>
+</tr>
+@endforelse
+
+</tbody>
+</table>
+</div>
 </div>
 
 <div class="box">
-    <div class="section-title">INCOMING</div>
+<div class="section-title">INCOMING</div>
 
-    <div style="overflow-x:auto;">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>From Branch</th>
-                    <th>Amount</th>
-                    <th>Notes</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($incoming as $row)
-                <tr>
-                    <td>{{ $row->transfer_date }}</td>
-                    <td>{{ $row->fromBranch->name ?? '' }}</td>
-                    <td class="amount">₱{{ number_format($row->amount,2) }}</td>
-                    <td>{{ $row->notes }}</td>
-                    <td>
-                        <form method="POST"
-                              action="{{ route('cashier.transfer.cash.accept', $row->id) }}"
-                              class="inline-form">
-                            @csrf
-                            <button type="submit" class="btn btn-orange">
-                                ✅ Accept
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="empty">No incoming pending transfers</td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
-    </div>
+<div style="overflow-x:auto;">
+<table class="table">
+<thead>
+<tr>
+<th>Date</th>
+<th>From Branch</th>
+<th>Amount</th>
+<th>Notes</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+
+@forelse($incoming as $row)
+<tr>
+<td>{{ $row->transfer_date }}</td>
+<td>{{ $row->fromBranch->name ?? '' }}</td>
+<td class="amount">₱{{ number_format($row->amount,2) }}</td>
+<td>{{ $row->notes }}</td>
+<td>
+@if($role === 'cashier')
+<form method="POST"
+action="/{{ $routePrefix }}/cash-transfer/{{ $row->id }}/accept"
+class="inline-form">
+@csrf
+<button type="submit" class="btn btn-orange">
+✅ Accept
+</button>
+</form>
+@else
+<span style="font-weight:700;color:#64748b;">Pending</span>
+@endif
+</td>
+</tr>
+@empty
+<tr>
+<td colspan="5" class="empty">No incoming pending transfers</td>
+</tr>
+@endforelse
+
+</tbody>
+</table>
+</div>
 </div>
 
 </div>
