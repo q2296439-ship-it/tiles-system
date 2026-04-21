@@ -478,17 +478,31 @@ Route::delete('/announcements/delete/{id}', [AnnouncementController::class, 'des
     ->middleware('auth')
     ->name('announcements.delete');
 
-/* READ ANNOUNCEMENTS = RESET BELL COUNT */
+/* READ ANNOUNCEMENTS = PERMANENT RESET BELL COUNT */
 Route::post('/announcements/read', function () {
-    $ids = \App\Models\Announcement::where('is_active', 1)
-        ->pluck('id')
-        ->toArray();
 
-    session(['seen_announcements' => $ids]);
+    $userId = auth()->id();
+
+    $ids = \App\Models\Announcement::where('is_active', 1)
+        ->pluck('id');
+
+    foreach ($ids as $id) {
+        DB::table('announcement_reads')->updateOrInsert(
+            [
+                'user_id' => $userId,
+                'announcement_id' => $id
+            ],
+            [
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
+        );
+    }
 
     return response()->json([
         'success' => true
     ]);
+
 })->middleware('auth')->name('announcements.read');
 
 
