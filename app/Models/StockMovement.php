@@ -13,14 +13,25 @@ class StockMovement extends Model
         'product_id',
         'branch_id',
         'from_branch_id',
+
         'type',
         'quantity',
         'reason',
         'status',
+
         'requested_by',
         'approved_by',
         'released_by',
         'received_by',
+
+        'approved_at',
+        'received_at',
+
+        'transfer_number',
+        'receive_remarks',
+
+        'dr_number',
+        'unit_price',
     ];
 
     // 🔥 PRODUCT
@@ -41,25 +52,25 @@ class StockMovement extends Model
         return $this->belongsTo(Branch::class, 'from_branch_id');
     }
 
-    // 🔥 REQUESTED BY (cashier)
+    // 🔥 REQUESTED BY
     public function requester()
     {
         return $this->belongsTo(User::class, 'requested_by');
     }
 
-    // 🔥 APPROVED BY (manager)
+    // 🔥 APPROVED BY
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    // 🔥 RELEASED BY (sender manager)
+    // 🔥 RELEASED BY
     public function releaser()
     {
         return $this->belongsTo(User::class, 'released_by');
     }
 
-    // 🔥 RECEIVED BY (cashier receiver)
+    // 🔥 RECEIVED BY
     public function receiver()
     {
         return $this->belongsTo(User::class, 'received_by');
