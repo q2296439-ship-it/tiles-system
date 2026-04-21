@@ -85,7 +85,7 @@ $layout = match(auth()->user()->role) {
         </div>
     @endif
 
-    <form method="POST" action="{{ route('inventory.store') }}">
+    <form method="POST" action="{{ route('stock.store') }}">
         @csrf
 
         <label>Mode</label>

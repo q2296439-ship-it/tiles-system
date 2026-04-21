@@ -266,7 +266,12 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/collection/export/pdf', [CollectionController::class, 'exportPdf'])->name('admin.collection.export.pdf');
     Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])->name('admin.collection.export.excel');
-});
+    
+});// end admin group
+
+    Route::post('/stock/store', [InventoryController::class, 'store'])
+    ->middleware('auth')
+    ->name('stock.store');
 
 
 // =====================
