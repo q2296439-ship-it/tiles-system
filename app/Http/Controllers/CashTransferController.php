@@ -75,8 +75,21 @@ class CashTransferController extends Controller
             'amount'        => 'required|numeric|min:1',
         ]);
 
+        $user = Auth::user();
+        $role = strtolower($user->role);
+
+        $fromBranchId = $user->branch_id;
+
+        if ($role !== 'cashier') {
+            $fromBranchId = $request->branch_id;
+        }
+
+        if (!$fromBranchId) {
+            return back()->with('error', 'Please select source branch.');
+        }
+
         CashTransfer::create([
-            'from_branch_id' => Auth::user()->branch_id,
+            'from_branch_id' => $fromBranchId,
             'to_branch_id'   => $request->to_branch_id,
             'transfer_date'  => $request->transfer_date,
             'amount'         => $request->amount,
@@ -85,9 +98,7 @@ class CashTransferController extends Controller
             'created_by'     => Auth::id(),
         ]);
 
-        return redirect()
-            ->route('cashier.transfer.cash')
-            ->with('success', 'Transfer request sent successfully.');
+        return back()->with('success', 'Transfer request sent successfully.');
     }
 
     public function accept($id)
@@ -101,8 +112,6 @@ class CashTransferController extends Controller
             'status' => 'completed'
         ]);
 
-        return redirect()
-            ->route('cashier.transfer.cash')
-            ->with('success', 'Incoming transfer accepted successfully.');
+        return back()->with('success', 'Incoming transfer accepted successfully.');
     }
 }
