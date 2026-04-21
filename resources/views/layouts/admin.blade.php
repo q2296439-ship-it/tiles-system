@@ -475,7 +475,7 @@ $unreadCount = $notes->whereNotIn('id', $seenIds)->count();
             <div class="bell-empty">No announcements</div>
         @endforelse
 
-        <a href="/announcements" class="bell-view">View All</a>
+        <a href="/announcements?view=1" class="bell-view">View All</a>
     </div>
 </div>
 
