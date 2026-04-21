@@ -206,5 +206,9 @@ Showing latest records first
 
 </div>
 </div>
-
+<script>
+setInterval(function () {
+    location.reload();
+}, 10000);
+</script>
 @endsection
