@@ -1,4 +1,20 @@
-@extends('layouts.cashier')
+@php
+$layout = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'layouts.admin',
+    'manager' => 'layouts.manager',
+    'audit'   => 'layouts.manager',
+    default   => 'layouts.cashier',
+};
+
+$routePrefix = match(strtolower(auth()->user()->role)) {
+    'admin'   => 'admin',
+    'manager' => 'manager',
+    'audit'   => 'manager',
+    default   => 'cashier',
+};
+@endphp
+
+@extends($layout)
 
 @section('content')
 
@@ -29,6 +45,8 @@ margin-bottom:18px;
 display:flex;
 justify-content:center;
 margin-bottom:18px;
+gap:10px;
+flex-wrap:wrap;
 }
 .filter{
 min-width:260px;
@@ -38,6 +56,15 @@ border-radius:10px;
 background:#fff;
 font-size:14px;
 outline:none;
+}
+.btn{
+padding:10px 14px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:#fff;
+font-weight:700;
+cursor:pointer;
 }
 .statement-date{
 text-align:center;
@@ -163,125 +190,119 @@ text-align:center;
 <div class="title">BRANCH CASH FLOW STATEMENT</div>
 <div class="sub">Financial Position Report • Real-Time Business Monitoring</div>
 
-@if(isset($branches))
+<form method="GET" action="/{{ $routePrefix }}/total-cash">
 <div class="toolbar">
-    <select class="filter">
-        <option>All Branches</option>
-        @foreach($branches as $branch)
-            <option>{{ $branch->name }}</option>
-        @endforeach
-    </select>
-</div>
+
+@if($role !== 'cashier')
+<select name="branch_id" class="filter">
+<option value="">All Branches</option>
+@foreach($branches as $branch)
+<option value="{{ $branch->id }}" {{ $branchId == $branch->id ? 'selected' : '' }}>
+{{ $branch->name }}
+</option>
+@endforeach
+</select>
 @endif
+
+<button class="btn">Filter</button>
+
+</div>
+</form>
 
 <div class="statement-date">
 As of {{ date('F d, Y') }}
 </div>
 
 <div class="hero">
-    <div class="hero-label">Available Cash</div>
+<div class="hero-label">Available Cash</div>
 
-    <div class="hero-amount">
-        ₱{{ number_format($totalCash,2) }}
-    </div>
+<div class="hero-amount">
+₱{{ number_format($totalCash,2) }}
+</div>
 
-    <div class="hero-note">
-        Current usable cash balance of selected branch
-    </div>
+<div class="hero-note">
+Current usable cash balance of selected branch
+</div>
 
-    <div class="hero-breakdown">
+<div class="hero-breakdown">
 
-        <div class="hero-row">
-            <span class="hero-left">Beginning Balance</span>
-            <span class="hero-right blue">
-                ₱{{ number_format($previousBalance,2) }}
-            </span>
-        </div>
+<div class="hero-row">
+<span class="hero-left">Beginning Balance</span>
+<span class="hero-right blue">₱{{ number_format($previousBalance,2) }}</span>
+</div>
 
-        <div class="hero-row">
-            <span class="hero-left">Today Cash In</span>
-            <span class="hero-right green">
-                ₱{{ number_format($todayCashIn,2) }}
-            </span>
-        </div>
+<div class="hero-row">
+<span class="hero-left">Today Cash In</span>
+<span class="hero-right green">₱{{ number_format($todayCashIn,2) }}</span>
+</div>
 
-        <div class="hero-row">
-            <span class="hero-left">Today Cash Out</span>
-            <span class="hero-right red">
-                ₱{{ number_format($todayCashOut,2) }}
-            </span>
-        </div>
+<div class="hero-row">
+<span class="hero-left">Today Cash Out</span>
+<span class="hero-right red">₱{{ number_format($todayCashOut,2) }}</span>
+</div>
 
-        <div class="hero-row" style="border-top:1px dashed #cbd5e1; margin-top:8px; padding-top:12px;">
-            <span class="hero-left">Running Balance</span>
-            <span class="hero-right blue">
-                ₱{{ number_format($totalCash,2) }}
-            </span>
-        </div>
+<div class="hero-row" style="border-top:1px dashed #cbd5e1; margin-top:8px; padding-top:12px;">
+<span class="hero-left">Running Balance</span>
+<span class="hero-right blue">₱{{ number_format($totalCash,2) }}</span>
+</div>
 
-    </div>
+</div>
 </div>
 
 <div class="grid">
 
-    <div class="box">
-        <div class="box-title">💰 CASH IN</div>
+<div class="box">
+<div class="box-title">💰 CASH IN</div>
 
-        <div class="row">
-            <span class="label">Actual Deposit Amount</span>
-            <span class="value in">₱{{ number_format($actualDeposit,2) }}</span>
-        </div>
+<div class="row">
+<span class="label">Actual Deposit Amount</span>
+<span class="value in">₱{{ number_format($actualDeposit,2) }}</span>
+</div>
 
-        <div class="row">
-            <span class="label">A/R Payment</span>
-            <span class="value in">₱{{ number_format($arPayments,2) }}</span>
-        </div>
+<div class="row">
+<span class="label">A/R Payment</span>
+<span class="value in">₱{{ number_format($arPayments,2) }}</span>
+</div>
 
-        <div class="row">
-            <span class="label">Incoming Transfers</span>
-            <span class="value in">₱{{ number_format($incomingTransfers,2) }}</span>
-        </div>
+<div class="row">
+<span class="label">Incoming Transfers</span>
+<span class="value in">₱{{ number_format($incomingTransfers,2) }}</span>
+</div>
 
-        <div class="row">
-            <span class="label"><strong>Total Cash In</strong></span>
-            <span class="value in">
-                ₱{{ number_format($cashIn,2) }}
-            </span>
-        </div>
-    </div>
+<div class="row">
+<span class="label"><strong>Total Cash In</strong></span>
+<span class="value in">₱{{ number_format($cashIn,2) }}</span>
+</div>
+</div>
 
-    <div class="box">
-        <div class="box-title">💸 CASH OUT</div>
+<div class="box">
+<div class="box-title">💸 CASH OUT</div>
 
-        <div class="row">
-            <span class="label">Expenses</span>
-            <span class="value out">₱{{ number_format($expenses,2) }}</span>
-        </div>
+<div class="row">
+<span class="label">Expenses</span>
+<span class="value out">₱{{ number_format($expenses,2) }}</span>
+</div>
 
-        <div class="row">
-            <span class="label">Transfer to Other Branch</span>
-            <span class="value out">₱{{ number_format($outgoingTransfers,2) }}</span>
-        </div>
+<div class="row">
+<span class="label">Transfer to Other Branch</span>
+<span class="value out">₱{{ number_format($outgoingTransfers,2) }}</span>
+</div>
 
-        <div class="row">
-            <span class="label"><strong>Total Cash Out</strong></span>
-            <span class="value out">
-                ₱{{ number_format($cashOut,2) }}
-            </span>
-        </div>
-    </div>
+<div class="row">
+<span class="label"><strong>Total Cash Out</strong></span>
+<span class="value out">₱{{ number_format($cashOut,2) }}</span>
+</div>
+</div>
 
 </div>
 
 <div class="summary">
-    <div class="summary-title">📊 NET CASH POSITION</div>
+<div class="summary-title">📊 NET CASH POSITION</div>
 
-    <div class="net">
-        <span>Cash In - Cash Out</span>
-        <span class="net-value">
-            ₱{{ number_format($totalCash,2) }}
-        </span>
-    </div>
+<div class="net">
+<span>Cash In - Cash Out</span>
+<span class="net-value">₱{{ number_format($totalCash,2) }}</span>
+</div>
 </div>
 
 <div class="footer-note">

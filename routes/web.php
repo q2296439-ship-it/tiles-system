@@ -218,6 +218,10 @@ Route::get('/manager/delivery-today/excel', [CollectionController::class, 'deliv
     ->middleware('auth')
     ->name('manager.delivery.excel');
 
+Route::get('/manager/total-cash', [CashierController::class, 'totalCash'])
+    ->middleware('auth')
+    ->name('manager.total.cash');
+
 
 // =====================
 // ADMIN GROUP
@@ -301,6 +305,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
     Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 
+    Route::get('/total-cash', [CashierController::class, 'totalCash'])
+    ->name('admin.total.cash');
 
 
     });// end admin group
