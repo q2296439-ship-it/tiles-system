@@ -820,14 +820,46 @@ private function getProducts()
 
     return back()->with('success', 'Stock received successfully!');
 }
-public function deliveryReport()
+public function deliveryReport(Request $request)
 {
-    $rows = StockMovement::with(['product', 'branch'])
-        ->whereNotNull('dr_number')
-        ->where('type', 'IN')
-        ->latest()
-        ->get();
+    $branchId = $request->branch_id;
 
-    return view('manager.delivery-report', compact('rows'));
+    // All branches for dropdown
+    $branches = Branch::orderBy('name')->get();
+
+    $query = StockMovement::with(['product', 'branch'])
+        ->whereNotNull('dr_number')
+        ->where('type', 'IN');
+
+    // Filter specific branch
+    if (!empty($branchId)) {
+        $query->where('branch_id', $branchId);
+    }
+
+    // Summary totals (all filtered records)
+    $summaryRows = (clone $query)->get();
+
+    $totalDeliveries = $summaryRows->count();
+    $totalQty = $summaryRows->sum('quantity');
+    $totalValue = $summaryRows->sum(function ($row) {
+        return $row->quantity * $row->unit_price;
+    });
+
+    $totalBranches = $branches->count();
+
+    // Pagination
+    $rows = $query->latest()
+        ->paginate(10)
+        ->withQueryString();
+
+    return view('manager.delivery-report', compact(
+        'rows',
+        'branches',
+        'branchId',
+        'totalDeliveries',
+        'totalQty',
+        'totalValue',
+        'totalBranches'
+    ));
 }
 }
