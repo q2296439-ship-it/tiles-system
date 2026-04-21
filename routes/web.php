@@ -478,6 +478,19 @@ Route::delete('/announcements/delete/{id}', [AnnouncementController::class, 'des
     ->middleware('auth')
     ->name('announcements.delete');
 
+/* READ ANNOUNCEMENTS = RESET BELL COUNT */
+Route::post('/announcements/read', function () {
+    $ids = \App\Models\Announcement::where('is_active', 1)
+        ->pluck('id')
+        ->toArray();
+
+    session(['seen_announcements' => $ids]);
+
+    return response()->json([
+        'success' => true
+    ]);
+})->middleware('auth')->name('announcements.read');
+
 
 // =====================
 // FIX MANAGER PASSWORD
