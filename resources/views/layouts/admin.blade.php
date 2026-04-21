@@ -192,17 +192,19 @@
             font-weight:700;
         }
 
+        /* FIXED DROPDOWN PARA LAGING NASA IBABAW */
         .bell-dropdown{
             display:none;
-            position:absolute;
-            top:55px;
-            right:0;
-            width:320px;
+            position:fixed;
+            top:78px;
+            right:130px;
+            width:340px;
+            max-width:90vw;
             background:#fff;
             border:1px solid #e5e7eb;
             border-radius:12px;
-            box-shadow:0 10px 25px rgba(0,0,0,.12);
-            z-index:99999;
+            box-shadow:0 14px 35px rgba(0,0,0,.18);
+            z-index:999999;
             overflow:hidden;
         }
 
@@ -290,7 +292,6 @@
         }
 
         @media(max-width:768px){
-
             .menu-btn{
                 display:flex;
                 align-items:center;
@@ -335,13 +336,13 @@
             }
 
             .bell-dropdown{
-                right:-40px;
+                top:70px;
+                right:15px;
                 width:300px;
             }
         }
 
         @media(max-width:480px){
-
             .content{
                 padding:12px;
             }
@@ -365,7 +366,7 @@
 
             .bell-dropdown{
                 width:260px;
-                right:-60px;
+                right:10px;
             }
         }
 
@@ -389,7 +390,9 @@ $notes = \App\Models\Announcement::where('is_active',1)
     ->take(5)
     ->get();
 
-$unreadCount = session('announcement_unread', $notes->count());
+/* unread only once */
+$seenIds = session('seen_announcements', []);
+$unreadCount = $notes->whereNotIn('id', $seenIds)->count();
 @endphp
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
@@ -441,61 +444,58 @@ $unreadCount = session('announcement_unread', $notes->count());
 <!-- MAIN -->
 <div class="main">
 
-    <div class="topbar">
+<div class="topbar">
 
-        <div class="left-wrap">
-            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="left-wrap">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
-            <div>
-                <div class="top-title">Admin Workspace</div>
-                <div class="top-sub">Manage reports, products, inventory and users</div>
-            </div>
-        </div>
+    <div>
+        <div class="top-title">Admin Workspace</div>
+        <div class="top-sub">Manage reports, products, inventory and users</div>
+    </div>
+</div>
 
-        <div style="display:flex;align-items:center;gap:10px;">
+<div style="display:flex;align-items:center;gap:10px;">
 
-            <div class="bell-wrap">
-
-                <div class="bell-box" onclick="toggleBell(event)">
-                    🔔
-                    @if($unreadCount > 0)
-                        <span class="bell-count" id="bellCount">{{ $unreadCount }}</span>
-                    @endif
-                </div>
-
-                <div class="bell-dropdown" id="bellDropdown">
-                    @forelse($notes as $note)
-                        <div class="bell-item">
-                            <strong>{{ $note->title }}</strong><br>
-                            <small>{{ $note->message }}</small>
-                        </div>
-                    @empty
-                        <div class="bell-empty">No announcements</div>
-                    @endforelse
-
-                    <a href="/announcements" class="bell-view">View All</a>
-                </div>
-
-            </div>
-
-            <div class="user-box">
-                <div class="avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'A',0,1)) }}
-                </div>
-
-                <div class="user-info">
-                    <div class="user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
-                    <div class="user-role">Administrator</div>
-                </div>
-            </div>
-
-        </div>
-
+<div class="bell-wrap">
+    <div class="bell-box" onclick="toggleBell(event)">
+        🔔
+        @if($unreadCount > 0)
+            <span class="bell-count" id="bellCount">{{ $unreadCount }}</span>
+        @endif
     </div>
 
-    <div class="content">
-        @yield('content')
+    <div class="bell-dropdown" id="bellDropdown">
+        @forelse($notes as $note)
+            <div class="bell-item">
+                <strong>{{ $note->title }}</strong><br>
+                <small>{{ $note->message }}</small>
+            </div>
+        @empty
+            <div class="bell-empty">No announcements</div>
+        @endforelse
+
+        <a href="/announcements" class="bell-view">View All</a>
     </div>
+</div>
+
+<div class="user-box">
+    <div class="avatar">
+        {{ strtoupper(substr(auth()->user()->name ?? 'A',0,1)) }}
+    </div>
+
+    <div class="user-info">
+        <div class="user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
+        <div class="user-role">Administrator</div>
+    </div>
+</div>
+
+</div>
+</div>
+
+<div class="content">
+    @yield('content')
+</div>
 
 </div>
 
