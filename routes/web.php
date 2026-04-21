@@ -293,11 +293,17 @@ Route::prefix('admin')->group(function () {
     Route::get('/collection/export/excel', [CollectionController::class, 'exportExcel'])->name('admin.collection.export.excel');
     
     Route::get('/delivery-fee', [CollectionController::class, 'deliveryFeeForm']);
-Route::post('/delivery-fee/store', [CollectionController::class, 'deliveryStore']);
+    Route::post('/delivery-fee/store', [CollectionController::class, 'deliveryStore']);
 
-Route::get('/delivery-today', [CollectionController::class, 'deliveryToday']);
-Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel']);
-});// end admin group
+    Route::get('/delivery-today', [CollectionController::class, 'deliveryToday']);
+    Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel']);
+
+    Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
+Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
+
+
+
+    });// end admin group
 
     Route::post('/stock/store', [InventoryController::class, 'store'])
     ->middleware('auth')
