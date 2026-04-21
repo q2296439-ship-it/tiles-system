@@ -441,10 +441,6 @@ Route::prefix('cashier')->group(function () {
 Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 });
 
-Route::get('/store-expenses', [ExpenseController::class, 'index'])->name('cashier.expenses');
-Route::post('/store-expenses/store', [ExpenseController::class, 'store'])->name('cashier.expenses.store');
-Route::get('/store-expenses/list', [ExpenseController::class, 'list')->name('cashier.expenses.list');
-Route::get('/store-expenses/excel', [ExpenseController::class, 'excel'])->name('cashier.expenses.excel');
 
 // =====================
 // OTHER
