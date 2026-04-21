@@ -14,7 +14,18 @@ class AnnouncementController extends Controller
             ->latest()
             ->get();
 
-        return view('announcements.index', compact('announcements'));
+        $role = strtolower(auth()->user()->role ?? '');
+
+        if ($role === 'manager') {
+            $layout = 'layouts.manager';
+        } else {
+            $layout = 'layouts.admin';
+        }
+
+        return view('announcements.index', compact(
+            'announcements',
+            'layout'
+        ));
     }
 
     public function store(Request $request)
