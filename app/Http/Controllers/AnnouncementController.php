@@ -16,8 +16,15 @@ class AnnouncementController extends Controller
 
         $role = strtolower(auth()->user()->role ?? '');
 
-        if ($role === 'manager') {
+        if ($role === 'admin') {
+            $layout = 'layouts.admin';
+
+        } elseif ($role === 'cashier') {
+            $layout = 'layouts.cashier';
+
+        } elseif ($role === 'manager' || $role === 'audit') {
             $layout = 'layouts.manager';
+
         } else {
             $layout = 'layouts.admin';
         }
