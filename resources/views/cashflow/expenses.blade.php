@@ -235,12 +235,12 @@ placeholder="Notes / Instructions"></textarea>
 ❌ Clear
 </button>
 
-<a href="/{{ $routePrefix }}/store-expenses/list@if($role !== 'cashier' && $branchId)?branch_id={{ $branchId }}@endif"
+<a href="/{{ $routePrefix }}/store-expenses/list{{ ($role !== 'cashier' && $branchId) ? '?branch_id='.$branchId : '' }}"
 class="btn btn-blue">
 📋 Expense List
 </a>
 
-<a href="/{{ $routePrefix }}/store-expenses/excel@if($role !== 'cashier' && $branchId)?branch_id={{ $branchId }}@endif"
+<a href="/{{ $routePrefix }}/store-expenses/excel{{ ($role !== 'cashier' && $branchId) ? '?branch_id='.$branchId : '' }}"
 class="btn btn-blue">
 📄 Excel
 </a>
