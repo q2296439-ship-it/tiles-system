@@ -242,7 +242,7 @@ textarea.input{
 
     <button type="button"
             class="btn btn-blue"
-            onclick="window.location.href='{{ route($routePrefix . '.delivery.today') }}'">
+            onclick="window.location.href='/{{ $routePrefix }}/delivery-today'" }}'">
         📋 Delivery List
     </button>
 
