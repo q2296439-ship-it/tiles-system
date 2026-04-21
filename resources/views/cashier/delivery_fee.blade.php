@@ -134,7 +134,7 @@ textarea.input{
 <div class="page">
 <div class="card">
 
-<form method="POST" action="{{ route($routePrefix . '.delivery.store') }}">
+<form method="POST" action="/{{ $routePrefix }}/delivery-fee/store">
 @csrf
 
 @if(session('success'))
