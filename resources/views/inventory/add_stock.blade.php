@@ -95,15 +95,14 @@ $layout = match(auth()->user()->role) {
         </select>
 
         <label>Select Branch</label>
-        <select name="branch_id" required>
-            <option value="">-- Select Branch --</option>
-            @foreach($branches as $branch)
-                <option value="{{ $branch->id }}">
-                    {{ $branch->name }}
-                </option>
-            @endforeach
-        </select>
-
+<select name="branch_id" id="branchSelect" required>
+    <option value="">-- Select Branch --</option>
+    @foreach($branches as $branch)
+        <option value="{{ $branch->id }}">
+            {{ $branch->name }}
+        </option>
+    @endforeach
+</select>
         {{-- EXISTING PRODUCT --}}
         <div id="existingProduct">
 
