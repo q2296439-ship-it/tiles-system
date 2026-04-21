@@ -357,8 +357,12 @@ $notes = \App\Models\Announcement::where('is_active',1)
     ->take(5)
     ->get();
 
-$seenIds = session('seen_announcements', []);
-$unreadCount = $notes->whereNotIn('id', $seenIds)->count();
+$readIds = \DB::table('announcement_reads')
+    ->where('user_id', auth()->id())
+    ->pluck('announcement_id')
+    ->toArray();
+
+$unreadCount = $notes->whereNotIn('id', $readIds)->count();
 @endphp
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
