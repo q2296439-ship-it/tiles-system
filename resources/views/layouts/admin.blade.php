@@ -155,6 +155,37 @@
             flex-shrink:0;
         }
 
+            .bell-box{
+    position:relative;
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    background:#f8fafc;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    cursor:pointer;
+    border:1px solid #e5e7eb;
+}
+
+.bell-count{
+    position:absolute;
+    top:-4px;
+    right:-4px;
+    background:#ef4444;
+    color:#fff;
+    font-size:11px;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+}
+
         .avatar{
             width:34px;
             height:34px;
@@ -361,18 +392,27 @@
             </div>
         </div>
 
-        <div class="user-box">
-            <div class="avatar">
-                {{ strtoupper(substr(auth()->user()->name ?? 'A',0,1)) }}
-            </div>
+        <div style="display:flex;align-items:center;gap:10px;">
 
-            <div class="user-info">
-                <div class="user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
-                <div class="user-role">Administrator</div>
-            </div>
+    <a href="/announcements" class="bell-box">
+        🔔
+        <span class="bell-count">10</span>
+    </a>
+
+    <div class="user-box">
+        <div class="avatar">
+            {{ strtoupper(substr(auth()->user()->name ?? 'A',0,1)) }}
         </div>
 
+        <div class="user-info">
+            <div class="user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
+            <div class="user-role">Administrator</div>
+        </div>
     </div>
+
+</div>
+
+</div>
 
     <div class="content">
         @yield('content')
