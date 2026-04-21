@@ -115,8 +115,9 @@
             gap:15px;
             position:sticky;
             top:0;
-            z-index:900;
+            z-index:5000;
             width:100%;
+            overflow:visible;
         }
 
         .left-wrap{
@@ -150,6 +151,89 @@
             margin-top:4px;
             color:#64748b;
             font-size:13px;
+        }
+
+        .right-wrap{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .bell-wrap{
+            position:relative;
+            z-index:6000;
+        }
+
+        .bell-box{
+            position:relative;
+            width:42px;
+            height:42px;
+            border-radius:12px;
+            background:#f8fafc;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:20px;
+            cursor:pointer;
+            border:1px solid #e5e7eb;
+        }
+
+        .bell-count{
+            position:absolute;
+            top:-4px;
+            right:-4px;
+            background:#ef4444;
+            color:#fff;
+            font-size:11px;
+            min-width:18px;
+            height:18px;
+            padding:0 5px;
+            border-radius:999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+        }
+
+        .bell-dropdown{
+            display:none;
+            position:fixed;
+            top:78px;
+            right:130px;
+            width:340px;
+            max-width:90vw;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:12px;
+            box-shadow:0 14px 35px rgba(0,0,0,.18);
+            z-index:999999;
+            overflow:hidden;
+        }
+
+        .bell-item{
+            padding:12px;
+            border-bottom:1px solid #f1f5f9;
+            font-size:13px;
+            line-height:1.4;
+        }
+
+        .bell-item small{
+            color:#64748b;
+        }
+
+        .bell-empty{
+            padding:15px;
+            text-align:center;
+            color:#64748b;
+        }
+
+        .bell-view{
+            display:block;
+            text-align:center;
+            padding:10px;
+            background:#eff6ff;
+            color:#2563eb;
+            font-weight:700;
         }
 
         .user-card{
@@ -219,7 +303,6 @@
         }
 
         @media(max-width:768px){
-
             .menu-btn{
                 display:flex;
                 align-items:center;
@@ -259,10 +342,15 @@
             table{
                 min-width:700px;
             }
+
+            .bell-dropdown{
+                top:70px;
+                right:15px;
+                width:300px;
+            }
         }
 
         @media(max-width:480px){
-
             .content{
                 padding:12px;
             }
@@ -280,11 +368,26 @@
                 width:34px;
                 height:34px;
             }
+
+            .bell-dropdown{
+                width:260px;
+                right:10px;
+            }
         }
     </style>
 </head>
 
 <body>
+
+@php
+$notes = \App\Models\Announcement::where('is_active',1)
+    ->latest()
+    ->take(5)
+    ->get();
+
+$seenIds = session('seen_announcements', []);
+$unreadCount = $notes->whereNotIn('id', $seenIds)->count();
+@endphp
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
@@ -294,102 +397,50 @@
 
     <p>Main</p>
 
-    <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">
-        📊 Dashboard
-    </a>
-    <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">
-    📢 Announcements
-    </a>
+    <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">📊 Dashboard</a>
+    <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">📢 Announcements</a>
 
     <p>Operations</p>
 
-    <a href="/manager/request-access" class="{{ request()->is('manager/request-access') ? 'active' : '' }}">
-        🔓 Request Access
-    </a>
-
-    <a href="/manager/deposit" class="{{ request()->is('manager/deposit') ? 'active' : '' }}">
-        💰 Deposit
-    </a>
+    <a href="/manager/request-access" class="{{ request()->is('manager/request-access') ? 'active' : '' }}">🔓 Request Access</a>
+    <a href="/manager/deposit" class="{{ request()->is('manager/deposit') ? 'active' : '' }}">💰 Deposit</a>
 
     <p>Cash Flow</p>
 
-    <a href="/manager/total-cash" class="{{ request()->is('manager/total-cash*') ? 'active' : '' }}">
-        💰 Total Cash
-    </a>
-
-    <a href="/manager/cash-transfer" class="{{ request()->is('manager/cash-transfer*') ? 'active' : '' }}">
-        💸 B2B Cash Transfer
-    </a>
-
-    <a href="/manager/store-expenses" class="{{ request()->is('manager/store-expenses*') ? 'active' : '' }}">
-          🧾 Store Expenses
-    </a>
+    <a href="/manager/total-cash" class="{{ request()->is('manager/total-cash*') ? 'active' : '' }}">💰 Total Cash</a>
+    <a href="/manager/cash-transfer" class="{{ request()->is('manager/cash-transfer*') ? 'active' : '' }}">💸 B2B Cash Transfer</a>
+    <a href="/manager/store-expenses" class="{{ request()->is('manager/store-expenses*') ? 'active' : '' }}">🧾 Store Expenses</a>
 
     <hr>
 
     <p>Sales</p>
 
-    <a href="/manager/daily-sales" class="{{ request()->is('manager/daily-sales') ? 'active' : '' }}">
-        📅 Daily Sales
-    </a>
-
-    <a href="/manager/sales-report" class="{{ request()->is('manager/sales-report') ? 'active' : '' }}">
-        📈 Sales Report
-    </a>
-
-    <a href="/manager/collection" class="{{ request()->is('manager/collection') ? 'active' : '' }}">
-        🧾 Collection
-    </a>
-
-    <a href="/manager/delivery-fee" class="{{ request()->is('manager/delivery-fee*') ? 'active' : '' }}">
-        🚚 Delivery Fee
-    </a>
-
-    <a href="/manager/ar-accounts" class="{{ request()->is('manager/ar-accounts*') ? 'active' : '' }}">
-         📒 A/R Accounts
-    </a>
+    <a href="/manager/daily-sales" class="{{ request()->is('manager/daily-sales') ? 'active' : '' }}">📅 Daily Sales</a>
+    <a href="/manager/sales-report" class="{{ request()->is('manager/sales-report') ? 'active' : '' }}">📈 Sales Report</a>
+    <a href="/manager/collection" class="{{ request()->is('manager/collection') ? 'active' : '' }}">🧾 Collection</a>
+    <a href="/manager/delivery-fee" class="{{ request()->is('manager/delivery-fee*') ? 'active' : '' }}">🚚 Delivery Fee</a>
+    <a href="/manager/ar-accounts" class="{{ request()->is('manager/ar-accounts*') ? 'active' : '' }}">📒 A/R Accounts</a>
 
     <p>Inventory</p>
 
-    <a href="/manager/inventory" class="{{ request()->is('manager/inventory') ? 'active' : '' }}">
-        📦 Branch Stock
-    </a>
-
-    <a href="/manager/inventory-report" class="{{ request()->is('manager/inventory-report') ? 'active' : '' }}">
-        📊 Inventory Report
-    </a>
+    <a href="/manager/inventory" class="{{ request()->is('manager/inventory') ? 'active' : '' }}">📦 Branch Stock</a>
+    <a href="/manager/inventory-report" class="{{ request()->is('manager/inventory-report') ? 'active' : '' }}">📊 Inventory Report</a>
 
     @if(auth()->user()->role != 'audit')
-    <a href="/manager/add-stock" class="{{ request()->is('manager/add-stock') ? 'active' : '' }}">
-        ➕ Add Stock
-    </a>
+    <a href="/manager/add-stock" class="{{ request()->is('manager/add-stock') ? 'active' : '' }}">➕ Add Stock</a>
     @endif
 
-    <a href="/manager/transfer-in" class="{{ request()->is('manager/transfer-in') ? 'active' : '' }}">
-        ⬅️ Transfer In
-    </a>
+    <a href="/manager/transfer-in" class="{{ request()->is('manager/transfer-in') ? 'active' : '' }}">⬅️ Transfer In</a>
+    <a href="/manager/transfer-out" class="{{ request()->is('manager/transfer-out') ? 'active' : '' }}">➡️ Transfer Out</a>
 
-    <a href="/manager/transfer-out" class="{{ request()->is('manager/transfer-out') ? 'active' : '' }}">
-        ➡️ Transfer Out
-    </a>
-
-    <a href="{{ route('manager.delivery.report') }}"
-   class="{{ request()->is('manager/delivery-report') ? 'active' : '' }}">
-   🚚 Delivery Report
-    </a>
-
-    <a href="{{ route('manager.defective.index') }}"
-   class="{{ request()->is('manager/defective-stock*') ? 'active' : '' }}">
-   🛠️ Defective Stock
-    </a>
+    <a href="{{ route('manager.delivery.report') }}" class="{{ request()->is('manager/delivery-report') ? 'active' : '' }}">🚚 Delivery Report</a>
+    <a href="{{ route('manager.defective.index') }}" class="{{ request()->is('manager/defective-stock*') ? 'active' : '' }}">🛠️ Defective Stock</a>
 
     <hr>
 
     <p>Account</p>
 
-    <a href="/manager/change-password" class="{{ request()->is('manager/change-password') ? 'active' : '' }}">
-        🔑 Change Password
-    </a>
+    <a href="/manager/change-password" class="{{ request()->is('manager/change-password') ? 'active' : '' }}">🔑 Change Password</a>
 
     <form method="POST" action="/logout">
         @csrf
@@ -407,9 +458,7 @@
             <button class="menu-btn" onclick="toggleSidebar()">☰</button>
 
             <div>
-                <h1>
-                    {{ auth()->user()->role == 'audit' ? 'Audit Workspace' : 'Manager Workspace' }}
-                </h1>
+                <h1>{{ auth()->user()->role == 'audit' ? 'Audit Workspace' : 'Manager Workspace' }}</h1>
 
                 <p>
                     {{ auth()->user()->role == 'audit'
@@ -420,15 +469,39 @@
 
         </div>
 
-        <div class="user-card">
+        <div class="right-wrap">
 
-            <div class="avatar">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+            <div class="bell-wrap">
+                <div class="bell-box" onclick="toggleBell(event)">
+                    🔔
+                    @if($unreadCount > 0)
+                        <span class="bell-count" id="bellCount">{{ $unreadCount }}</span>
+                    @endif
+                </div>
+
+                <div class="bell-dropdown" id="bellDropdown">
+                    @forelse($notes as $note)
+                        <div class="bell-item">
+                            <strong>{{ $note->title }}</strong><br>
+                            <small>{{ $note->message }}</small>
+                        </div>
+                    @empty
+                        <div class="bell-empty">No announcements</div>
+                    @endforelse
+
+                    <a href="/announcements?view=1" class="bell-view" onclick="clearBellCount()">View All</a>
+                </div>
             </div>
 
-            <div class="user-meta">
-                <div class="user-name">{{ auth()->user()->name }}</div>
-                <div class="user-role">{{ ucfirst(auth()->user()->role) }}</div>
+            <div class="user-card">
+                <div class="avatar">
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                </div>
+
+                <div class="user-meta">
+                    <div class="user-name">{{ auth()->user()->name }}</div>
+                    <div class="user-role">{{ ucfirst(auth()->user()->role) }}</div>
+                </div>
             </div>
 
         </div>
@@ -451,6 +524,43 @@ function closeSidebar(){
     document.getElementById('sidebar').classList.remove('show');
     document.getElementById('overlay').classList.remove('show');
 }
+
+function clearBellCount(){
+    let badge = document.getElementById('bellCount');
+
+    if(badge){
+        badge.remove();
+    }
+
+    fetch('/announcements/read', {
+        method:'POST',
+        headers:{
+            'X-CSRF-TOKEN':'{{ csrf_token() }}',
+            'Content-Type':'application/json'
+        }
+    });
+}
+
+function toggleBell(event){
+    event.stopPropagation();
+
+    let box = document.getElementById('bellDropdown');
+
+    if(box.style.display === 'block'){
+        box.style.display = 'none';
+    }else{
+        box.style.display = 'block';
+    }
+}
+
+document.addEventListener('click', function(e){
+    let wrap = document.querySelector('.bell-wrap');
+    let box = document.getElementById('bellDropdown');
+
+    if(!wrap.contains(e.target)){
+        box.style.display = 'none';
+    }
+});
 </script>
 
 </body>
