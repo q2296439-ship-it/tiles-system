@@ -185,7 +185,46 @@
     justify-content:center;
     font-weight:700;
 }
+.bell-dropdown{
+    display:none;
+    position:absolute;
+    top:55px;
+    right:70px;
+    width:320px;
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+    z-index:9999;
+    overflow:hidden;
+}
 
+.bell-item{
+    padding:12px;
+    border-bottom:1px solid #f1f5f9;
+    font-size:13px;
+    line-height:1.4;
+}
+
+.bell-item small{
+    color:#64748b;
+}
+
+.bell-empty{
+    padding:15px;
+    text-align:center;
+    color:#64748b;
+}
+
+.bell-view{
+    display:block;
+    text-align:center;
+    padding:10px;
+    background:#eff6ff;
+    text-decoration:none;
+    font-weight:700;
+    color:#2563eb;
+}
         .avatar{
             width:34px;
             height:34px;
@@ -394,10 +433,32 @@
 
         <div style="display:flex;align-items:center;gap:10px;">
 
-    <a href="/announcements" class="bell-box">
-        🔔
-        <span class="bell-count">10</span>
-    </a>
+  <div class="bell-box" onclick="toggleBell()">
+    🔔
+    <span class="bell-count">
+        {{ \App\Models\Announcement::where('is_active',1)->count() }}
+    </span>
+</div>
+
+<div class="bell-dropdown" id="bellDropdown">
+    @php
+        $notes = \App\Models\Announcement::where('is_active',1)
+            ->latest()
+            ->take(5)
+            ->get();
+    @endphp
+
+    @forelse($notes as $note)
+        <div class="bell-item">
+            <strong>{{ $note->title }}</strong><br>
+            <small>{{ $note->message }}</small>
+        </div>
+    @empty
+        <div class="bell-empty">No announcements</div>
+    @endforelse
+
+    <a href="/announcements" class="bell-view">View All</a>
+</div>
 
     <div class="user-box">
         <div class="avatar">
@@ -429,6 +490,16 @@ function toggleSidebar(){
 function closeSidebar(){
     document.getElementById('sidebar').classList.remove('show');
     document.getElementById('overlay').classList.remove('show');
+}
+
+function toggleBell(){
+    let box = document.getElementById('bellDropdown');
+
+    if(box.style.display === 'block'){
+        box.style.display = 'none';
+    }else{
+        box.style.display = 'block';
+    }
 }
 </script>
 
