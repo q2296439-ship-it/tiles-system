@@ -155,76 +155,82 @@
             flex-shrink:0;
         }
 
-            .bell-box{
-    position:relative;
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    background:#f8fafc;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-    cursor:pointer;
-    border:1px solid #e5e7eb;
-}
+        .bell-wrap{
+            position:relative;
+        }
 
-.bell-count{
-    position:absolute;
-    top:-4px;
-    right:-4px;
-    background:#ef4444;
-    color:#fff;
-    font-size:11px;
-    min-width:18px;
-    height:18px;
-    padding:0 5px;
-    border-radius:999px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-}
-.bell-dropdown{
-    display:none;
-    position:absolute;
-    top:55px;
-    right:70px;
-    width:320px;
-    background:#fff;
-    border:1px solid #e5e7eb;
-    border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,.12);
-    z-index:9999;
-    overflow:hidden;
-}
+        .bell-box{
+            position:relative;
+            width:42px;
+            height:42px;
+            border-radius:12px;
+            background:#f8fafc;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:20px;
+            cursor:pointer;
+            border:1px solid #e5e7eb;
+        }
 
-.bell-item{
-    padding:12px;
-    border-bottom:1px solid #f1f5f9;
-    font-size:13px;
-    line-height:1.4;
-}
+        .bell-count{
+            position:absolute;
+            top:-4px;
+            right:-4px;
+            background:#ef4444;
+            color:#fff;
+            font-size:11px;
+            min-width:18px;
+            height:18px;
+            padding:0 5px;
+            border-radius:999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+        }
 
-.bell-item small{
-    color:#64748b;
-}
+        .bell-dropdown{
+            display:none;
+            position:absolute;
+            top:55px;
+            right:0;
+            width:320px;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:12px;
+            box-shadow:0 10px 25px rgba(0,0,0,.12);
+            z-index:9999;
+            overflow:hidden;
+        }
 
-.bell-empty{
-    padding:15px;
-    text-align:center;
-    color:#64748b;
-}
+        .bell-item{
+            padding:12px;
+            border-bottom:1px solid #f1f5f9;
+            font-size:13px;
+            line-height:1.4;
+        }
 
-.bell-view{
-    display:block;
-    text-align:center;
-    padding:10px;
-    background:#eff6ff;
-    text-decoration:none;
-    font-weight:700;
-    color:#2563eb;
-}
+        .bell-item small{
+            color:#64748b;
+        }
+
+        .bell-empty{
+            padding:15px;
+            text-align:center;
+            color:#64748b;
+        }
+
+        .bell-view{
+            display:block;
+            text-align:center;
+            padding:10px;
+            background:#eff6ff;
+            text-decoration:none;
+            font-weight:700;
+            color:#2563eb;
+        }
+
         .avatar{
             width:34px;
             height:34px;
@@ -248,20 +254,17 @@
             color:#6b7280;
         }
 
-        /* CONTENT */
         .content{
             padding:20px;
             width:100%;
             max-width:100%;
         }
 
-        /* IMPORTANT FIX FOR DESKTOP */
         .content > *{
             width:100%;
             max-width:100%;
         }
 
-        /* TABLES */
         table{
             width:100%;
             border-collapse:collapse;
@@ -272,7 +275,6 @@
             overflow-x:auto;
         }
 
-        /* OVERLAY */
         .overlay{
             position:fixed;
             inset:0;
@@ -285,7 +287,6 @@
             display:block;
         }
 
-        /* RESPONSIVE */
         @media(max-width:768px){
 
             .menu-btn{
@@ -330,6 +331,11 @@
             table{
                 min-width:700px;
             }
+
+            .bell-dropdown{
+                right:-40px;
+                width:300px;
+            }
         }
 
         @media(max-width:480px){
@@ -354,6 +360,11 @@
                 width:32px;
                 height:32px;
             }
+
+            .bell-dropdown{
+                width:260px;
+                right:-60px;
+            }
         }
 
         ::-webkit-scrollbar{
@@ -370,6 +381,15 @@
 
 <body>
 
+@php
+$notes = \App\Models\Announcement::where('is_active',1)
+    ->latest()
+    ->take(5)
+    ->get();
+
+$unreadCount = session('announcement_unread', $notes->count());
+@endphp
+
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
 <!-- SIDEBAR -->
@@ -382,21 +402,22 @@
     <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">
     📢 Announcements
 </a>
+
     <div class="menu-title">POS / Sales</div>
-<a href="/admin/collection" class="{{ request()->is('admin/collection') ? 'active' : '' }}">💰 Collection</a>
-<a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">📈 Per Brand</a>
-<a href="/admin/sales/branch" class="{{ request()->is('admin/sales/branch') ? 'active' : '' }}">🏬 Per Branch</a>
-<a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
-<a href="/admin/delivery-fee" class="{{ request()->is('admin/delivery-fee') ? 'active' : '' }}">🚚 Delivery Fee</a>
-<a href="/admin/ar-accounts" class="{{ request()->is('admin/ar-accounts') ? 'active' : '' }}">📒 A/R Accounts</a>
+    <a href="/admin/collection" class="{{ request()->is('admin/collection') ? 'active' : '' }}">💰 Collection</a>
+    <a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">📈 Per Brand</a>
+    <a href="/admin/sales/branch" class="{{ request()->is('admin/sales/branch') ? 'active' : '' }}">🏬 Per Branch</a>
+    <a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
+    <a href="/admin/delivery-fee" class="{{ request()->is('admin/delivery-fee') ? 'active' : '' }}">🚚 Delivery Fee</a>
+    <a href="/admin/ar-accounts" class="{{ request()->is('admin/ar-accounts') ? 'active' : '' }}">📒 A/R Accounts</a>
 
-<div class="menu-title">Cash Flow</div>
-<a href="/admin/total-cash" class="{{ request()->is('admin/total-cash') ? 'active' : '' }}">💰 Total Cash</a>
-<a href="/admin/cash-transfer" class="{{ request()->is('admin/cash-transfer') ? 'active' : '' }}">🔄 B2B Cash Transfer</a>
-<a href="/admin/store-expenses" class="{{ request()->is('admin/store-expenses') ? 'active' : '' }}">🧾 Store Expenses</a>
+    <div class="menu-title">Cash Flow</div>
+    <a href="/admin/total-cash" class="{{ request()->is('admin/total-cash') ? 'active' : '' }}">💰 Total Cash</a>
+    <a href="/admin/cash-transfer" class="{{ request()->is('admin/cash-transfer') ? 'active' : '' }}">🔄 B2B Cash Transfer</a>
+    <a href="/admin/store-expenses" class="{{ request()->is('admin/store-expenses') ? 'active' : '' }}">🧾 Store Expenses</a>
 
-<div class="menu-title">Product</div>
-<a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
+    <div class="menu-title">Product</div>
+    <a href="/admin/products" class="{{ request()->is('admin/products') ? 'active' : '' }}">📦 Product Overview</a>
 
     <div class="menu-title">Inventory</div>
     <a href="{{ url('/admin/inventory') }}" class="{{ request()->is('admin/inventory') ? 'active' : '' }}">📦 Overview Stock</a>
@@ -433,47 +454,46 @@
 
         <div style="display:flex;align-items:center;gap:10px;">
 
-  <div class="bell-box" onclick="toggleBell()">
-    🔔
-    <span class="bell-count">
-        {{ \App\Models\Announcement::where('is_active',1)->count() }}
-    </span>
-</div>
+            <div class="bell-wrap">
 
-<div class="bell-dropdown" id="bellDropdown">
-    @php
-        $notes = \App\Models\Announcement::where('is_active',1)
-            ->latest()
-            ->take(5)
-            ->get();
-    @endphp
+                <div class="bell-box" onclick="toggleBell(event)">
+                    🔔
+                    @if($unreadCount > 0)
+                        <span class="bell-count" id="bellCount">{{ $unreadCount }}</span>
+                    @endif
+                </div>
 
-    @forelse($notes as $note)
-        <div class="bell-item">
-            <strong>{{ $note->title }}</strong><br>
-            <small>{{ $note->message }}</small>
+                <div class="bell-dropdown" id="bellDropdown">
+
+                    @forelse($notes as $note)
+                        <div class="bell-item">
+                            <strong>{{ $note->title }}</strong><br>
+                            <small>{{ $note->message }}</small>
+                        </div>
+                    @empty
+                        <div class="bell-empty">No announcements</div>
+                    @endforelse
+
+                    <a href="/announcements" class="bell-view">View All</a>
+
+                </div>
+
+            </div>
+
+            <div class="user-box">
+                <div class="avatar">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'A',0,1)) }}
+                </div>
+
+                <div class="user-info">
+                    <div class="user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+
         </div>
-    @empty
-        <div class="bell-empty">No announcements</div>
-    @endforelse
 
-    <a href="/announcements" class="bell-view">View All</a>
-</div>
-
-    <div class="user-box">
-        <div class="avatar">
-            {{ strtoupper(substr(auth()->user()->name ?? 'A',0,1)) }}
-        </div>
-
-        <div class="user-info">
-            <div class="user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
-            <div class="user-role">Administrator</div>
-        </div>
     </div>
-
-</div>
-
-</div>
 
     <div class="content">
         @yield('content')
@@ -492,15 +512,39 @@ function closeSidebar(){
     document.getElementById('overlay').classList.remove('show');
 }
 
-function toggleBell(){
+function toggleBell(event){
+    event.stopPropagation();
+
     let box = document.getElementById('bellDropdown');
+    let badge = document.getElementById('bellCount');
 
     if(box.style.display === 'block'){
         box.style.display = 'none';
     }else{
         box.style.display = 'block';
+
+        if(badge){
+            badge.remove();
+        }
+
+        fetch('/announcements/read', {
+            method:'POST',
+            headers:{
+                'X-CSRF-TOKEN':'{{ csrf_token() }}',
+                'Content-Type':'application/json'
+            }
+        });
     }
 }
+
+document.addEventListener('click', function(e){
+    let wrap = document.querySelector('.bell-wrap');
+    let box = document.getElementById('bellDropdown');
+
+    if(!wrap.contains(e.target)){
+        box.style.display = 'none';
+    }
+});
 </script>
 
 </body>
