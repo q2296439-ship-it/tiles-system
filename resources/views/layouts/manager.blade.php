@@ -402,7 +402,9 @@ $unreadCount = $notes->whereNotIn('id', $readIds)->count();
     <p>Main</p>
 
     <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">📊 Dashboard</a>
-    <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">📢 Announcements</a>
+    @if(auth()->user()->role != 'audit')
+<a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">📢 Announcements</a>
+@endif
 
     <p>Operations</p>
 
