@@ -297,6 +297,9 @@
     <a href="/manager" class="{{ request()->is('manager') ? 'active' : '' }}">
         📊 Dashboard
     </a>
+    <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">
+    📢 Announcements
+    </a>
 
     <p>Operations</p>
 
