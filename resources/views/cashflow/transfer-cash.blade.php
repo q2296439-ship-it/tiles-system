@@ -181,6 +181,18 @@ color:#0f172a;
 <form method="POST" action="/{{ $routePrefix }}/cash-transfer/store">
 @csrf
 
+@if($role !== 'cashier')
+<select name="branch_id" class="input" required>
+    <option value="">Select Source Branch</option>
+    @foreach($branches as $branch)
+        <option value="{{ $branch->id }}"
+            {{ $branchId == $branch->id ? 'selected' : '' }}>
+            {{ $branch->name }}
+        </option>
+    @endforeach
+</select>
+@endif
+
 <div class="grid" style="margin-top:12px;">
 
 <input type="date"
