@@ -865,6 +865,8 @@ public function deliveryReport(Request $request)
 }
 public function defectiveIndex()
 {
+    $branches = Branch::orderBy('name')->get();
+
     $products = Product::with('branch')
         ->orderBy('name')
         ->get();
@@ -873,9 +875,12 @@ public function defectiveIndex()
         ->latest()
         ->paginate(10);
 
-    return view('manager.defective-stock', compact('products', 'rows'));
+    return view('manager.defective-stock', compact(
+        'branches',
+        'products',
+        'rows'
+    ));
 }
-
 public function defectiveStore(Request $request)
 {
     $request->validate([
