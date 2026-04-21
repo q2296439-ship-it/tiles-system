@@ -12,6 +12,9 @@ $routePrefix = match(strtolower(auth()->user()->role)) {
     'audit'   => 'manager',
     default   => 'cashier',
 };
+
+$displayCashIn = $todayCashIn;
+$displayCashOut = $todayCashOut;
 @endphp
 
 @extends($layout)
@@ -193,7 +196,7 @@ text-align:center;
 <form method="GET" action="/{{ $routePrefix }}/total-cash">
 <div class="toolbar">
 
-@if($role !== 'cashier')
+@if($routePrefix !== 'cashier')
 <select name="branch_id" class="filter">
 <option value="">All Branches</option>
 @foreach($branches as $branch)
@@ -256,22 +259,22 @@ Current usable cash balance of selected branch
 
 <div class="row">
 <span class="label">Actual Deposit Amount</span>
-<span class="value in">₱{{ number_format($actualDeposit,2) }}</span>
+<span class="value in">₱{{ number_format($todayDeposit,2) }}</span>
 </div>
 
 <div class="row">
 <span class="label">A/R Payment</span>
-<span class="value in">₱{{ number_format($arPayments,2) }}</span>
+<span class="value in">₱{{ number_format($todayArPayments,2) }}</span>
 </div>
 
 <div class="row">
 <span class="label">Incoming Transfers</span>
-<span class="value in">₱{{ number_format($incomingTransfers,2) }}</span>
+<span class="value in">₱{{ number_format($todayIncomingTransfers,2) }}</span>
 </div>
 
 <div class="row">
 <span class="label"><strong>Total Cash In</strong></span>
-<span class="value in">₱{{ number_format($cashIn,2) }}</span>
+<span class="value in">₱{{ number_format($displayCashIn,2) }}</span>
 </div>
 </div>
 
@@ -280,17 +283,17 @@ Current usable cash balance of selected branch
 
 <div class="row">
 <span class="label">Expenses</span>
-<span class="value out">₱{{ number_format($expenses,2) }}</span>
+<span class="value out">₱{{ number_format($todayExpenses,2) }}</span>
 </div>
 
 <div class="row">
 <span class="label">Transfer to Other Branch</span>
-<span class="value out">₱{{ number_format($outgoingTransfers,2) }}</span>
+<span class="value out">₱{{ number_format($todayOutgoingTransfers,2) }}</span>
 </div>
 
 <div class="row">
 <span class="label"><strong>Total Cash Out</strong></span>
-<span class="value out">₱{{ number_format($cashOut,2) }}</span>
+<span class="value out">₱{{ number_format($displayCashOut,2) }}</span>
 </div>
 </div>
 
@@ -300,13 +303,13 @@ Current usable cash balance of selected branch
 <div class="summary-title">📊 NET CASH POSITION</div>
 
 <div class="net">
-<span>Cash In - Cash Out</span>
+<span>Beginning + Today In - Today Out</span>
 <span class="net-value">₱{{ number_format($totalCash,2) }}</span>
 </div>
 </div>
 
 <div class="footer-note">
-This report is computed from Deposits, A/R Payments, Approved Expenses, and Completed Cash Transfers.
+This report resets daily activity totals while preserving running balance.
 </div>
 
 </div>
