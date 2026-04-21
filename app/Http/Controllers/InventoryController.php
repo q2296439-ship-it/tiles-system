@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\InventoryExport;
 use App\Exports\TransferInExport;
 use App\Exports\TransferOutExport;
+use App\Models\DefectiveStock;
 
 class InventoryController extends Controller
 {
@@ -861,5 +862,57 @@ public function deliveryReport(Request $request)
         'totalValue',
         'totalBranches'
     ));
+}
+public function defectiveIndex()
+{
+    $products = Product::with('branch')
+        ->orderBy('name')
+        ->get();
+
+    $rows = DefectiveStock::with(['product', 'branch', 'user'])
+        ->latest()
+        ->paginate(10);
+
+    return view('manager.defective-stock', compact('products', 'rows'));
+}
+
+public function defectiveStore(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required|exists:products,id',
+        'quantity'   => 'required|integer|min:1',
+        'reason'     => 'required|string|max:255',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $product = Product::findOrFail($request->product_id);
+
+        if ($product->stock < $request->quantity) {
+            return back()->with('error', 'Insufficient stock.');
+        }
+
+        // bawas stock
+        $product->stock -= $request->quantity;
+        $product->save();
+
+        // save log
+        DefectiveStock::create([
+            'product_id' => $product->id,
+            'branch_id'  => $product->branch_id,
+            'quantity'   => $request->quantity,
+            'reason'     => $request->reason,
+            'user_id'    => auth()->id(),
+        ]);
+
+        DB::commit();
+
+        return back()->with('success', 'Defective stock recorded.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
+    }
 }
 }

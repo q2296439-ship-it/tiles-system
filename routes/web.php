@@ -196,6 +196,12 @@ Route::get('/manager/delivery-report', [InventoryController::class, 'deliveryRep
 Route::get('/delivery-report/excel', [InventoryController::class, 'deliveryReportExcel'])
     ->name('manager.delivery.report.excel');
 
+Route::get('/defective-stock', [InventoryController::class, 'defectiveIndex'])
+    ->name('manager.defective.index');
+
+Route::post('/defective-stock/store', [InventoryController::class, 'defectiveStore'])
+    ->name('manager.defective.store');
+
 
 // =====================
 // ADMIN GROUP

@@ -351,6 +351,11 @@
    🚚 Delivery Report
     </a>
 
+    <a href="{{ route('manager.defective.index') }}"
+   class="{{ request()->is('manager/defective-stock*') ? 'active' : '' }}">
+   🛠️ Defective Stock
+    </a>
+
     <hr>
 
     <p>Account</p>
