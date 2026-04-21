@@ -193,6 +193,9 @@ Route::get('/manager/collection', [CollectionController::class, 'managerCollecti
 Route::get('/manager/delivery-report', [InventoryController::class, 'deliveryReport'])
     ->name('manager.delivery.report');
 
+Route::get('/delivery-report/excel', [InventoryController::class, 'deliveryReportExcel'])
+    ->name('manager.delivery.report.excel');
+
 
 // =====================
 // ADMIN GROUP
