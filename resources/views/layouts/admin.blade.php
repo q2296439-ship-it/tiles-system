@@ -319,7 +319,7 @@
 <a href="/admin/ar-accounts" class="{{ request()->is('admin/ar-accounts') ? 'active' : '' }}">📒 A/R Accounts</a>
 
 <div class="menu-title">Cash Flow</div>
-<a href="/admin/cashflow" class="{{ request()->is('admin/cashflow') ? 'active' : '' }}">💰 Total Cash</a>
+<a href="/admin/total-cash" class="{{ request()->is('admin/total-cash') ? 'active' : '' }}">💰 Total Cash</a>
 <a href="/admin/cash-transfer" class="{{ request()->is('admin/cash-transfer') ? 'active' : '' }}">🔄 B2B Cash Transfer</a>
 <a href="/admin/store-expenses" class="{{ request()->is('admin/store-expenses') ? 'active' : '' }}">🧾 Store Expenses</a>
 
