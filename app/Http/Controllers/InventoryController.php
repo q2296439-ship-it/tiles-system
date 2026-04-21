@@ -28,7 +28,7 @@ class InventoryController extends Controller
         return view('inventory.add_stock', compact('products', 'branches'));
     }
 
-        // =====================
+           // =====================
     // STORE STOCK 🔥
     // =====================
     public function store(Request $request)
@@ -69,10 +69,12 @@ class InventoryController extends Controller
 
                 $request->validate([
                     'product_id' => 'required|exists:products,id',
-                    'quantity'   => 'required|integer|min:1',
                     'branch_id'  => 'required|exists:branches,id',
-                    'price'      => 'required|numeric'
+                    'price'      => 'required|numeric',
+                    'quantity'   => 'nullable|integer|min:0'
                 ]);
+
+                $qty = (int) ($request->quantity ?? 0);
 
                 $existingProduct = Product::findOrFail($request->product_id);
 
@@ -83,7 +85,7 @@ class InventoryController extends Controller
 
                 if ($product) {
 
-                    $product->stock += $request->quantity;
+                    $product->stock += $qty;
                     $product->price = $request->price;
                     $product->save();
 
@@ -93,21 +95,23 @@ class InventoryController extends Controller
                         'name'      => $existingProduct->name,
                         'size'      => $existingProduct->size,
                         'price'     => $request->price,
-                        'stock'     => $request->quantity,
+                        'stock'     => $qty,
                         'color'     => $existingProduct->color,
                         'branch_id' => $request->branch_id,
                     ]);
                 }
 
-                StockMovement::create([
-                    'product_id' => $product->id,
-                    'branch_id'  => $request->branch_id,
-                    'type'       => 'IN',
-                    'quantity'   => $request->quantity,
-                    'reason'     => 'Manual Add',
-                    'dr_number'  => $request->dr_number,
-                    'unit_price' => $request->price,
-                ]);
+                if ($qty > 0) {
+                    StockMovement::create([
+                        'product_id' => $product->id,
+                        'branch_id'  => $request->branch_id,
+                        'type'       => 'IN',
+                        'quantity'   => $qty,
+                        'reason'     => 'Manual Add',
+                        'dr_number'  => $request->dr_number,
+                        'unit_price' => $request->price,
+                    ]);
+                }
             }
 
             DB::commit();
