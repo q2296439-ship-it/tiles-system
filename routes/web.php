@@ -299,7 +299,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/delivery-today/excel', [CollectionController::class, 'deliveryExcel']);
 
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
-Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
+    Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 
 
 
@@ -377,10 +377,10 @@ Route::prefix('cashier')->group(function () {
     Route::get('/cash-transfer', [CashTransferController::class, 'index'])
     ->name('cashier.transfer.cash');
 
-Route::post('/cash-transfer/store', [CashTransferController::class, 'store'])
+    Route::post('/cash-transfer/store', [CashTransferController::class, 'store'])
     ->name('cashier.transfer.cash.store');
 
-Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accept'])
+    Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accept'])
     ->name('cashier.transfer.cash.accept');
 
    Route::get('/expenses', [ExpenseController::class, 'index'])
@@ -407,6 +407,9 @@ Route::post('/cash-transfer/{id}/accept', [CashTransferController::class, 'accep
 
     Route::post('/change-password', [AuthController::class, 'changePassword'])
         ->name('cashier.password.update');
+
+    Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
+Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 });
 
 
