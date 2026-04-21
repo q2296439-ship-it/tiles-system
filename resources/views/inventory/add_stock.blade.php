@@ -157,27 +157,42 @@ $layout = match(auth()->user()->role) {
 </div>
 
 <script>
-const modeSelect = document.getElementById('modeSelect');
-const existingDiv = document.getElementById('existingProduct');
-const newDiv = document.getElementById('newProduct');
+const modeSelect    = document.getElementById('modeSelect');
+const existingDiv   = document.getElementById('existingProduct');
+const newDiv        = document.getElementById('newProduct');
 
-const branchSelect = document.getElementById('branchSelect');
+const branchSelect  = document.getElementById('branchSelect');
 const productSelect = document.getElementById('productSelect');
-const currentStock = document.getElementById('currentStock');
-const priceInput = document.getElementById('priceInput');
+const currentStock  = document.getElementById('currentStock');
+const priceInput    = document.getElementById('priceInput');
 
-// mode switch
-modeSelect.addEventListener('change', function () {
-    if (this.value === 'new') {
+const existingFields = existingDiv.querySelectorAll('input, select');
+const newFields      = newDiv.querySelectorAll('input, select');
+
+// 🔥 MODE TOGGLE + disable unused fields
+function toggleMode() {
+
+    if (modeSelect.value === 'new') {
+
         existingDiv.style.display = 'none';
         newDiv.style.display = 'block';
+
+        existingFields.forEach(el => el.disabled = true);
+        newFields.forEach(el => el.disabled = false);
+
     } else {
+
         existingDiv.style.display = 'block';
         newDiv.style.display = 'none';
-    }
-});
 
-// save all products
+        existingFields.forEach(el => el.disabled = false);
+        newFields.forEach(el => el.disabled = true);
+    }
+}
+
+modeSelect.addEventListener('change', toggleMode);
+
+// 🔥 Save original products
 const allProducts = [];
 
 for (let i = 1; i < productSelect.options.length; i++) {
@@ -186,13 +201,13 @@ for (let i = 1; i < productSelect.options.length; i++) {
     allProducts.push({
         value: opt.value,
         text: opt.text,
-        stock: opt.getAttribute('data-stock'),
-        price: opt.getAttribute('data-price'),
-        branch: opt.getAttribute('data-branch')
+        stock: opt.dataset.stock,
+        price: opt.dataset.price,
+        branch: opt.dataset.branch
     });
 }
 
-// filter by branch
+// 🔥 Filter products by selected branch
 branchSelect.addEventListener('change', function () {
 
     const selectedBranch = this.value;
@@ -204,32 +219,33 @@ branchSelect.addEventListener('change', function () {
     priceInput.value = '';
 
     allProducts.forEach(item => {
+
         if (item.branch === selectedBranch) {
 
             const option = document.createElement('option');
 
             option.value = item.value;
             option.textContent = item.text;
-            option.setAttribute('data-stock', item.stock);
-            option.setAttribute('data-price', item.price);
-            option.setAttribute('data-branch', item.branch);
+            option.dataset.stock = item.stock;
+            option.dataset.price = item.price;
+            option.dataset.branch = item.branch;
 
             productSelect.appendChild(option);
         }
     });
 });
 
-// product select
+// 🔥 Product select auto fill
 productSelect.addEventListener('change', function () {
 
     const selected = this.options[this.selectedIndex];
 
-    currentStock.value =
-        selected.getAttribute('data-stock') || '';
-
-    priceInput.value =
-        selected.getAttribute('data-price') || '';
+    currentStock.value = selected.dataset.stock || '';
+    priceInput.value = selected.dataset.price || '';
 });
+
+// init
+toggleMode();
 </script>
 
 @endsection
