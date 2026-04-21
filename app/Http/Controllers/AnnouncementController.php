@@ -31,6 +31,14 @@ class AnnouncementController extends Controller
             'is_active'  => true,
         ]);
 
+        $old = Announcement::latest()
+            ->skip(10)
+            ->get();
+
+        foreach ($old as $row) {
+            $row->delete();
+        }
+
         return back()->with('success', 'Announcement posted successfully.');
     }
 

@@ -309,7 +309,9 @@
 
     <div class="menu-title">Main</div>
     <a href="/admin/dashboard" class="{{ request()->is('admin') || request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
-
+    <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">
+    📢 Announcements
+</a>
     <div class="menu-title">POS / Sales</div>
 <a href="/admin/collection" class="{{ request()->is('admin/collection') ? 'active' : '' }}">💰 Collection</a>
 <a href="/admin/sales/brand" class="{{ request()->is('admin/sales/brand') ? 'active' : '' }}">📈 Per Brand</a>
