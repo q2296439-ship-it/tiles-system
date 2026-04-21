@@ -326,7 +326,7 @@
 
         <a href="{{ route('cashier.delivery.fee') }}" class="{{ request()->is('cashier/delivery-fee*') ? 'active' : '' }}">🚚 Delivery Fee</a>
 
-        <a href="{{ route('cashier.ar.accounts') }}" class="{{ request()->is('cashier/ar-accounts*') ? 'active' : '' }}">📒 A/R Accounts</a>
+        <a href="{{ url('/cashier/ar-accounts') }}" class="{{ request()->is('cashier/ar-accounts*') ? 'active' : '' }}">📒 A/R Accounts</a>
 
         <a href="{{ url('/cashier/collection-today') }}" class="{{ request()->is('cashier/collection-today*') ? 'active' : '' }}">📊 Collection Today</a>
 
