@@ -446,7 +446,15 @@ Route::prefix('cashier')->group(function () {
         ->name('cashier.password.update');
 
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
-Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
+    Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
+
+    Route::get('/add-stock', [InventoryController::class, 'create'])
+        ->name('cashier.add.stock');
+
+    Route::post('/add-stock', [InventoryController::class, 'store'])
+        ->name('cashier.add.stock.store');
+
+
 });
 
 

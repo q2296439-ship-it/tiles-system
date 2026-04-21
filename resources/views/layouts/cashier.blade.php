@@ -345,6 +345,8 @@
 
         <a href="{{ route('cashier.inventory.stock') }}" class="{{ request()->is('cashier/inventory-stock') ? 'active' : '' }}">📦 Inventory Stock</a>
 
+        <a href="/cashier/add-stock" class="{{ request()->is('cashier/add-stock*') ? 'active' : '' }}">➕ Add New Stock</a>
+
         <a href="{{ route('cashier.transfer.in') }}" class="{{ request()->is('cashier/transfer-in*') ? 'active' : '' }}">⬇ Transfer In</a>
 
         <a href="{{ url('/cashier/incoming') }}" class="{{ request()->is('cashier/incoming*') ? 'active' : '' }}">📦 Incoming Transfer Stock</a>
