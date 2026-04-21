@@ -153,7 +153,8 @@ padding:15px;
 <div class="title">STORE EXPENSES</div>
 <div class="sub">Connected to Cash Flow • Daily Expense Monitoring</div>
 
-<form method="GET" action="/{{ $routePrefix }}/store-expenses">
+<form method="GET"
+action="/{{ $role === 'cashier' ? 'cashier/expenses' : $routePrefix.'/store-expenses' }}">
 <div class="actions">
 
 @if($role !== 'cashier')
