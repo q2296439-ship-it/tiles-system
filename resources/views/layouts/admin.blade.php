@@ -109,8 +109,9 @@
             gap:15px;
             position:sticky;
             top:0;
-            z-index:900;
+            z-index:5000;
             width:100%;
+            overflow:visible;
         }
 
         .left-wrap{
@@ -157,6 +158,7 @@
 
         .bell-wrap{
             position:relative;
+            z-index:6000;
         }
 
         .bell-box{
@@ -200,7 +202,7 @@
             border:1px solid #e5e7eb;
             border-radius:12px;
             box-shadow:0 10px 25px rgba(0,0,0,.12);
-            z-index:9999;
+            z-index:99999;
             overflow:hidden;
         }
 
@@ -399,9 +401,7 @@ $unreadCount = session('announcement_unread', $notes->count());
 
     <div class="menu-title">Main</div>
     <a href="/admin/dashboard" class="{{ request()->is('admin') || request()->is('admin/dashboard') ? 'active' : '' }}">📊 Dashboard</a>
-    <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">
-    📢 Announcements
-</a>
+    <a href="/announcements" class="{{ request()->is('announcements') ? 'active' : '' }}">📢 Announcements</a>
 
     <div class="menu-title">POS / Sales</div>
     <a href="/admin/collection" class="{{ request()->is('admin/collection') ? 'active' : '' }}">💰 Collection</a>
@@ -464,7 +464,6 @@ $unreadCount = session('announcement_unread', $notes->count());
                 </div>
 
                 <div class="bell-dropdown" id="bellDropdown">
-
                     @forelse($notes as $note)
                         <div class="bell-item">
                             <strong>{{ $note->title }}</strong><br>
@@ -475,7 +474,6 @@ $unreadCount = session('announcement_unread', $notes->count());
                     @endforelse
 
                     <a href="/announcements" class="bell-view">View All</a>
-
                 </div>
 
             </div>
