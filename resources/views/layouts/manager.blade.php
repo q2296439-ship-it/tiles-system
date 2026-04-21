@@ -26,7 +26,6 @@
             text-decoration:none;
         }
 
-        /* SIDEBAR */
         .sidebar{
             position:fixed;
             top:0;
@@ -99,7 +98,6 @@
             margin:14px 0;
         }
 
-        /* MAIN */
         .main{
             margin-left:230px;
             width:calc(100% - 230px);
@@ -107,7 +105,6 @@
             transition:.3s ease;
         }
 
-        /* TOPBAR */
         .topbar{
             background:#fff;
             border-bottom:1px solid #e5e7eb;
@@ -188,7 +185,6 @@
             color:#64748b;
         }
 
-        /* CONTENT */
         .content{
             padding:20px;
             width:100%;
@@ -200,7 +196,6 @@
             max-width:100%;
         }
 
-        /* TABLE */
         table{
             width:100%;
             border-collapse:collapse;
@@ -211,7 +206,6 @@
             overflow-x:auto;
         }
 
-        /* OVERLAY */
         .overlay{
             position:fixed;
             inset:0;
@@ -224,7 +218,6 @@
             display:block;
         }
 
-        /* MOBILE */
         @media(max-width:768px){
 
             .menu-btn{
@@ -295,7 +288,6 @@
 
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
 
     <h2>{{ auth()->user()->role == 'audit' ? 'Audit Panel' : 'Manager Panel' }}</h2>
@@ -307,12 +299,6 @@
     </a>
 
     <p>Operations</p>
-
-    @if(auth()->user()->role != 'audit')
-    <a href="/manager/approvals" class="{{ request()->is('manager/approvals') ? 'active' : '' }}">
-        🧾 Approvals
-    </a>
-    @endif
 
     <a href="/manager/request-access" class="{{ request()->is('manager/request-access') ? 'active' : '' }}">
         🔓 Request Access
@@ -375,7 +361,6 @@
 
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
     <div class="topbar">
@@ -392,7 +377,7 @@
                 <p>
                     {{ auth()->user()->role == 'audit'
                         ? 'View reports, logs, sales and inventory'
-                        : 'Manage approvals, sales, inventory and transfers' }}
+                        : 'Manage sales, inventory, deposits and transfers' }}
                 </p>
             </div>
 

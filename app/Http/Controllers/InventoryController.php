@@ -179,11 +179,7 @@ public function exportExcel(Request $request)
         return view('cashier.transferin_cashier', compact('products', 'branches', 'requests'));
     }
 
-   // =====================
-// =====================
-// 🔥 STORE TRANSFER IN
-// =====================
-public function transferInStore(Request $request)
+   public function transferInStore(Request $request)
 {
     // 🔥 FIX: mas reliable check
     if (!$request->has('items') || count($request->items) == 0) {
@@ -208,20 +204,20 @@ public function transferInStore(Request $request)
             }
 
             \App\Models\StockMovement::create([
-                'product_id' => $item['product_id'],
-                'branch_id' => auth()->user()->branch_id, // destination
+                'product_id'     => $item['product_id'],
+                'branch_id'      => auth()->user()->branch_id, // destination
                 'from_branch_id' => $request->from_branch_id, // source
-                'type' => 'IN_REQUEST',
-                'quantity' => $item['qty'],
-                'reason' => 'Transfer IN Request',
-                'status' => 'pending',
-                'requested_by' => auth()->id(), // 🔥 important
+                'type'           => 'IN_REQUEST',
+                'quantity'       => $item['qty'],
+                'reason'         => 'Direct Transfer Request',
+                'status'         => 'approved_sender',
+                'requested_by'   => auth()->id(),
             ]);
         }
 
         \DB::commit();
 
-        return back()->with('success', 'Request sent to manager!');
+        return back()->with('success', 'Transfer request sent to Incoming.');
 
     } catch (\Exception $e) {
 
@@ -739,12 +735,14 @@ private function getProducts()
         return view('cashier.incoming', compact('requests'));
     }
 
-    // =====================
-// 🔥 RECEIVE STOCK
-// =====================
-public function receive($id)
+    public function receive(Request $request, $id)
 {
-    DB::transaction(function () use ($id) {
+    $request->validate([
+        'transfer_number' => 'required|string|max:100',
+        'receive_remarks' => 'nullable|string|max:255',
+    ]);
+
+    DB::transaction(function () use ($request, $id) {
 
         $movement = StockMovement::findOrFail($id);
 
@@ -785,13 +783,15 @@ public function receive($id)
             ]);
         }
 
-        // ✅ Update transfer status
+        // ✅ Update transfer status + audit trail
         $movement->status = 'completed';
+        $movement->transfer_number = $request->transfer_number;
+        $movement->receive_remarks = $request->receive_remarks;
         $movement->received_by = auth()->id();
         $movement->received_at = now();
         $movement->save();
     });
 
-    return back()->with('success', 'Stock received!');
+    return back()->with('success', 'Stock received successfully!');
 }
 }

@@ -133,8 +133,6 @@ Route::post('/logout', [AuthController::class, 'logout']);
 // 🔥 MANAGER
 // =====================
 Route::get('/manager', [InventoryController::class, 'managerDashboard'])->middleware('auth');
-Route::get('/manager/approvals', [InventoryController::class, 'approvals'])->middleware('auth');
-Route::get('/manager/transfer-out', [InventoryController::class, 'transferOutManager'])->middleware('auth');
 Route::post('/manager/release/{id}', [InventoryController::class, 'release'])->middleware('auth');
 
 Route::get('/manager/daily-sales', [SalesReportController::class, 'daily'])->middleware('auth')->name('manager.daily.sales');
@@ -239,9 +237,6 @@ Route::prefix('admin')->group(function () {
     Route::post('/inventory/transfer-out', [InventoryController::class, 'transferOutStore']);
     Route::post('/inventory/transfer-accept/{id}', [InventoryController::class, 'acceptTransfer']);
     Route::post('/inventory/transfer-in-old', [InventoryController::class, 'transferInStore']);
-
-    Route::post('/manager/approve/{id}', [InventoryController::class, 'approve']);
-    Route::post('/manager/reject/{id}', [InventoryController::class, 'reject']);
 
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/store', [UserController::class, 'store']);
