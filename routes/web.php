@@ -16,6 +16,7 @@ use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\CashTransferController;
+use App\Http\Controllers\AnnouncementController;
 
 
 // =====================
