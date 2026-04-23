@@ -252,8 +252,16 @@ svg{
     <div class="card">
 
         <div class="top-bar">
-            <input type="text" id="searchInput" class="search" placeholder="🔍 Search product...">
-        </div>
+    <form method="GET" action="{{ url('/admin/products') }}">
+        <input
+            type="text"
+            name="search"
+            class="search"
+            placeholder="🔍 Search product..."
+            value="{{ request('search') }}"
+        >
+    </form>
+</div>
 
         <table id="productTable">
             <thead>
@@ -313,16 +321,5 @@ svg{
     </div>
 
 </div>
-
-<script>
-document.getElementById('searchInput').addEventListener('keyup', function () {
-    let value = this.value.toLowerCase();
-    let rows = document.querySelectorAll("#productTable tbody tr");
-
-    rows.forEach((row) => {
-        row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
-    });
-});
-</script>
 
 @endsection
