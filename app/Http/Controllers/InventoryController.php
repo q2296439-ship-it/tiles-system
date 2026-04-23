@@ -54,8 +54,14 @@ public function store(Request $request)
             }
 
             // Prevent duplicate product (same name + size + branch)
-            $exists = Product::where('name', trim($request->new_name))
-                ->where('size', trim($request->new_size))
+            $exists = Product::whereRaw(
+                    'LOWER(TRIM(name)) = ?',
+                    [strtolower(trim($request->new_name))]
+                )
+                ->whereRaw(
+                    'LOWER(TRIM(size)) = ?',
+                    [strtolower(trim($request->new_size))]
+                )
                 ->where('branch_id', $request->branch_id)
                 ->exists();
 
@@ -64,8 +70,8 @@ public function store(Request $request)
             }
 
             $product = Product::create([
-                'name'      => $request->new_name,
-                'size'      => $request->new_size,
+                'name'      => trim($request->new_name),
+                'size'      => trim($request->new_size),
                 'price'     => $request->new_price,
                 'stock'     => $request->quantity,
                 'color'     => 'N/A',
@@ -148,8 +154,7 @@ public function store(Request $request)
 
         return back()->with('error', $e->getMessage());
     }
-}
-         
+}         
 
     // =====================
     // OVERVIEW STOCK
