@@ -93,14 +93,30 @@ $layout = match(auth()->user()->role) {
         </select>
 
         <label>Select Branch</label>
-        <select name="branch_id" id="branchSelect" required>
-            <option value="">-- Select Branch --</option>
-            @foreach($branches as $branch)
-                <option value="{{ $branch->id }}">
-                    {{ $branch->name }}
-                </option>
-            @endforeach
-        </select>
+
+        @if(strtolower(auth()->user()->role) === 'cashier')
+
+            <input type="text"
+                   value="{{ auth()->user()->branch->name ?? 'Assigned Branch' }}"
+                   readonly>
+
+            <input type="hidden"
+                   name="branch_id"
+                   id="branchSelect"
+                   value="{{ auth()->user()->branch_id }}">
+
+        @else
+
+            <select name="branch_id" id="branchSelect" required>
+                <option value="">-- Select Branch --</option>
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}">
+                        {{ $branch->name }}
+                    </option>
+                @endforeach
+            </select>
+
+        @endif
 
         {{-- EXISTING PRODUCT --}}
         <div id="existingProduct">
@@ -255,6 +271,10 @@ productSelect.addEventListener('change', function () {
 
 // init
 toggleMode();
+
+if (branchSelect.value) {
+    branchSelect.dispatchEvent(new Event('change'));
+}
 </script>
 
 @endsection

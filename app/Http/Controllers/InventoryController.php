@@ -28,8 +28,7 @@ class InventoryController extends Controller
 
         return view('inventory.add_stock', compact('products', 'branches'));
     }
-
-         // =====================
+// =====================
 // STORE STOCK 🔥
 // =====================
 public function store(Request $request)
@@ -52,6 +51,16 @@ public function store(Request $request)
                 $request->merge([
                     'new_price' => 0
                 ]);
+            }
+
+            // Prevent duplicate product (same name + size + branch)
+            $exists = Product::where('name', trim($request->new_name))
+                ->where('size', trim($request->new_size))
+                ->where('branch_id', $request->branch_id)
+                ->exists();
+
+            if ($exists) {
+                throw new \Exception('Product already existed on the system.');
             }
 
             $product = Product::create([
@@ -140,6 +149,7 @@ public function store(Request $request)
         return back()->with('error', $e->getMessage());
     }
 }
+         
 
     // =====================
     // OVERVIEW STOCK
