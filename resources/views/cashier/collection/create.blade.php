@@ -255,7 +255,7 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
 <tr>
     <th class="center">Qty</th>
     <th class="center">Size</th>
-    <th>Articles</th>
+    <th>Product Code</th>
     <th class="right">Unit Price</th>
     <th class="right">Amount</th>
     <th></th>
