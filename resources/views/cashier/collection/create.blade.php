@@ -431,6 +431,14 @@ function addRow(){
         </tr>
     `);
 
+    let newSelect = body.lastElementChild.querySelector('.product-select');
+
+    new TomSelect(newSelect,{
+        create:false,
+        maxOptions:5000,
+        placeholder:"Search Product Code..."
+    });
+
     rowIndex++;
 }
 
@@ -438,7 +446,6 @@ function removeRow(btn){
     btn.closest('tr').remove();
     computeAll();
 }
-
 document.addEventListener('input', function(e){
     if(
         e.target.classList.contains('qty') ||
