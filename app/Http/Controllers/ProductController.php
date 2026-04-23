@@ -151,49 +151,56 @@ public function index(Request $request)
 
         DB::beginTransaction();
 
-        try {
+       try {
 
-            $product->update([
-                'sku' => $request->sku,
-                'category' => $request->category,
-                'name' => $request->name,
-                'size' => $request->size,
-                'color' => $request->color,
-                'price' => $request->price,
-                'stock' => $request->stock,
-                'low_stock_threshold' => $request->low_stock_threshold,
-                'branch_id' => $request->branch_id,
-            ]);
+    // Update price/info to all same product + size
+    Product::where('name', $product->name)
+        ->where('size', $product->size)
+        ->update([
+            'sku' => $request->sku,
+            'category' => $request->category,
+            'name' => $request->name,
+            'size' => $request->size,
+            'color' => $request->color,
+            'price' => $request->price,
+            'low_stock_threshold' => $request->low_stock_threshold,
+        ]);
 
-            DB::table('branch_product')->updateOrInsert(
-                [
-                    'product_id' => $product->id,
-                    'branch_id' => $request->branch_id,
-                ],
-                [
-                    'stock' => $request->stock,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
+    // Update stock only current branch record
+    $product->update([
+        'stock' => $request->stock,
+        'branch_id' => $request->branch_id,
+    ]);
 
-            StockMovement::create([
-                'product_id' => $product->id,
-                'branch_id' => $request->branch_id,
-                'type' => 'IN',
-                'quantity' => $request->stock,
-                'reason' => 'Product updated',
-            ]);
+    DB::table('branch_product')->updateOrInsert(
+        [
+            'product_id' => $product->id,
+            'branch_id' => $request->branch_id,
+        ],
+        [
+            'stock' => $request->stock,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]
+    );
 
-            DB::commit();
+    StockMovement::create([
+        'product_id' => $product->id,
+        'branch_id' => $request->branch_id,
+        'type' => 'IN',
+        'quantity' => $request->stock,
+        'reason' => 'Product updated',
+    ]);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', $e->getMessage());
-        }
+    DB::commit();
 
-        return redirect('/admin/products')->with('success', 'Product updated successfully');
-    }
+} catch (\Exception $e) {
+    DB::rollBack();
+    return back()->with('error', $e->getMessage());
+}
+
+return redirect('/admin/products')->with('success', 'Product updated successfully');
+}
 
     // =====================
     // DELETE PRODUCT
