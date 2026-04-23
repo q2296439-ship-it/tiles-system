@@ -89,10 +89,13 @@ $layout = match(auth()->user()->role) {
         @csrf
 
         <label>Mode</label>
-        <select id="modeSelect" name="mode">
-            <option value="existing">Select Existing Product</option>
-            <option value="new">Add New Product</option>
-        </select>
+<select id="modeSelect" name="mode">
+    <option value="existing">Select Existing Product</option>
+
+    @if(strtolower(auth()->user()->role) !== 'cashier')
+        <option value="new">Add New Product</option>
+    @endif
+</select>
 
         <label>Select Branch</label>
         <select name="branch_id" id="branchSelect" required>
