@@ -2,6 +2,9 @@
 
 @section('content')
 
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
 <style>
 .page{
     max-width:1200px;
@@ -512,6 +515,17 @@ function computeAll(){
 }
 
 computeAll();
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.product-select').forEach(function(el){
+        new TomSelect(el,{
+            create:false,
+            maxOptions:5000,
+            placeholder:"Search Product Code..."
+        });
+    });
+});
 </script>
 
 @endsection
