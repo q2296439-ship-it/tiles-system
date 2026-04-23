@@ -14,25 +14,32 @@ class ProductController extends Controller
     // =====================
 // SHOW PRODUCTS
 // =====================
-public function index()
+public function index(Request $request)
 {
     $user = Auth::user();
     $role = strtolower($user->role);
 
-    if (in_array($role, ['admin', 'manager', 'audit'])) {
-        $products = Product::with('branch')
-            ->latest()
-            ->paginate(10);
-    } else {
-        $products = Product::with('branch')
-            ->where('branch_id', $user->branch_id)
-            ->latest()
-            ->paginate(10);
+    $query = Product::with('branch');
+
+    if (!in_array($role, ['admin', 'manager', 'audit'])) {
+        $query->where('branch_id', $user->branch_id);
     }
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('sku', 'like', "%{$search}%")
+              ->orWhere('size', 'like', "%{$search}%")
+              ->orWhere('color', 'like', "%{$search}%");
+        });
+    }
+
+    $products = $query->latest()->paginate(10)->withQueryString();
 
     return view('products.index', compact('products'));
 }
-
     // =====================
     // ADMIN OVERVIEW STOCK
     // =====================
