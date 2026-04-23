@@ -20,9 +20,7 @@ $layout = match(auth()->user()->role) {
         box-shadow: 0 5px 20px rgba(0,0,0,0.08);
     }
 
-    h2 {
-        margin-bottom: 20px;
-    }
+    h2 { margin-bottom: 20px; }
 
     label {
         font-size: 13px;
@@ -89,13 +87,10 @@ $layout = match(auth()->user()->role) {
         @csrf
 
         <label>Mode</label>
-<select id="modeSelect" name="mode">
-    <option value="existing">Select Existing Product</option>
-
-    @if(strtolower(auth()->user()->role) !== 'cashier')
-        <option value="new">Add New Product</option>
-    @endif
-</select>
+        <select id="modeSelect" name="mode">
+            <option value="existing">Select Existing Product</option>
+            <option value="new">Add New Product</option>
+        </select>
 
         <label>Select Branch</label>
         <select name="branch_id" id="branchSelect" required>
@@ -128,43 +123,43 @@ $layout = match(auth()->user()->role) {
 
             <label>Update Price</label>
             @if(strtolower(auth()->user()->role) === 'cashier')
-<input type="number" step="0.01" name="price" id="priceInput" readonly>
-@else
-<input type="number" step="0.01" name="price" id="priceInput">
-@endif
+                <input type="number" step="0.01" name="price" id="priceInput" readonly>
+            @else
+                <input type="number" step="0.01" name="price" id="priceInput">
+            @endif
 
             <label>D.R Number</label>
             <input type="text" name="dr_number">
 
         </div>
 
-       {{-- NEW PRODUCT --}}
-<div id="newProduct" style="display:none;">
+        {{-- NEW PRODUCT --}}
+        <div id="newProduct" style="display:none;">
 
-    <label>Product Name</label>
-    <input type="text" name="new_name">
+            <label>Product Name</label>
+            <input type="text" name="new_name">
 
-    <label>Size</label>
-    <input type="text" name="new_size">
+            <label>Size</label>
+            <input type="text" name="new_size">
 
-    <label>Price</label>
-    @if(strtolower(auth()->user()->role) === 'cashier')
-        <input type="number" step="0.01" name="new_price_display" value="0" readonly>
-        <input type="hidden" name="new_price" value="0">
-    @else
-        <input type="number" step="0.01" name="new_price">
-    @endif
+            <label>Price</label>
+            @if(strtolower(auth()->user()->role) === 'cashier')
+                <input type="number" step="0.01" value="0" readonly>
+                <input type="hidden" name="new_price" value="0">
+            @else
+                <input type="number" step="0.01" name="new_price">
+            @endif
 
-    <label>D.R Number</label>
-    <input type="text" name="dr_number_new">
+            <label>D.R Number</label>
+            <input type="text" name="dr_number_new">
 
-</div>
+        </div>
 
-<label>Quantity</label>
-<input type="number" name="quantity" required>
+        <label>Quantity</label>
+        <input type="number" name="quantity" required>
 
-<button type="submit" class="btn">Save</button>
-</form>
+        <button type="submit" class="btn">Save</button>
+    </form>
 
 </div>
 
@@ -181,7 +176,6 @@ const priceInput    = document.getElementById('priceInput');
 const existingFields = existingDiv.querySelectorAll('input, select');
 const newFields      = newDiv.querySelectorAll('input, select');
 
-// 🔥 MODE TOGGLE + disable unused fields
 function toggleMode() {
 
     if (modeSelect.value === 'new') {
@@ -204,7 +198,7 @@ function toggleMode() {
 
 modeSelect.addEventListener('change', toggleMode);
 
-// 🔥 Save original products
+// Save original products
 const allProducts = [];
 
 for (let i = 1; i < productSelect.options.length; i++) {
@@ -219,7 +213,7 @@ for (let i = 1; i < productSelect.options.length; i++) {
     });
 }
 
-// 🔥 Filter products by selected branch
+// Filter products by branch
 branchSelect.addEventListener('change', function () {
 
     const selectedBranch = this.value;
@@ -228,7 +222,7 @@ branchSelect.addEventListener('change', function () {
         '<option value="">-- Select Product --</option>';
 
     currentStock.value = '';
-    priceInput.value = '';
+    if (priceInput) priceInput.value = '';
 
     allProducts.forEach(item => {
 
@@ -247,13 +241,16 @@ branchSelect.addEventListener('change', function () {
     });
 });
 
-// 🔥 Product select auto fill
+// Product select autofill
 productSelect.addEventListener('change', function () {
 
     const selected = this.options[this.selectedIndex];
 
     currentStock.value = selected.dataset.stock || '';
-    priceInput.value = selected.dataset.price || '';
+
+    if (priceInput) {
+        priceInput.value = selected.dataset.price || '';
+    }
 });
 
 // init
