@@ -265,7 +265,23 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
 <tr>
     <td><input type="number" name="items[0][qty]" class="input qty" value="1" min="1"></td>
     <td><input type="text" name="items[0][unit]" class="input"></td>
-    <td><input type="text" name="items[0][description]" class="input" required></td>
+    <td>
+<select name="items[0][product_id]" class="input product-select" required onchange="setProduct(this)">
+    <option value="">Select Product</option>
+    @foreach(\App\Models\Product::where('branch_id', auth()->user()->branch_id)->where('stock','>',0)->orderBy('name')->get() as $p)
+        <option
+            value="{{ $p->id }}"
+            data-name="{{ $p->name }}"
+            data-size="{{ $p->size }}"
+            data-price="{{ $p->price }}"
+            data-unit="{{ $p->size }}">
+            {{ $p->name }} - {{ $p->size }} (Stock: {{ $p->stock }})
+        </option>
+    @endforeach
+</select>
+
+<input type="hidden" name="items[0][description]" class="desc-hidden">
+</td>
     <td><input type="number" step="0.01" name="items[0][unit_price]" class="input price" value="0"></td>
     <td><input type="number" step="0.01" name="items[0][amount]" class="input amount" value="0" readonly></td>
     <td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
@@ -354,16 +370,60 @@ $todayClosed = \App\Models\Deposit::whereDate('deposit_date', date('Y-m-d'))
 <script>
 let rowIndex = 1;
 
+function setProduct(select){
+    let row = select.closest('tr');
+    let opt = select.options[select.selectedIndex];
+
+    if(!opt.value) return;
+
+    row.querySelector('[name*="[unit]"]').value = opt.dataset.unit || '';
+
+    row.querySelector('.desc-hidden').value =
+        (opt.dataset.name || '') + ' - ' + (opt.dataset.size || '');
+
+    row.querySelector('.price').value =
+        parseFloat(opt.dataset.price || 0).toFixed(2);
+
+    let qty = parseFloat(row.querySelector('.qty').value) || 0;
+    let price = parseFloat(row.querySelector('.price').value) || 0;
+
+    row.querySelector('.amount').value = (qty * price).toFixed(2);
+
+    computeAll();
+}
+
 function addRow(){
     let body = document.querySelector('#itemsTable tbody');
 
     body.insertAdjacentHTML('beforeend', `
         <tr>
             <td><input type="number" name="items[${rowIndex}][qty]" class="input qty" value="1" min="1"></td>
+
             <td><input type="text" name="items[${rowIndex}][unit]" class="input"></td>
-            <td><input type="text" name="items[${rowIndex}][description]" class="input" required></td>
+
+            <td>
+                <select name="items[${rowIndex}][product_id]" class="input product-select" required onchange="setProduct(this)">
+                    <option value="">Select Product</option>
+
+                    @foreach(\App\Models\Product::where('branch_id', auth()->user()->branch_id)->where('stock','>',0)->orderBy('name')->get() as $p)
+                        <option
+                            value="{{ $p->id }}"
+                            data-name="{{ $p->name }}"
+                            data-size="{{ $p->size }}"
+                            data-price="{{ $p->price }}"
+                            data-unit="{{ $p->size }}">
+                            {{ $p->name }} - {{ $p->size }} (Stock: {{ $p->stock }})
+                        </option>
+                    @endforeach
+                </select>
+
+                <input type="hidden" name="items[${rowIndex}][description]" class="desc-hidden">
+            </td>
+
             <td><input type="number" step="0.01" name="items[${rowIndex}][unit_price]" class="input price" value="0"></td>
+
             <td><input type="number" step="0.01" name="items[${rowIndex}][amount]" class="input amount" value="0" readonly></td>
+
             <td><button type="button" class="btn btn-red" onclick="removeRow(this)">✖</button></td>
         </tr>
     `);
@@ -384,11 +444,14 @@ document.addEventListener('input', function(e){
         e.target.id === 'paidAmount'
     ){
         let row = e.target.closest('tr');
+
         if(row){
             let qty = parseFloat(row.querySelector('.qty').value) || 0;
             let price = parseFloat(row.querySelector('.price').value) || 0;
+
             row.querySelector('.amount').value = (qty * price).toFixed(2);
         }
+
         computeAll();
     }
 });
@@ -418,6 +481,7 @@ function computeAll(){
     let grand = total - discount;
 
     let paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+
     if(paid > grand){
         paid = grand;
         document.getElementById('paidAmount').value = grand.toFixed(2);

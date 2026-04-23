@@ -524,11 +524,12 @@ public function exportExcel(Request $request)
 {
     try {
 
-        $request->validate([
-            'receipt_no'   => 'required|unique:collections,receipt_no',
-            'receipt_date' => 'required|date',
-            'items'        => 'required|array|min:1',
-        ]);
+       $request->validate([
+    'receipt_no'         => 'required|unique:collections,receipt_no',
+    'receipt_date'       => 'required|date',
+    'items'              => 'required|array|min:1',
+    'items.*.product_id' => 'required|exists:products,id',
+]);
 
         // bawal magsave kapag closed na deposit date
         $isClosed = \App\Models\Deposit::whereDate('deposit_date', $request->receipt_date)
@@ -617,8 +618,8 @@ public function exportExcel(Request $request)
 
             foreach ($request->items as $item) {
 
-                if (empty($item['description'])) {
-                    continue;
+               if (empty($item['product_id'])) {
+    continue;
                 }
 
                 $qty    = (int) ($item['qty'] ?? 0);
@@ -635,28 +636,28 @@ public function exportExcel(Request $request)
                     'amount'        => $amount,
                 ]);
 
-                $product = Product::where('name', $desc)
-                    ->where('branch_id', $branchId)
-                    ->first();
+                $product = Product::where('id', $item['product_id'])
+    ->where('branch_id', $branchId)
+    ->first();
 
-                if (!$product) {
-                    throw new \Exception('Product not found: ' . $desc);
-                }
+if (!$product) {
+    throw new \Exception('Product not found.');
+}
 
-                if ($product->stock < $qty) {
-                    throw new \Exception('Not enough stock: ' . $desc);
-                }
+if ($product->stock < $qty) {
+    throw new \Exception('Not enough stock: ' . $product->name . ' - ' . $product->size);
+}
 
-                $product->stock -= $qty;
-                $product->save();
+$product->stock -= $qty;
+$product->save();
 
-                SaleItem::create([
-                    'sale_id'    => $sale->id,
-                    'product_id' => $product->id,
-                    'quantity'   => $qty,
-                    'price'      => $price,
-                    'subtotal'   => $amount,
-                ]);
+SaleItem::create([
+    'sale_id'    => $sale->id,
+    'product_id' => $product->id,
+    'quantity'   => $qty,
+    'price'      => $price,
+    'subtotal'   => $amount,
+]);
             }
         });
 
