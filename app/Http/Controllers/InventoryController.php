@@ -29,7 +29,7 @@ class InventoryController extends Controller
         return view('inventory.add_stock', compact('products', 'branches'));
     }
 
-          // =====================
+         // =====================
 // STORE STOCK 🔥
 // =====================
 public function store(Request $request)
@@ -42,10 +42,17 @@ public function store(Request $request)
 
             $request->validate([
                 'new_name'  => 'required|string',
-                'new_price' => 'required|numeric',
+                'new_price' => 'nullable|numeric',
                 'quantity'  => 'required|integer|min:1',
                 'branch_id' => 'required|exists:branches,id'
             ]);
+
+            // Cashier cannot input price → auto 0
+            if (strtolower(auth()->user()->role) === 'cashier') {
+                $request->merge([
+                    'new_price' => 0
+                ]);
+            }
 
             $product = Product::create([
                 'name'      => $request->new_name,

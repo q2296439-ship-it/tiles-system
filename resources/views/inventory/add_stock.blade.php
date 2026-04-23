@@ -138,32 +138,33 @@ $layout = match(auth()->user()->role) {
 
         </div>
 
-        {{-- NEW PRODUCT --}}
-        <div id="newProduct" style="display:none;">
+       {{-- NEW PRODUCT --}}
+<div id="newProduct" style="display:none;">
 
-            <label>Product Name</label>
-            <input type="text" name="new_name">
+    <label>Product Name</label>
+    <input type="text" name="new_name">
 
-            <label>Size</label>
-            <input type="text" name="new_size">
+    <label>Size</label>
+    <input type="text" name="new_size">
 
-            <label>Price</label>
-            @if(strtolower(auth()->user()->role) === 'cashier')
-<input type="number" step="0.01" name="new_price" readonly>
-@else
-<input type="number" step="0.01" name="new_price">
-@endif
+    <label>Price</label>
+    @if(strtolower(auth()->user()->role) === 'cashier')
+        <input type="number" step="0.01" name="new_price_display" value="0" readonly>
+        <input type="hidden" name="new_price" value="0">
+    @else
+        <input type="number" step="0.01" name="new_price">
+    @endif
 
-            <label>D.R Number</label>
-            <input type="text" name="dr_number_new">
+    <label>D.R Number</label>
+    <input type="text" name="dr_number_new">
 
-        </div>
+</div>
 
-        <label>Quantity</label>
-        <input type="number" name="quantity" required>
+<label>Quantity</label>
+<input type="number" name="quantity" required>
 
-        <button type="submit" class="btn">Save</button>
-    </form>
+<button type="submit" class="btn">Save</button>
+</form>
 
 </div>
 
