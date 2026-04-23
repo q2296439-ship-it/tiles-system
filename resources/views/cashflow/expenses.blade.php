@@ -174,7 +174,8 @@ action="/{{ $role === 'cashier' ? 'cashier/expenses' : $routePrefix.'/store-expe
 </div>
 </form>
 
-<form method="POST" action="/{{ $routePrefix }}/store-expenses/store">
+<form method="POST"
+action="/{{ $role === 'cashier' ? 'cashier/expenses/store' : $routePrefix.'/store-expenses/store' }}">
 @csrf
 
 <div class="grid">
