@@ -29,103 +29,110 @@ class InventoryController extends Controller
         return view('inventory.add_stock', compact('products', 'branches'));
     }
 
-           // =====================
-    // STORE STOCK 🔥
-    // =====================
-    public function store(Request $request)
-    {
-        DB::beginTransaction();
+          // =====================
+// STORE STOCK 🔥
+// =====================
+public function store(Request $request)
+{
+    DB::beginTransaction();
 
-        try {
+    try {
 
-           if ($request->mode === 'new') {
+        if ($request->mode === 'new') {
 
-                $request->validate([
-                    'new_name'  => 'required|string',
-                    'new_price' => 'required|numeric',
-                    'quantity'  => 'required|integer|min:1',
-                    'branch_id' => 'required|exists:branches,id'
+            $request->validate([
+                'new_name'  => 'required|string',
+                'new_price' => 'required|numeric',
+                'quantity'  => 'required|integer|min:1',
+                'branch_id' => 'required|exists:branches,id'
+            ]);
+
+            $product = Product::create([
+                'name'      => $request->new_name,
+                'size'      => $request->new_size,
+                'price'     => $request->new_price,
+                'stock'     => $request->quantity,
+                'color'     => 'N/A',
+                'branch_id' => $request->branch_id,
+            ]);
+
+            StockMovement::create([
+                'product_id' => $product->id,
+                'branch_id'  => $request->branch_id,
+                'type'       => 'IN',
+                'quantity'   => $request->quantity,
+                'reason'     => 'New Product Added',
+                'dr_number'  => $request->dr_number_new,
+                'unit_price' => $request->new_price,
+            ]);
+
+        } else {
+
+            $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'branch_id'  => 'required|exists:branches,id',
+                'price'      => 'nullable|numeric',
+                'quantity'   => 'nullable|integer|min:0'
+            ]);
+
+            $qty = (int) ($request->quantity ?? 0);
+
+            $existingProduct = Product::findOrFail($request->product_id);
+
+            // Cashier auto uses existing price
+            if (strtolower(auth()->user()->role) === 'cashier') {
+                $request->merge([
+                    'price' => $existingProduct->price
                 ]);
+            }
+
+            $product = Product::where('name', $existingProduct->name)
+                ->where('size', $existingProduct->size)
+                ->where('branch_id', $request->branch_id)
+                ->first();
+
+            if ($product) {
+
+                $product->stock += $qty;
+                $product->price = $request->price;
+                $product->save();
+
+            } else {
 
                 $product = Product::create([
-                    'name'      => $request->new_name,
-                    'size'      => $request->new_size,
-                    'price'     => $request->new_price,
-                    'stock'     => $request->quantity,
-                    'color'     => 'N/A',
+                    'name'      => $existingProduct->name,
+                    'size'      => $existingProduct->size,
+                    'price'     => $request->price,
+                    'stock'     => $qty,
+                    'color'     => $existingProduct->color,
                     'branch_id' => $request->branch_id,
                 ]);
+            }
 
+            if ($qty > 0) {
                 StockMovement::create([
                     'product_id' => $product->id,
                     'branch_id'  => $request->branch_id,
                     'type'       => 'IN',
-                    'quantity'   => $request->quantity,
-                    'reason'     => 'New Product Added',
-                    'dr_number'  => $request->dr_number_new,
-                    'unit_price' => $request->new_price,
+                    'quantity'   => $qty,
+                    'reason'     => 'Manual Add',
+                    'dr_number'  => $request->dr_number,
+                    'unit_price' => $request->price,
                 ]);
-
-            } else {
-
-                $request->validate([
-                    'product_id' => 'required|exists:products,id',
-                    'branch_id'  => 'required|exists:branches,id',
-                    'price'      => 'required|numeric',
-                    'quantity'   => 'nullable|integer|min:0'
-                ]);
-
-                $qty = (int) ($request->quantity ?? 0);
-
-                $existingProduct = Product::findOrFail($request->product_id);
-
-                $product = Product::where('name', $existingProduct->name)
-                    ->where('size', $existingProduct->size)
-                    ->where('branch_id', $request->branch_id)
-                    ->first();
-
-                if ($product) {
-
-                    $product->stock += $qty;
-                    $product->price = $request->price;
-                    $product->save();
-
-                } else {
-
-                    $product = Product::create([
-                        'name'      => $existingProduct->name,
-                        'size'      => $existingProduct->size,
-                        'price'     => $request->price,
-                        'stock'     => $qty,
-                        'color'     => $existingProduct->color,
-                        'branch_id' => $request->branch_id,
-                    ]);
-                }
-
-                if ($qty > 0) {
-                    StockMovement::create([
-                        'product_id' => $product->id,
-                        'branch_id'  => $request->branch_id,
-                        'type'       => 'IN',
-                        'quantity'   => $qty,
-                        'reason'     => 'Manual Add',
-                        'dr_number'  => $request->dr_number,
-                        'unit_price' => $request->price,
-                    ]);
-                }
             }
-
-            DB::commit();
-
-            return back()->with('success', 'Saved successfully!');
-
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
         }
+
+        DB::commit();
+
+        return back()->with('success', 'Saved successfully!');
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return back()->with('error', $e->getMessage());
     }
+}
 
     // =====================
     // OVERVIEW STOCK
