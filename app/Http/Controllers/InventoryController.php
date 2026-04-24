@@ -180,27 +180,38 @@ public function store(Request $request)
     // OVERVIEW STOCK
     // =====================
     public function overviewStock(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $query = Product::with('branch');
-
-        if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->branch_id) {
-            $query->where('branch_id', $request->branch_id);
-        }
-
-        $products = $query->paginate(10)->withQueryString();
-        $branches = Branch::all();
-
-        return view('admin.overview-stock', compact('products', 'branches'));
+{
+    if (!Auth::check()) {
+        return redirect('/login');
     }
 
+    $query = Product::with('branch');
+
+    if ($request->search) {
+        $query->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    if ($request->branch_id) {
+        $query->where('branch_id', $request->branch_id);
+    }
+
+    $products = $query->paginate(10)->withQueryString();
+    $branches = Branch::all();
+
+    // ✅ UNIQUE TOTAL PRODUCTS (name + size)
+    $totalProducts = Product::when($request->branch_id, function ($q) use ($request) {
+            $q->where('branch_id', $request->branch_id);
+        })
+        ->select('name', 'size')
+        ->distinct()
+        ->count();
+
+    return view('admin.overview-stock', compact(
+        'products',
+        'branches',
+        'totalProducts'
+    ));
+}
     // =====================
 // EXPORT EXCEL
 // =====================
