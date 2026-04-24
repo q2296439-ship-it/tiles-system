@@ -255,7 +255,7 @@ svg{
 
         <div class="stat">
             <small>Total Products</small>
-            <h2>{{ $products->total() }}</h2>
+            <h2>{{ $totalProducts }}</h2>
         </div>
 
         <div class="stat">
