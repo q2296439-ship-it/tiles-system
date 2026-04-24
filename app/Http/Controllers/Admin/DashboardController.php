@@ -19,12 +19,16 @@ class DashboardController extends Controller
         $branches = Branch::all();
 
         // =====================
- // TOTAL PRODUCTS
- // =====================
-$totalProducts = Product::when($branchId, function ($q) use ($branchId) {
-        $q->where('branch_id', $branchId);
-    })
-    ->count();
+        // TOTAL PRODUCTS
+        // UNIQUE BY NAME + SIZE
+        // =====================
+        $totalProducts = Product::when($branchId, function ($q) use ($branchId) {
+                $q->where('branch_id', $branchId);
+            })
+            ->select('name', 'size')
+            ->distinct()
+            ->get()
+            ->count();
 
         // =====================
         // LOW STOCKS
