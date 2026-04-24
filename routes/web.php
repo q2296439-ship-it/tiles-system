@@ -245,7 +245,7 @@ Route::get('/manager/store-expenses/excel', [ExpenseController::class, 'excel'])
 // =====================
 // ADMIN GROUP
 // =====================
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware('auth')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
@@ -351,7 +351,7 @@ Route::get('/store-expenses/excel', [ExpenseController::class, 'excel'])->name('
 // =====================
 // 🔥 CASHIER
 // =====================
-Route::prefix('cashier')->group(function () {
+Route::prefix('cashier')->middleware('auth')->group(function () {
 
     Route::get('/', [CashierController::class, 'index'])->name('cashier.dashboard');
     Route::post('/checkout', [CashierController::class, 'checkout']);
