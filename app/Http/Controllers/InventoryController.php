@@ -35,6 +35,8 @@ public function store(Request $request)
 {
     DB::beginTransaction();
 
+    try {
+
     if ($request->mode === 'new') {
 
     $request->validate([
