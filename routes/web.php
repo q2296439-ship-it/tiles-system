@@ -249,7 +249,7 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
-
+    Route::get('/sync-products', [ProductController::class, 'syncProducts']);
     Route::get('/collection', [CollectionController::class, 'today']);
 
     Route::get('/inventory', [InventoryController::class, 'overviewStock']);

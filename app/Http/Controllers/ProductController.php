@@ -6,40 +6,42 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Branch;
 use App\Models\StockMovement;
+use App\Models\Announcement;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     // =====================
-// SHOW PRODUCTS
-// =====================
-public function index(Request $request)
-{
-    $user = Auth::user();
-    $role = strtolower($user->role);
+    // SHOW PRODUCTS
+    // =====================
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $role = strtolower($user->role);
 
-    $query = Product::with('branch');
+        $query = Product::with('branch');
 
-    if (!in_array($role, ['admin', 'manager', 'audit'])) {
-        $query->where('branch_id', $user->branch_id);
+        if (!in_array($role, ['admin', 'manager', 'audit'])) {
+            $query->where('branch_id', $user->branch_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('size', 'like', "%{$search}%")
+                  ->orWhere('color', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->latest()->paginate(10)->withQueryString();
+
+        return view('products.index', compact('products'));
     }
 
-    if ($request->filled('search')) {
-        $search = $request->search;
-
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('sku', 'like', "%{$search}%")
-              ->orWhere('size', 'like', "%{$search}%")
-              ->orWhere('color', 'like', "%{$search}%");
-        });
-    }
-
-    $products = $query->latest()->paginate(10)->withQueryString();
-
-    return view('products.index', compact('products'));
-}
     // =====================
     // ADMIN OVERVIEW STOCK
     // =====================
@@ -136,6 +138,7 @@ public function index(Request $request)
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        $oldPrice = $product->price;
 
         $request->validate([
             'sku' => 'required|string|max:100',
@@ -151,56 +154,68 @@ public function index(Request $request)
 
         DB::beginTransaction();
 
-       try {
+        try {
 
-    // Update price/info to all same product + size
-    Product::where('name', $product->name)
-        ->where('size', $product->size)
-        ->update([
-            'sku' => $request->sku,
-            'category' => $request->category,
-            'name' => $request->name,
-            'size' => $request->size,
-            'color' => $request->color,
-            'price' => $request->price,
-            'low_stock_threshold' => $request->low_stock_threshold,
-        ]);
+            // Update price/info to all same product + size
+            Product::where('name', $product->name)
+                ->where('size', $product->size)
+                ->update([
+                    'sku' => $request->sku,
+                    'category' => $request->category,
+                    'name' => $request->name,
+                    'size' => $request->size,
+                    'color' => $request->color,
+                    'price' => $request->price,
+                    'low_stock_threshold' => $request->low_stock_threshold,
+                ]);
 
-    // Update stock only current branch record
-    $product->update([
-        'stock' => $request->stock,
-        'branch_id' => $request->branch_id,
-    ]);
+            // Update stock only current branch
+            $product->update([
+                'stock' => $request->stock,
+                'branch_id' => $request->branch_id,
+            ]);
 
-    DB::table('branch_product')->updateOrInsert(
-        [
-            'product_id' => $product->id,
-            'branch_id' => $request->branch_id,
-        ],
-        [
-            'stock' => $request->stock,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]
-    );
+            DB::table('branch_product')->updateOrInsert(
+                [
+                    'product_id' => $product->id,
+                    'branch_id' => $request->branch_id,
+                ],
+                [
+                    'stock' => $request->stock,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
 
-    StockMovement::create([
-        'product_id' => $product->id,
-        'branch_id' => $request->branch_id,
-        'type' => 'IN',
-        'quantity' => $request->stock,
-        'reason' => 'Product updated',
-    ]);
+            StockMovement::create([
+                'product_id' => $product->id,
+                'branch_id' => $request->branch_id,
+                'type' => 'IN',
+                'quantity' => $request->stock,
+                'reason' => 'Product updated',
+            ]);
 
-    DB::commit();
+            // Auto Announcement if price changed
+            if ($oldPrice != $request->price) {
+                Announcement::create([
+                    'title'      => 'Pricing Adjustment',
+                    'message'    => 'Product ' . $request->name . ' - ' . $request->size .
+                                    ' price changed from ₱' . number_format($oldPrice, 2) .
+                                    ' to ₱' . number_format($request->price, 2),
+                    'created_by' => auth()->id(),
+                    'is_active'  => 1,
+                ]);
+            }
 
-} catch (\Exception $e) {
-    DB::rollBack();
-    return back()->with('error', $e->getMessage());
-}
+            DB::commit();
 
-return redirect('/admin/products')->with('success', 'Product updated successfully');
-}
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect('/admin/products')->with('success', 'Product updated successfully');
+    }
 
     // =====================
     // DELETE PRODUCT
@@ -211,6 +226,68 @@ return redirect('/admin/products')->with('success', 'Product updated successfull
         $product->delete();
 
         return redirect('/admin/products')->with('success', 'Product deleted successfully');
+    }
+
+    // =====================
+    // SYNC SAN ISIDRO PRODUCTS TO ALL BRANCHES
+    // =====================
+    public function syncProducts()
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $sourceProducts = Product::where('branch_id', 1)->get();
+            $branches = Branch::where('id', '!=', 1)->get();
+
+            $created = 0;
+
+            foreach ($sourceProducts as $item) {
+
+                foreach ($branches as $branch) {
+
+                    $exists = Product::where('name', $item->name)
+                        ->where('size', $item->size)
+                        ->where('branch_id', $branch->id)
+                        ->exists();
+
+                    if (!$exists) {
+
+                        $new = Product::create([
+                            'sku' => $item->sku,
+                            'category' => $item->category,
+                            'name' => $item->name,
+                            'size' => $item->size,
+                            'color' => $item->color,
+                            'price' => $item->price,
+                            'stock' => 0,
+                            'low_stock_threshold' => $item->low_stock_threshold,
+                            'branch_id' => $branch->id,
+                        ]);
+
+                        DB::table('branch_product')->insert([
+                            'product_id' => $new->id,
+                            'branch_id' => $branch->id,
+                            'stock' => 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        $created++;
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return back()->with('success', $created . ' products synced successfully.');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     // =====================
