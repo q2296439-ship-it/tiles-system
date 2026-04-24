@@ -228,68 +228,7 @@ class ProductController extends Controller
         return redirect('/admin/products')->with('success', 'Product deleted successfully');
     }
 
-    // =====================
-    // SYNC SAN ISIDRO PRODUCTS TO ALL BRANCHES
-    // =====================
-    public function syncProducts()
-    {
-        DB::beginTransaction();
-
-        try {
-
-            $sourceProducts = Product::where('branch_id', 1)->get();
-            $branches = Branch::where('id', '!=', 1)->get();
-
-            $created = 0;
-
-            foreach ($sourceProducts as $item) {
-
-                foreach ($branches as $branch) {
-
-                    $exists = Product::where('name', $item->name)
-                        ->where('size', $item->size)
-                        ->where('branch_id', $branch->id)
-                        ->exists();
-
-                    if (!$exists) {
-
-                        $new = Product::create([
-                            'sku' => $item->sku,
-                            'category' => $item->category,
-                            'name' => $item->name,
-                            'size' => $item->size,
-                            'color' => $item->color,
-                            'price' => $item->price,
-                            'stock' => 0,
-                            'low_stock_threshold' => $item->low_stock_threshold,
-                            'branch_id' => $branch->id,
-                        ]);
-
-                        DB::table('branch_product')->insert([
-                            'product_id' => $new->id,
-                            'branch_id' => $branch->id,
-                            'stock' => 0,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-
-                        $created++;
-                    }
-                }
-            }
-
-            DB::commit();
-
-            return back()->with('success', $created . ' products synced successfully.');
-
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-
-            return back()->with('error', $e->getMessage());
-        }
-    }
-
+    
     // =====================
     // EXPORT CSV
     // =====================

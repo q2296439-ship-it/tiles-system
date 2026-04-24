@@ -949,4 +949,48 @@ public function defectiveStore(Request $request)
         return back()->with('error', $e->getMessage());
     }
 }
+public function syncProducts()
+{
+    DB::beginTransaction();
+
+    try {
+
+        $sourceProducts = Product::where('branch_id', 1)->get();
+        $branches = Branch::where('id', '!=', 1)->get();
+
+        $created = 0;
+
+        foreach ($sourceProducts as $item) {
+            foreach ($branches as $branch) {
+
+                $exists = Product::where('name', $item->name)
+                    ->where('size', $item->size)
+                    ->where('branch_id', $branch->id)
+                    ->exists();
+
+                if (!$exists) {
+
+                    $new = Product::create([
+                        'name' => $item->name,
+                        'size' => $item->size,
+                        'price' => $item->price,
+                        'stock' => 0,
+                        'color' => $item->color,
+                        'branch_id' => $branch->id,
+                    ]);
+
+                    $created++;
+                }
+            }
+        }
+
+        DB::commit();
+
+        return back()->with('success', $created . ' synced successfully');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
+    }
+}
 }
