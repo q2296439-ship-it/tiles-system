@@ -15,7 +15,7 @@ class ProductController extends Controller
      // =====================
  // SHOW PRODUCTS
  // =====================
-public function overviewStock(Request $request)
+public function index(Request $request)
 {
     if (!Auth::check()) {
         return redirect('/login');
