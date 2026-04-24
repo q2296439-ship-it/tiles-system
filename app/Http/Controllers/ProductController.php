@@ -16,31 +16,42 @@ class ProductController extends Controller
     // SHOW PRODUCTS
     // =====================
     public function index(Request $request)
-    {
-        $user = Auth::user();
-        $role = strtolower($user->role);
+{
+    $user = Auth::user();
+    $role = strtolower($user->role);
 
-        $query = Product::with('branch');
+    $query = Product::with('branch');
 
-        if (!in_array($role, ['admin', 'manager', 'audit'])) {
-            $query->where('branch_id', $user->branch_id);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhere('size', 'like', "%{$search}%")
-                  ->orWhere('color', 'like', "%{$search}%");
-            });
-        }
-
-        $products = $query->latest()->paginate(10)->withQueryString();
-
-        return view('products.index', compact('products'));
+    if (!in_array($role, ['admin', 'manager', 'audit'])) {
+        $query->where('branch_id', $user->branch_id);
     }
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('sku', 'like', "%{$search}%")
+              ->orWhere('size', 'like', "%{$search}%")
+              ->orWhere('color', 'like', "%{$search}%");
+        });
+    }
+
+    $products = $query->latest()->paginate(10)->withQueryString();
+
+    // UNIQUE TOTAL PRODUCTS
+    $totalProducts = Product::when(!in_array($role, ['admin', 'manager', 'audit']), function ($q) use ($user) {
+            $q->where('branch_id', $user->branch_id);
+        })
+        ->select('name', 'size')
+        ->distinct()
+        ->count();
+
+    return view('products.index', compact(
+        'products',
+        'totalProducts'
+    ));
+}
 
     // =====================
     // ADMIN OVERVIEW STOCK
