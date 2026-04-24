@@ -15,14 +15,10 @@ class ProductController extends Controller
      // =====================
  // SHOW PRODUCTS
  // =====================
-public function index(Request $request)
+public function overviewStock(Request $request)
 {
     if (!Auth::check()) {
         return redirect('/login');
-    }
-
-    if (strtolower(Auth::user()->role) !== 'admin') {
-        abort(403, 'Unauthorized Access');
     }
 
     $user = Auth::user();

@@ -185,10 +185,6 @@ public function overviewStock(Request $request)
         return redirect('/login');
     }
 
-    if (!in_array(strtolower(Auth::user()->role), ['admin'])) {
-        abort(403, 'Unauthorized Access');
-    }
-
     $query = Product::with('branch');
 
     if ($request->search) {

@@ -12,16 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+public function overviewStock(Request $request)
 {
-    if (!auth()->check()) {
+    if (!Auth::check()) {
         return redirect('/login');
     }
-
-    if (strtolower(auth()->user()->role) !== 'admin') {
-        abort(403, 'Unauthorized Access');
-    }
-
     $branchId = $request->branch_id;
 
     $branches = Branch::all();
