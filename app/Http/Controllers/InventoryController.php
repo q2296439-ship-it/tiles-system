@@ -35,61 +35,79 @@ public function store(Request $request)
 {
     DB::beginTransaction();
 
-    try {
+    if ($request->mode === 'new') {
 
-        if ($request->mode === 'new') {
+    $request->validate([
+        'new_name'  => 'required|string',
+        'new_price' => 'nullable|numeric',
+        'quantity'  => 'required|integer|min:1',
+        'branch_id' => 'required|exists:branches,id'
+    ]);
 
-            $request->validate([
-                'new_name'  => 'required|string',
-                'new_price' => 'nullable|numeric',
-                'quantity'  => 'required|integer|min:1',
-                'branch_id' => 'required|exists:branches,id'
-            ]);
+    if (strtolower(auth()->user()->role) === 'cashier') {
+        $request->merge([
+            'new_price' => 0
+        ]);
+    }
 
-            // Cashier cannot input price → auto 0
-            if (strtolower(auth()->user()->role) === 'cashier') {
-                $request->merge([
-                    'new_price' => 0
-                ]);
-            }
+    $name  = trim($request->new_name);
+    $size  = trim($request->new_size);
+    $price = $request->new_price;
 
-            // Prevent duplicate product (same name + size + branch)
-            $exists = Product::whereRaw(
-                    'LOWER(TRIM(name)) = ?',
-                    [strtolower(trim($request->new_name))]
-                )
-                ->whereRaw(
-                    'LOWER(TRIM(size)) = ?',
-                    [strtolower(trim($request->new_size))]
-                )
-                ->where('branch_id', $request->branch_id)
+    $exists = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower($name)])
+        ->whereRaw('LOWER(TRIM(size)) = ?', [strtolower($size)])
+        ->where('branch_id', $request->branch_id)
+        ->exists();
+
+    if ($exists) {
+        throw new \Exception('Product already existed on the system.');
+    }
+
+    $product = Product::create([
+        'name'      => $name,
+        'size'      => $size,
+        'price'     => $price,
+        'stock'     => $request->quantity,
+        'color'     => 'N/A',
+        'branch_id' => $request->branch_id,
+    ]);
+
+    StockMovement::create([
+        'product_id' => $product->id,
+        'branch_id'  => $request->branch_id,
+        'type'       => 'IN',
+        'quantity'   => $request->quantity,
+        'reason'     => 'New Product Added',
+        'dr_number'  => $request->dr_number_new,
+        'unit_price' => $price,
+    ]);
+
+    // AUTO CENTRALIZED IF SAN ISIDRO
+    if ((int)$request->branch_id === 1) {
+
+        $branches = Branch::where('id', '!=', 1)->get();
+
+        foreach ($branches as $branch) {
+
+            $already = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower($name)])
+                ->whereRaw('LOWER(TRIM(size)) = ?', [strtolower($size)])
+                ->where('branch_id', $branch->id)
                 ->exists();
 
-            if ($exists) {
-                throw new \Exception('Product already existed on the system.');
+            if (!$already) {
+                Product::create([
+                    'name'      => $name,
+                    'size'      => $size,
+                    'price'     => $price,
+                    'stock'     => 0,
+                    'color'     => 'N/A',
+                    'branch_id' => $branch->id,
+                ]);
             }
+        }
+    }
 
-            $product = Product::create([
-                'name'      => trim($request->new_name),
-                'size'      => trim($request->new_size),
-                'price'     => $request->new_price,
-                'stock'     => $request->quantity,
-                'color'     => 'N/A',
-                'branch_id' => $request->branch_id,
-            ]);
-
-            StockMovement::create([
-                'product_id' => $product->id,
-                'branch_id'  => $request->branch_id,
-                'type'       => 'IN',
-                'quantity'   => $request->quantity,
-                'reason'     => 'New Product Added',
-                'dr_number'  => $request->dr_number_new,
-                'unit_price' => $request->new_price,
-            ]);
-
-        } else {
-
+} else {
             $request->validate([
                 'product_id' => 'required|exists:products,id',
                 'branch_id'  => 'required|exists:branches,id',
