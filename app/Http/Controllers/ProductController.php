@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // =====================
-    // SHOW PRODUCTS
-    // =====================
-    public function index(Request $request)
+     // =====================
+ // SHOW PRODUCTS
+ // =====================
+public function index(Request $request)
 {
     $user = Auth::user();
     $role = strtolower($user->role);
@@ -39,12 +39,17 @@ class ProductController extends Controller
 
     $products = $query->latest()->paginate(10)->withQueryString();
 
-    // UNIQUE TOTAL PRODUCTS
-    $totalProducts = Product::when(!in_array($role, ['admin', 'manager', 'audit']), function ($q) use ($user) {
-            $q->where('branch_id', $user->branch_id);
+    // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
+    $totalProducts = Product::when(
+            !in_array($role, ['admin', 'manager', 'audit']),
+            function ($q) use ($user) {
+                $q->where('branch_id', $user->branch_id);
+            }
+        )
+        ->get()
+        ->unique(function ($item) {
+            return strtolower(trim($item->name)) . '|' . strtolower(trim($item->size));
         })
-        ->select('name', 'size')
-        ->distinct()
         ->count();
 
     return view('products.index', compact(
