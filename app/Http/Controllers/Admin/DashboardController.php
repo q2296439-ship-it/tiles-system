@@ -13,10 +13,18 @@ use Illuminate\Support\Facades\DB;
 class DashboardController extends Controller
 {
     public function index(Request $request)
-    {
-        $branchId = $request->branch_id;
+{
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
 
-        $branches = Branch::all();
+    if (strtolower(auth()->user()->role) !== 'admin') {
+        abort(403, 'Unauthorized Access');
+    }
+
+    $branchId = $request->branch_id;
+
+    $branches = Branch::all();
 
         // =====================
         // TOTAL PRODUCTS
