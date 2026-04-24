@@ -9,22 +9,20 @@ use App\Models\Branch;
 use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-public function overviewStock(Request $request)
-{
-    if (!Auth::check()) {
-        return redirect('/login');
-    }
-    $branchId = $request->branch_id;
+    public function index(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
 
-    $branches = Branch::all();
+        $branchId = $request->branch_id;
 
-        // =====================
-        // TOTAL PRODUCTS
-        // UNIQUE BY NAME + SIZE
-        // =====================
+        $branches = Branch::all();
+
         $totalProducts = Product::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
@@ -33,9 +31,6 @@ public function overviewStock(Request $request)
             ->get()
             ->count();
 
-        // =====================
-        // LOW STOCKS
-        // =====================
         $lowStocks = DB::table('branch_product')
             ->join('products', 'branch_product.product_id', '=', 'products.id')
             ->join('branches', 'branch_product.branch_id', '=', 'branches.id')
@@ -50,27 +45,18 @@ public function overviewStock(Request $request)
             )
             ->get();
 
-        // =====================
-        // TODAY SALES
-        // =====================
         $todaySales = Sale::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
             ->whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
-        // =====================
-        // TRANSACTIONS TODAY
-        // =====================
         $transactionsToday = Sale::when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
             })
             ->whereDate('created_at', Carbon::today())
             ->count();
 
-        // =====================
-        // GRAPH (LAST 7 DAYS)
-        // =====================
         $dates = collect();
 
         for ($i = 6; $i >= 0; $i--) {
@@ -88,9 +74,6 @@ public function overviewStock(Request $request)
             return [$date => $salesRaw[$date] ?? 0];
         });
 
-        // =====================
-        // RECENT SALES
-        // =====================
         $recentSales = Sale::with('branch')
             ->when($branchId, function ($q) use ($branchId) {
                 $q->where('branch_id', $branchId);
@@ -99,9 +82,6 @@ public function overviewStock(Request $request)
             ->take(10)
             ->get();
 
-        // =====================
-        // TOP BRANCHES
-        // =====================
         $topBranches = Sale::join('branches', 'sales.branch_id', '=', 'branches.id')
             ->selectRaw('branches.id, branches.name as branch_name, SUM(total_amount) as total')
             ->groupBy('branches.id', 'branches.name')
