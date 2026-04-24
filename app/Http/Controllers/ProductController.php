@@ -12,55 +12,55 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-     // =====================
- // SHOW PRODUCTS
- // =====================
-public function index(Request $request)
-{
-    if (!Auth::check()) {
-        return redirect('/login');
+    // =====================
+    // SHOW PRODUCTS
+    // =====================
+    public function index(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        $user = Auth::user();
+        $role = strtolower($user->role);
+
+        $query = Product::with('branch');
+
+        if (!in_array($role, ['admin', 'manager', 'audit'])) {
+            $query->where('branch_id', $user->branch_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('size', 'like', "%{$search}%")
+                    ->orWhere('color', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->latest()->paginate(10)->withQueryString();
+
+        // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
+        $totalProducts = Product::when(
+                !in_array($role, ['admin', 'manager', 'audit']),
+                function ($q) use ($user) {
+                    $q->where('branch_id', $user->branch_id);
+                }
+            )
+            ->get()
+            ->unique(function ($item) {
+                return strtolower(trim($item->name)) . '|' . strtolower(trim($item->size));
+            })
+            ->count();
+
+        return view('products.index', compact(
+            'products',
+            'totalProducts'
+        ));
     }
-
-    $user = Auth::user();
-    $role = strtolower($user->role);
-
-    $query = Product::with('branch');
-
-    if (!in_array($role, ['admin', 'manager', 'audit'])) {
-        $query->where('branch_id', $user->branch_id);
-    }
-
-    if ($request->filled('search')) {
-        $search = $request->search;
-
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('sku', 'like', "%{$search}%")
-              ->orWhere('size', 'like', "%{$search}%")
-              ->orWhere('color', 'like', "%{$search}%");
-        });
-    }
-
-    $products = $query->latest()->paginate(10)->withQueryString();
-
-    // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
-    $totalProducts = Product::when(
-            !in_array($role, ['admin', 'manager', 'audit']),
-            function ($q) use ($user) {
-                $q->where('branch_id', $user->branch_id);
-            }
-        )
-        ->get()
-        ->unique(function ($item) {
-            return strtolower(trim($item->name)) . '|' . strtolower(trim($item->size));
-        })
-        ->count();
-
-    return view('products.index', compact(
-        'products',
-        'totalProducts'
-    ));
-}
 
     // =====================
     // ADMIN OVERVIEW STOCK
@@ -132,7 +132,6 @@ public function index(Request $request)
             ]);
 
             DB::commit();
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Error saving product');
@@ -175,8 +174,6 @@ public function index(Request $request)
         DB::beginTransaction();
 
         try {
-
-            // Update price/info to all same product + size
             Product::where('name', $product->name)
                 ->where('size', $product->size)
                 ->update([
@@ -189,7 +186,6 @@ public function index(Request $request)
                     'low_stock_threshold' => $request->low_stock_threshold,
                 ]);
 
-            // Update stock only current branch
             $product->update([
                 'stock' => $request->stock,
                 'branch_id' => $request->branch_id,
@@ -215,20 +211,18 @@ public function index(Request $request)
                 'reason' => 'Product updated',
             ]);
 
-            // Auto Announcement if price changed
             if ($oldPrice != $request->price) {
                 Announcement::create([
-                    'title'      => 'Pricing Adjustment',
-                    'message'    => 'Product ' . $request->name . ' - ' . $request->size .
-                                    ' price changed from ₱' . number_format($oldPrice, 2) .
-                                    ' to ₱' . number_format($request->price, 2),
+                    'title' => 'Pricing Adjustment',
+                    'message' => 'Product ' . $request->name . ' - ' . $request->size .
+                        ' price changed from ₱' . number_format($oldPrice, 2) .
+                        ' to ₱' . number_format($request->price, 2),
                     'created_by' => auth()->id(),
-                    'is_active'  => 1,
+                    'is_active' => 1,
                 ]);
             }
 
             DB::commit();
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
@@ -248,7 +242,6 @@ public function index(Request $request)
         return redirect('/admin/products')->with('success', 'Product deleted successfully');
     }
 
-    
     // =====================
     // EXPORT CSV
     // =====================
