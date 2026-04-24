@@ -17,6 +17,14 @@ class ProductController extends Controller
  // =====================
 public function index(Request $request)
 {
+    if (!Auth::check()) {
+        return redirect('/login');
+    }
+
+    if (strtolower(Auth::user()->role) !== 'admin') {
+        abort(403, 'Unauthorized Access');
+    }
+
     $user = Auth::user();
     $role = strtolower($user->role);
 
