@@ -176,10 +176,10 @@ public function store(Request $request)
     }
 }         
 
-    // =====================
-    // OVERVIEW STOCK
-    // =====================
-    public function overviewStock(Request $request)
+     // =====================
+ // OVERVIEW STOCK
+ // =====================
+public function overviewStock(Request $request)
 {
     if (!Auth::check()) {
         return redirect('/login');
@@ -195,15 +195,17 @@ public function store(Request $request)
         $query->where('branch_id', $request->branch_id);
     }
 
-    $products = $query->paginate(10)->withQueryString();
+    $products = $query->latest()->paginate(10)->withQueryString();
     $branches = Branch::all();
 
-    // ✅ UNIQUE TOTAL PRODUCTS (name + size)
+    // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
     $totalProducts = Product::when($request->branch_id, function ($q) use ($request) {
             $q->where('branch_id', $request->branch_id);
         })
-        ->select('name', 'size')
-        ->distinct()
+        ->get()
+        ->unique(function ($item) {
+            return strtolower(trim($item->name)) . '|' . strtolower(trim($item->size));
+        })
         ->count();
 
     return view('admin.overview-stock', compact(
