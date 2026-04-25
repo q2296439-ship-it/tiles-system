@@ -54,7 +54,6 @@ body{
     color:#64748b;
     margin-bottom:28px;
 }
-
 .logo-wrap{
     width:110px;
     height:110px;
@@ -77,7 +76,6 @@ body{
     display:block;
     background:transparent;
 }
-
 .title{
     text-align:center;
     font-size:28px;
