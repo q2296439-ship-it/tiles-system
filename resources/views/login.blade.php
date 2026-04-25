@@ -56,18 +56,26 @@ body{
 }
 
 .logo-wrap{
-    text-align:center;
-    width:100%;
+    width:110px;
+    height:110px;
     margin:0 auto 16px;
+    border-radius:50%;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    padding:0;
+    box-shadow:0 10px 25px rgba(0,0,0,.18);
 }
 
 .login-logo{
-    width:90px;
-    height:90px;
-    object-fit:contain;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
     display:block;
-    margin:0 auto;
-    filter:drop-shadow(0 8px 18px rgba(0,0,0,.12));
+    background:transparent;
 }
 
 .title{
