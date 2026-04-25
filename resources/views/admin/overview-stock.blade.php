@@ -180,22 +180,62 @@ tbody tr:hover{
 }
 
 .pagination{
-    margin-top:18px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:6px;
+    margin-top:22px;
+    width:100%;
+}
+
+.pagination nav{
+    width:100%;
+}
+
+.pagination .flex{
+    display:flex !important;
+    justify-content:center !important;
+    align-items:center !important;
     flex-wrap:wrap;
+    gap:8px;
+}
+
+.pagination a,
+.pagination span{
+    min-width:38px;
+    height:38px;
+    padding:0 12px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+    border:1px solid #dbeafe;
+    background:#fff;
+    color:#2563eb;
+}
+
+.pagination a:hover{
+    background:#eff6ff;
+}
+
+.pagination span[aria-current="page"],
+.pagination .z-10{
+    background:#2563eb !important;
+    color:#fff !important;
+    border-color:#2563eb !important;
+}
+
+.pagination p{
+    display:none !important;
 }
 
 .pagination svg{
-    width:18px !important;
-    height:18px !important;
+    width:16px !important;
+    height:16px !important;
 }
 
 svg{
-    max-width:18px;
-    max-height:18px;
+    max-width:16px;
+    max-height:16px;
 }
 
 .empty{
@@ -220,15 +260,14 @@ svg{
                 class="search">
 
             <select name="branch_id" class="select">
-                <option value="">All Branch</option>
-                @foreach($branches as $b)
-                    <option value="{{ $b->id }}"
-                        {{ request('branch_id') == $b->id ? 'selected' : '' }}>
-                        {{ $b->name }}
-                    </option>
-                @endforeach
-            </select>
-
+    <option value="">All Branch</option>
+    @foreach($branches as $b)
+        <option value="{{ $b->id }}"
+            {{ ($selectedBranch ?? request('branch_id')) == $b->id ? 'selected' : '' }}>
+            {{ $b->name }}
+        </option>
+    @endforeach
+</select>
             <button type="submit" class="btn">Filter</button>
 
             @php

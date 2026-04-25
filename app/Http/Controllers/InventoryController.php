@@ -176,31 +176,38 @@ public function store(Request $request)
     }
 }         
 
-     // =====================
- // OVERVIEW STOCK
- // =====================
-public function overviewStock(Request $request)
+   public function overviewStock(Request $request)
 {
     if (!Auth::check()) {
         return redirect('/login');
     }
 
+    $user = Auth::user();
+    $role = strtolower($user->role);
+
     $query = Product::with('branch');
+
+    $selectedBranch = $request->branch_id;
+
+    // Cashier default sariling branch
+    if (!$selectedBranch && $role === 'cashier') {
+        $selectedBranch = $user->branch_id;
+    }
 
     if ($request->search) {
         $query->where('name', 'like', '%' . $request->search . '%');
     }
 
-    if ($request->branch_id) {
-        $query->where('branch_id', $request->branch_id);
+    if ($selectedBranch) {
+        $query->where('branch_id', $selectedBranch);
     }
 
     $products = $query->latest()->paginate(10)->withQueryString();
     $branches = Branch::all();
 
     // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
-    $totalProducts = Product::when($request->branch_id, function ($q) use ($request) {
-            $q->where('branch_id', $request->branch_id);
+    $totalProducts = Product::when($selectedBranch, function ($q) use ($selectedBranch) {
+            $q->where('branch_id', $selectedBranch);
         })
         ->get()
         ->unique(function ($item) {
@@ -211,7 +218,8 @@ public function overviewStock(Request $request)
     return view('admin.overview-stock', compact(
         'products',
         'branches',
-        'totalProducts'
+        'totalProducts',
+        'selectedBranch'
     ));
 }
     // =====================
