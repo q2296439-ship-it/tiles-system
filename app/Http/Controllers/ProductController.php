@@ -65,10 +65,13 @@ public function index(Request $request)
         })
         ->count();
 
-    return view('products.index', compact(
-        'products',
-        'totalProducts'
-    ));
+    $branches = Branch::all();
+
+return view('products.index', compact(
+    'products',
+    'totalProducts',
+    'branches'
+));
 }
     // =====================
     // ADMIN OVERVIEW STOCK
