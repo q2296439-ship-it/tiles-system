@@ -58,7 +58,9 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;background:#1f2d6
 <div class="left">
 <div class="brand">NMC HOME IMPROVEMENT CENTER</div>
 <div class="sub">Secure ERP Access Portal</div>
-<div class="avatar">👤</div>
+<div class="logo-wrap">
+    <img src="/logo.png" alt="NMC Logo" class="login-logo">
+</div>
 <div class="title">Login</div>
 @if($errors->any())<div class="error">{{ $errors->first() }}</div>@endif
 <form method="POST" action="/login">
