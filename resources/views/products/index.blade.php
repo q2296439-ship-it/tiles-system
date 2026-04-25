@@ -259,7 +259,7 @@ svg{
 
         <div class="top-actions">
             <a href="/admin/products/create" class="btn green">+ Add Product</a>
-            <button onclick="window.print()" class="btn gray">🖨 Print</button>
+            <a href="/admin/products/export" class="btn gray">📗 Excel</a>
         </div>
     </div>
 
