@@ -12,56 +12,64 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    // =====================
-    // SHOW PRODUCTS
-    // =====================
-    public function index(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect('/login');
-        }
-
-        $user = Auth::user();
-        $role = strtolower($user->role);
-
-        $query = Product::with('branch');
-
-        if (!in_array($role, ['admin', 'manager', 'audit'])) {
-            $query->where('branch_id', $user->branch_id);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%")
-                    ->orWhere('size', 'like', "%{$search}%")
-                    ->orWhere('color', 'like', "%{$search}%");
-            });
-        }
-
-        $products = $query->latest()->paginate(10)->withQueryString();
-
-        // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
-        $totalProducts = Product::when(
-                !in_array($role, ['admin', 'manager', 'audit']),
-                function ($q) use ($user) {
-                    $q->where('branch_id', $user->branch_id);
-                }
-            )
-            ->get()
-            ->unique(function ($item) {
-                return strtolower(trim($item->name)) . '|' . strtolower(trim($item->size));
-            })
-            ->count();
-
-        return view('products.index', compact(
-            'products',
-            'totalProducts'
-        ));
+     // =====================
+ // SHOW PRODUCTS
+ // =====================
+public function index(Request $request)
+{
+    if (!Auth::check()) {
+        return redirect('/login');
     }
 
+    $user = Auth::user();
+    $role = strtolower($user->role);
+
+    $query = Product::with('branch');
+
+    if (!in_array($role, ['admin', 'manager', 'audit'])) {
+        $query->where('branch_id', $user->branch_id);
+    }
+
+    // BRANCH FILTER
+    if ($request->filled('branch_id')) {
+        $query->where('branch_id', $request->branch_id);
+    }
+
+    // SEARCH
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('sku', 'like', "%{$search}%")
+                ->orWhere('size', 'like', "%{$search}%")
+                ->orWhere('color', 'like', "%{$search}%");
+        });
+    }
+
+    $products = $query->latest()->paginate(10)->withQueryString();
+
+    // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
+    $totalProducts = Product::when(
+            !in_array($role, ['admin', 'manager', 'audit']),
+            function ($q) use ($user) {
+                $q->where('branch_id', $user->branch_id);
+            }
+        )
+        ->when($request->filled('branch_id'), function ($q) use ($request) {
+            $q->where('branch_id', $request->branch_id);
+        })
+        ->get()
+        ->unique(function ($item) {
+            return strtolower(trim($item->name)) . '|' . strtolower(trim($item->size));
+        })
+        ->count();
+
+    return view('products.index', compact(
+        'products',
+        'totalProducts'
+    ));
+}
     // =====================
     // ADMIN OVERVIEW STOCK
     // =====================

@@ -288,21 +288,34 @@ svg{
 
     </div>
 
-    {{-- PRODUCT TABLE --}}
-    <div class="card">
+   {{-- PRODUCT TABLE --}}
+<div class="card">
 
-        <div class="top-bar">
-    <form method="GET" action="{{ url('/admin/products') }}">
-        <input
-            type="text"
-            name="search"
-            class="search"
-            placeholder="🔍 Search product..."
-            value="{{ request('search') }}"
-        >
-    </form>
+<div class="top-bar">
+<form method="GET" action="{{ url('/admin/products') }}" style="display:flex;gap:10px;flex-wrap:wrap;">
+
+    <input
+        type="text"
+        name="search"
+        class="search"
+        placeholder="🔍 Search product..."
+        value="{{ request('search') }}"
+    >
+
+    <select name="branch_id" class="search" style="width:220px;">
+        <option value="">All Branch</option>
+        @foreach($branches as $b)
+            <option value="{{ $b->id }}"
+                {{ request('branch_id') == $b->id ? 'selected' : '' }}>
+                {{ $b->name }}
+            </option>
+        @endforeach
+    </select>
+
+    <button type="submit" class="btn blue">Filter</button>
+
+</form>
 </div>
-
         <table id="productTable">
             <thead>
                 <tr>
