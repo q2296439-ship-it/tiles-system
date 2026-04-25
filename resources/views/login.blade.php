@@ -326,7 +326,7 @@ body{
     <div class="sub">Secure ERP Access Portal</div>
 
     <div class="logo-wrap">
-        <img src="/logo.png" alt="NMC Logo" class="login-logo">
+        <img src="/logo.png?v=2" alt="NMC Logo" class="login-logo">
     </div>
 
     <div class="title">Login</div>
