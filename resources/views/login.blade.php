@@ -39,6 +39,18 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;background:#1f2d6
 .note{margin-top:18px;color:#cbd5e1;font-size:14px}
 @media(max-width:980px){.wrapper{grid-template-columns:1fr}.right{min-height:420px}.welcome{font-size:42px}.company{font-size:24px}}
 @media(max-width:560px){body{padding:10px}.wrapper{border-radius:18px}.left,.right{padding:22px}.welcome{font-size:34px}.company{font-size:20px}.title{font-size:24px}}
+@keyframes bgShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.right{background:linear-gradient(135deg,#243a8f,#1e3a8a,#10245f,#3156c9);background-size:300% 300%;animation:bgShift 14s ease infinite}
+.sparkles{position:absolute;inset:0;overflow:hidden;z-index:1}
+.sparkles span{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:0 0 12px rgba(255,255,255,.8);animation:rise 10s linear infinite}
+.sparkles span:nth-child(1){left:8%;bottom:-20px;animation-delay:0s}
+.sparkles span:nth-child(2){left:18%;bottom:-40px;animation-delay:2s}
+.sparkles span:nth-child(3){left:35%;bottom:-10px;animation-delay:4s}
+.sparkles span:nth-child(4){left:52%;bottom:-30px;animation-delay:1s}
+.sparkles span:nth-child(5){left:68%;bottom:-25px;animation-delay:5s}
+.sparkles span:nth-child(6){left:82%;bottom:-50px;animation-delay:3s}
+.sparkles span:nth-child(7){left:92%;bottom:-15px;animation-delay:6s}
+@keyframes rise{0%{transform:translateY(0) scale(.8);opacity:0}10%{opacity:1}100%{transform:translateY(-760px) scale(1.4);opacity:0}}
 </style>
 </head>
 <body>
@@ -64,7 +76,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;background:#1f2d6
 </form>
 <div class="footer">© 2026 Sales & Inventory ERP</div>
 </div>
-<div class="right">
+<div class="right"><div class="sparkles"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
 <div class="blob1"></div><div class="blob2"></div><div class="blob3"></div>
 <div class="content">
 <div class="welcome">Welcome.</div>
