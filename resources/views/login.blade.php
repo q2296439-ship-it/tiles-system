@@ -1,324 +1,88 @@
 <!DOCTYPE html>
+
 <html>
 <head>
-    <title>Nicole Tile System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <style>
-        *{
-            box-sizing:border-box;
-            margin:0;
-            padding:0;
-        }
-
-        body{
-            font-family:'Segoe UI',Tahoma,sans-serif;
-            min-height:100vh;
-            display:flex;
-            overflow:hidden;
-            background:#0f172a;
-        }
-
-        .light{
-            position:absolute;
-            border-radius:50%;
-            filter:blur(120px);
-            opacity:.15;
-            z-index:1;
-        }
-
-        .light.blue{
-            width:300px;
-            height:300px;
-            background:#3b82f6;
-            top:10%;
-            left:60%;
-            animation:float 10s ease-in-out infinite;
-        }
-
-        .light.purple{
-            width:250px;
-            height:250px;
-            background:#6366f1;
-            bottom:10%;
-            right:10%;
-            animation:float 14s ease-in-out infinite;
-        }
-
-        @keyframes float{
-            0%,100%{transform:translateY(0);}
-            50%{transform:translateY(-30px);}
-        }
-
-        .left,
-        .right{
-            width:50%;
-            min-height:100vh;
-            position:relative;
-            z-index:2;
-        }
-
-        .left{
-            background:linear-gradient(135deg,#1e40af,#3b82f6,#2563eb);
-            color:#fff;
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            padding:60px;
-        }
-
-        .left h1{
-            font-size:38px;
-            margin-bottom:14px;
-        }
-
-        .left p{
-            font-size:15px;
-            max-width:420px;
-            line-height:1.7;
-            color:rgba(255,255,255,.85);
-        }
-
-        .right{
-            background:linear-gradient(270deg,#0b1220,#1e293b,#0b1220);
-            background-size:400% 400%;
-            animation:gradientMove 12s ease infinite;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            padding:20px;
-        }
-
-        @keyframes gradientMove{
-            0%{background-position:0% 50%;}
-            50%{background-position:100% 50%;}
-            100%{background-position:0% 50%;}
-        }
-
-        .card{
-            width:100%;
-            max-width:380px;
-            background:rgba(255,255,255,.04);
-            backdrop-filter:blur(30px);
-            padding:32px;
-            border-radius:18px;
-            box-shadow:
-                0 20px 60px rgba(0,0,0,.7),
-                0 0 40px rgba(59,130,246,.15);
-        }
-
-        .logo{
-            text-align:center;
-            color:#cbd5f5;
-            font-size:17px;
-            font-weight:600;
-            margin-bottom:6px;
-        }
-
-        h2{
-            text-align:center;
-            color:#f8fafc;
-            margin-bottom:24px;
-            font-size:28px;
-        }
-
-        .error{
-            color:#f87171;
-            text-align:center;
-            font-size:12px;
-            margin-bottom:14px;
-        }
-
-        .input-group{
-            position:relative;
-            margin-bottom:15px;
-        }
-
-        .input-group input{
-            width:100%;
-            padding:12px 42px 12px 12px;
-            border:none;
-            border-radius:10px;
-            background:rgba(255,255,255,.06);
-            color:#fff;
-            font-size:14px;
-        }
-
-        .input-group input::placeholder{
-            color:#94a3b8;
-        }
-
-        .input-group input:focus{
-            outline:none;
-            box-shadow:0 0 0 2px #3b82f6;
-            background:rgba(255,255,255,.08);
-        }
-
-        .toggle-pass{
-            position:absolute;
-            right:12px;
-            top:12px;
-            cursor:pointer;
-            color:#94a3b8;
-            font-size:13px;
-        }
-
-        .form-options{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:10px;
-            margin-bottom:18px;
-            flex-wrap:wrap;
-        }
-
-        .remember{
-            display:flex;
-            align-items:center;
-            gap:6px;
-            color:#cbd5e1;
-            font-size:12px;
-        }
-
-        .forgot{
-            font-size:12px;
-            color:#93c5fd;
-            text-decoration:none;
-        }
-
-        .btn{
-            width:100%;
-            padding:12px;
-            border:none;
-            border-radius:10px;
-            background:linear-gradient(135deg,#3b82f6,#2563eb);
-            color:#fff;
-            font-size:14px;
-            font-weight:700;
-            cursor:pointer;
-        }
-
-        .footer{
-            text-align:center;
-            font-size:11px;
-            color:#64748b;
-            margin-top:16px;
-        }
-
-        /* MOBILE */
-        @media(max-width:900px){
-            body{
-                flex-direction:column;
-                overflow:auto;
-            }
-
-            .left,
-            .right{
-                width:100%;
-                min-height:auto;
-            }
-
-            .left{
-                padding:40px 24px;
-                text-align:center;
-                align-items:center;
-            }
-
-            .left h1{
-                font-size:30px;
-            }
-
-            .left p{
-                max-width:100%;
-            }
-
-            .right{
-                padding:24px 16px 40px;
-            }
-        }
-
-        @media(max-width:480px){
-            .card{
-                padding:24px 18px;
-            }
-
-            h2{
-                font-size:24px;
-            }
-
-            .left h1{
-                font-size:26px;
-            }
-
-            .left p{
-                font-size:14px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMC Home Improvement Center</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;background:#1f2d6b;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+.wrapper{width:100%;max-width:1180px;min-height:680px;background:#fff;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:420px 1fr;box-shadow:0 25px 70px rgba(0,0,0,.25);position:relative}
+.left{background:#fff;padding:42px 34px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.brand{font-size:22px;font-weight:800;color:#1e3a8a;margin-bottom:8px}
+.sub{font-size:13px;color:#64748b;margin-bottom:34px}
+.avatar{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px;margin:0 auto 24px auto;box-shadow:0 12px 30px rgba(59,130,246,.25)}
+.title{text-align:center;font-size:28px;font-weight:800;color:#0f172a;margin-bottom:18px}
+.error{background:#fee2e2;color:#b91c1c;padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:14px;text-align:center}
+.input{width:100%;padding:13px 14px;border:1px solid #dbeafe;border-radius:12px;font-size:14px;outline:none;margin-bottom:12px}
+.input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.pass-wrap{position:relative}.eye{position:absolute;right:12px;top:14px;cursor:pointer;color:#64748b;font-size:13px}
+.options{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:6px 0 16px 0;font-size:12px;color:#64748b;flex-wrap:wrap}
+.login-btn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;font-weight:800;cursor:pointer;font-size:14px;letter-spacing:.3px}
+.login-btn:hover{transform:translateY(-1px)}
+.footer{text-align:center;margin-top:16px;font-size:12px;color:#94a3b8}
+.right{position:relative;background:linear-gradient(135deg,#243a8f,#1e3a8a 40%,#10245f);display:flex;align-items:center;justify-content:center;padding:40px;color:#fff;overflow:hidden}
+.blob1,.blob2,.blob3{position:absolute;border-radius:50%;filter:blur(18px);opacity:.9}
+.blob1{width:420px;height:420px;background:radial-gradient(circle,#ffffff,rgba(255,255,255,.05));top:-80px;right:120px;animation:float1 9s ease-in-out infinite}
+.blob2{width:360px;height:360px;background:radial-gradient(circle,#f8fafc,rgba(255,255,255,.03));bottom:-120px;left:80px;animation:float2 11s ease-in-out infinite}
+.blob3{width:220px;height:220px;background:radial-gradient(circle,#ffffff,rgba(255,255,255,.02));top:45%;left:45%;animation:float3 7s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(-35px,28px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-24px)}}
+@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-15px,15px) scale(1.08)}}
+.content{position:relative;z-index:2;max-width:560px;text-align:left}
+.welcome{font-size:58px;font-weight:900;line-height:1;margin-bottom:10px}
+.company{font-size:30px;font-weight:800;line-height:1.2;margin-bottom:12px}
+.system{font-size:18px;color:#dbeafe;margin-bottom:22px;font-weight:600}
+.list{display:grid;gap:10px;font-size:15px;color:#eff6ff}
+.list div{padding:10px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);border-radius:12px;backdrop-filter:blur(10px)}
+.note{margin-top:18px;color:#cbd5e1;font-size:14px}
+@media(max-width:980px){.wrapper{grid-template-columns:1fr}.right{min-height:420px}.welcome{font-size:42px}.company{font-size:24px}}
+@media(max-width:560px){body{padding:10px}.wrapper{border-radius:18px}.left,.right{padding:22px}.welcome{font-size:34px}.company{font-size:20px}.title{font-size:24px}}
+</style>
 </head>
-
 <body>
-
-<div class="light blue"></div>
-<div class="light purple"></div>
-
+<div class="wrapper">
 <div class="left">
-    <h1>Nicole Tile Center</h1>
-    <p>Manage your inventory, sales, and reports efficiently with our smart ERP system.</p>
+<div class="brand">NMC HOME IMPROVEMENT CENTER</div>
+<div class="sub">Secure ERP Access Portal</div>
+<div class="avatar">👤</div>
+<div class="title">Login</div>
+@if($errors->any())<div class="error">{{ $errors->first() }}</div>@endif
+<form method="POST" action="/login">
+@csrf
+<input class="input" type="text" name="username" placeholder="Username" required>
+<div class="pass-wrap">
+<input class="input" id="password" type="password" name="password" placeholder="Password" required>
+<span class="eye" onclick="togglePassword()">👁</span>
 </div>
-
+<div class="options">
+<label><input type="checkbox" name="remember"> Remember me</label>
+<span>Authorized Users Only</span>
+</div>
+<button class="login-btn" type="submit">LOGIN</button>
+</form>
+<div class="footer">© 2026 Sales & Inventory ERP</div>
+</div>
 <div class="right">
-
-    <div class="card">
-
-        <div class="logo">Tile Inventory System</div>
-        <h2>Welcome Back</h2>
-
-        @if($errors->any())
-            <div class="error">{{ $errors->first() }}</div>
-        @endif
-
-        <form method="POST" action="/login">
-            @csrf
-
-            <div class="input-group">
-                <input type="text" name="username" placeholder="Username" required>
-            </div>
-
-            <div class="input-group">
-                <input type="password" id="password" name="password" placeholder="Password" required>
-                <span class="toggle-pass" onclick="togglePassword()">👁</span>
-            </div>
-
-            <div class="form-options">
-
-                <label class="remember">
-                    <input type="checkbox" name="remember">
-                    <span>Remember me</span>
-                </label>
-
-                <a href="#" class="forgot">Forgot?</a>
-
-            </div>
-
-            <button type="submit" class="btn">Login</button>
-
-        </form>
-
-        <div class="footer">
-            © 2026 Tiles Inventory System
-        </div>
-
-    </div>
-
+<div class="blob1"></div><div class="blob2"></div><div class="blob3"></div>
+<div class="content">
+<div class="welcome">Welcome.</div>
+<div class="company">NMC HOME IMPROVEMENT CENTER</div>
+<div class="system">Sales and Inventory System</div>
+<div class="list">
+<div>✔ Real-Time Stock Monitoring</div>
+<div>✔ Sales Tracking & Daily Reports</div>
+<div>✔ Multi-Branch Management</div>
+<div>✔ Secure Role-Based Access</div>
+<div>✔ Fast, Smart, and Reliable ERP Workflow</div>
 </div>
-
+<div class="note">Manage your business smarter and faster.</div>
+</div>
+</div>
+</div>
 <script>
-function togglePassword(){
-    const pass=document.getElementById('password');
-    pass.type=pass.type==='password' ? 'text' : 'password';
-}
+function togglePassword(){const p=document.getElementById('password');p.type=p.type==='password'?'text':'password';}
 </script>
-
 </body>
 </html>

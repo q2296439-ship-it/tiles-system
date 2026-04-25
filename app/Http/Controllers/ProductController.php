@@ -253,12 +253,19 @@ return view('products.index', compact(
         return redirect('/admin/products')->with('success', 'Product deleted successfully');
     }
 
-    // =====================
+        // =====================
     // EXPORT CSV
     // =====================
     public function export()
     {
-        $products = Product::with('branch')->get();
+        $query = Product::with('branch');
+
+        // FILTER BY BRANCH IF SELECTED
+        if (request()->filled('branch_id')) {
+            $query->where('branch_id', request('branch_id'));
+        }
+
+        $products = $query->get();
 
         $filename = "products_export_" . date('Y-m-d') . ".csv";
 
