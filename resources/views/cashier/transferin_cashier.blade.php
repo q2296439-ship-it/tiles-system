@@ -134,7 +134,6 @@ let perPage = 6;
 // ADD TO CART
 document.querySelectorAll('.product-card').forEach(card => {
     card.addEventListener('click', () => {
-
         let id = card.dataset.id;
         let name = card.dataset.name;
 
@@ -143,22 +142,19 @@ document.querySelectorAll('.product-card').forEach(card => {
         if (existing) {
             existing.qty++;
         } else {
-            cart.push({id, name, qty:1});
+            cart.push({ id, name, qty: 1 });
         }
-
-        console.log("CART:", cart);
 
         renderCart();
     });
 });
 
-// RENDER CART (UI ONLY)
+// RENDER CART
 function renderCart() {
     let container = document.getElementById('cart-items');
     container.innerHTML = '';
 
     cart.forEach((item, index) => {
-
         let div = document.createElement('div');
 
         div.style = "margin-bottom:10px; padding:10px; background:#f1f5f9; border-radius:8px;";
@@ -176,25 +172,23 @@ function renderCart() {
 }
 
 // UPDATE QTY
-function updateQty(index, value){
+function updateQty(index, value) {
     cart[index].qty = parseInt(value) || 1;
 }
 
 // REMOVE
-function removeItem(index){
-    cart.splice(index,1);
+function removeItem(index) {
+    cart.splice(index, 1);
     renderCart();
 }
 
-// 🔥 ONLY CHANGE HERE (FIX)
+// SUBMIT
 document.getElementById("transferForm").addEventListener("submit", function(e) {
-
-    let form = document.getElementById('transferForm'); // ✅ FIX
+    let form = document.getElementById('transferForm');
 
     document.querySelectorAll('.hidden-input').forEach(el => el.remove());
 
     cart.forEach((item, index) => {
-
         let input1 = document.createElement('input');
         input1.type = 'hidden';
         input1.name = `items[${index}][product_id]`;
@@ -207,11 +201,9 @@ document.getElementById("transferForm").addEventListener("submit", function(e) {
         input2.value = item.qty;
         input2.classList.add('hidden-input');
 
-        form.appendChild(input1); // ✅ FIX
-        form.appendChild(input2); // ✅ FIX
+        form.appendChild(input1);
+        form.appendChild(input2);
     });
-
-    console.log("FINAL SUBMIT:", cart);
 
     if (cart.length === 0) {
         e.preventDefault();
@@ -248,8 +240,10 @@ function showPage() {
     let cards = document.querySelectorAll('.product-card');
     let filtered = getFilteredCards();
 
-    // hide all cards first
     cards.forEach(card => card.style.display = 'none');
+
+    let totalPages = Math.ceil(filtered.length / perPage);
+    if (currentPage > totalPages) currentPage = 1;
 
     let start = (currentPage - 1) * perPage;
     let end = start + perPage;
@@ -259,8 +253,9 @@ function showPage() {
     });
 
     document.getElementById('prevBtn').disabled = currentPage === 1;
-    document.getElementById('nextBtn').disabled = end >= filtered.length;
+    document.getElementById('nextBtn').disabled = currentPage >= totalPages || totalPages === 0;
 }
+
 // NEXT
 document.getElementById('nextBtn').addEventListener('click', function() {
     currentPage++;
@@ -277,47 +272,14 @@ document.getElementById('prevBtn').addEventListener('click', function() {
 
 // SEARCH
 document.getElementById('searchInput').addEventListener('keyup', function() {
-    let value = this.value.toLowerCase();
-    let cards = document.querySelectorAll('.product-card');
-
-    if (value === "") {
-        currentPage = 1;
-        showPage();
-        return;
-    }
-
-    document.getElementById('nextBtn').style.display = 'none';
-    document.getElementById('prevBtn').style.display = 'none';
-
-    cards.forEach(card => {
-        let name = card.dataset.name;
-        let branch = card.dataset.branch;
-
-        if (name.includes(value) || branch.includes(value)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
+    currentPage = 1;
+    showPage();
 });
 
 // FILTER
 document.getElementById('branchFilter').addEventListener('change', function() {
-    let selected = this.value;
-    let cards = document.querySelectorAll('.product-card');
-
-    cards.forEach(card => {
-        let branchId = card.dataset.branchId;
-
-        if (selected === "" || Number(branchId) === Number(selected)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-
-    document.getElementById('nextBtn').style.display = 'none';
-    document.getElementById('prevBtn').style.display = 'none';
+    currentPage = 1;
+    showPage();
 });
 
 // INIT
@@ -325,4 +287,5 @@ document.addEventListener('DOMContentLoaded', function() {
     showPage();
 });
 </script>
+@endsection
 @endsection
