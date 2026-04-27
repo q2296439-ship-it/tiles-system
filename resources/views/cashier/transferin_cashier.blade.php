@@ -219,21 +219,48 @@ document.getElementById("transferForm").addEventListener("submit", function(e) {
     }
 });
 
-// PAGINATION
+// PAGINATION + SEARCH + FILTER
+function getFilteredCards() {
+    let search = document.getElementById('searchInput').value.toLowerCase();
+    let selectedBranch = document.getElementById('branchFilter').value;
+
+    let cards = [...document.querySelectorAll('.product-card')];
+
+    return cards.filter(card => {
+        let name = card.dataset.name;
+        let branch = card.dataset.branch;
+        let branchId = card.dataset.branchId;
+
+        let matchSearch =
+            search === '' ||
+            name.includes(search) ||
+            branch.includes(search);
+
+        let matchBranch =
+            selectedBranch === '' ||
+            Number(branchId) === Number(selectedBranch);
+
+        return matchSearch && matchBranch;
+    });
+}
+
 function showPage() {
     let cards = document.querySelectorAll('.product-card');
+    let filtered = getFilteredCards();
+
+    // hide all cards first
+    cards.forEach(card => card.style.display = 'none');
 
     let start = (currentPage - 1) * perPage;
     let end = start + perPage;
 
-    cards.forEach((card, index) => {
-        card.style.display = (index >= start && index < end) ? 'block' : 'none';
+    filtered.slice(start, end).forEach(card => {
+        card.style.display = 'block';
     });
 
     document.getElementById('prevBtn').disabled = currentPage === 1;
-    document.getElementById('nextBtn').disabled = end >= cards.length;
+    document.getElementById('nextBtn').disabled = end >= filtered.length;
 }
-
 // NEXT
 document.getElementById('nextBtn').addEventListener('click', function() {
     currentPage++;
