@@ -94,26 +94,37 @@ return view('products.index', compact(
         return view('products.create', compact('branches'));
     }
 
-    // =====================
-    // STORE PRODUCT
-    // =====================
-    public function store(Request $request)
-    {
-        $request->validate([
-            'sku' => 'required|string|max:100',
-            'category' => 'required|string|max:100',
-            'name' => 'required|string|max:255',
-            'size' => 'nullable|string|max:100',
-            'color' => 'nullable|string|max:100',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer|min:0',
-            'low_stock_threshold' => 'required|integer',
-            'branch_id' => 'required|exists:branches,id',
-        ]);
+     // =====================
+ // STORE PRODUCT
+ // =====================
+public function store(Request $request)
+{
+    $request->validate([
+        'sku' => 'required|string|max:100',
+        'category' => 'required|string|max:100',
+        'name' => 'required|string|max:255',
+        'size' => 'nullable|string|max:100',
+        'color' => 'nullable|string|max:100',
+        'price' => 'required|numeric',
+        'stock' => 'required|integer|min:0',
+        'low_stock_threshold' => 'required|integer',
+        'branch_id' => 'required|exists:branches,id',
+    ]);
 
-        DB::beginTransaction();
+    DB::beginTransaction();
 
-        try {
+    try {
+
+        $sanIsidroId = 1;
+
+        // CHECK EXISTING PRODUCT (NAME + SIZE BASIS)
+        $existing = Product::where('name', $request->name)
+            ->where('size', $request->size)
+            ->first();
+
+        if (!$existing) {
+
+            // NO EXISTING = CREATE PRODUCT
             $product = Product::create([
                 'sku' => $request->sku,
                 'category' => $request->category,
@@ -121,36 +132,63 @@ return view('products.index', compact(
                 'size' => $request->size,
                 'color' => $request->color,
                 'price' => $request->price,
-                'stock' => $request->stock,
+                'stock' => 0,
                 'low_stock_threshold' => $request->low_stock_threshold,
                 'branch_id' => $request->branch_id,
             ]);
 
-            DB::table('branch_product')->insert([
-                'product_id' => $product->id,
-                'branch_id' => $request->branch_id,
-                'stock' => $request->stock,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        } else {
 
-            StockMovement::create([
-                'product_id' => $product->id,
-                'branch_id' => $request->branch_id,
-                'type' => 'IN',
-                'quantity' => $request->stock,
-                'reason' => 'Initial stock',
-            ]);
+            // IF SAN ISIDRO CREATED FIRST, BLOCK OTHER BRANCHES
+            if (
+                $existing->branch_id == $sanIsidroId &&
+                $request->branch_id != $sanIsidroId
+            ) {
+                DB::rollBack();
+                return back()->with('error', 'Duplicate! Already encoded by San Isidro.');
+            }
 
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Error saving product');
+            // USE EXISTING PRODUCT
+            $product = $existing;
         }
 
-        return redirect('/admin/products')->with('success', 'Product added successfully');
+        // CHECK SAME BRANCH DUPLICATE
+        $branchExists = DB::table('branch_product')
+            ->where('product_id', $product->id)
+            ->where('branch_id', $request->branch_id)
+            ->first();
+
+        if ($branchExists) {
+            DB::rollBack();
+            return back()->with('error', 'Duplicate! Product already exists in this branch.');
+        }
+
+        // INSERT BRANCH STOCK
+        DB::table('branch_product')->insert([
+            'product_id' => $product->id,
+            'branch_id' => $request->branch_id,
+            'stock' => $request->stock,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        StockMovement::create([
+            'product_id' => $product->id,
+            'branch_id' => $request->branch_id,
+            'type' => 'IN',
+            'quantity' => $request->stock,
+            'reason' => 'Initial stock',
+        ]);
+
+        DB::commit();
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
     }
 
+    return redirect('/admin/products')->with('success', 'Product added successfully');
+}
     // =====================
     // EDIT PRODUCT
     // =====================
