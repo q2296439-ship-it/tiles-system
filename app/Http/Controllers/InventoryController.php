@@ -189,7 +189,7 @@ public function store(Request $request)
     }
 }
 
-   public function overviewStock(Request $request)
+ public function overviewStock(Request $request)
 {
     if (!Auth::check()) {
         return redirect('/login');
@@ -207,9 +207,10 @@ public function store(Request $request)
         $selectedBranch = $user->branch_id;
     }
 
-    // 🔍 SEARCH FILTER
+    // 🔍 SEARCH FILTER (FIXED - TRIM + LOWER)
     if ($request->search) {
-        $query->where('name', 'like', '%' . $request->search . '%');
+        $search = strtolower(trim($request->search));
+        $query->whereRaw('LOWER(TRIM(name)) LIKE ?', ['%' . $search . '%']);
     }
 
     // 🏢 BRANCH FILTER
@@ -228,22 +229,25 @@ public function store(Request $request)
         })
         ->count();
 
-    // 🔥 FIX: SEPARATE QUERY PARA SA AVAILABLE ITEMS (IMPORTANTE)
-    $availableQuery = Product::query();
+    // 🔥 AVAILABLE ITEMS (FINAL LOGIC)
+    if ($request->search || $selectedBranch || $role === 'cashier') {
 
-    if ($role === 'cashier') {
-        $availableQuery->where('branch_id', $user->branch_id);
+        $availableItems = Product::when($role === 'cashier', function ($q) use ($user) {
+                $q->where('branch_id', $user->branch_id);
+            })
+            ->when($selectedBranch, function ($q) use ($selectedBranch) {
+                $q->where('branch_id', $selectedBranch);
+            })
+            ->when($request->search, function ($q) use ($request) {
+                $q->whereRaw('LOWER(TRIM(name)) LIKE ?', ['%' . strtolower(trim($request->search)) . '%']);
+            })
+            ->sum('stock');
+
+    } else {
+
+        // 🟢 DEFAULT (ALL INVENTORY)
+        $availableItems = Product::sum('stock');
     }
-
-    if ($request->search) {
-        $availableQuery->where('name', 'like', '%' . $request->search . '%');
-    }
-
-    if ($selectedBranch) {
-        $availableQuery->where('branch_id', $selectedBranch);
-    }
-
-    $availableItems = $availableQuery->sum('stock');
 
     return view('admin.overview-stock', compact(
         'products',
