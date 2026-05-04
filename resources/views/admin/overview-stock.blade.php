@@ -308,8 +308,8 @@ svg{
         </div>
 
         <div class="stat">
-             <small>Total Value</small>
-    <h2>₱{{ number_format($totalValue, 2) }}</h2>
+            <small>Total Value</small>
+            <h2>₱{{ number_format($products->sum(fn($p) => $p->price * $p->stock), 2) }}</h2>
         </div>
 
     </div>
