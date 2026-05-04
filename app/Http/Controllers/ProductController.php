@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
      // =====================
- // SHOW PRODUCTS
- // =====================
+// SHOW PRODUCTS
+// =====================
 public function index(Request $request)
 {
     if (!Auth::check()) {
@@ -67,11 +67,33 @@ public function index(Request $request)
 
     $branches = Branch::all();
 
-return view('products.index', compact(
-    'products',
-    'totalProducts',
-    'branches'
-));
+    // 🔥 ADD THIS (FIX AVAILABLE ITEMS)
+    $availableItems = Product::when(
+            !in_array($role, ['admin', 'manager', 'audit']),
+            function ($q) use ($user) {
+                $q->where('branch_id', $user->branch_id);
+            }
+        )
+        ->when($request->filled('branch_id'), function ($q) use ($request) {
+            $q->where('branch_id', $request->branch_id);
+        })
+        ->when($request->filled('search'), function ($q) use ($request) {
+            $search = strtolower(trim($request->search));
+            $q->where(function ($qq) use ($search) {
+                $qq->whereRaw('LOWER(TRIM(name)) LIKE ?', ["%{$search}%"])
+                   ->orWhereRaw('LOWER(TRIM(sku)) LIKE ?', ["%{$search}%"])
+                   ->orWhereRaw('LOWER(TRIM(size)) LIKE ?', ["%{$search}%"])
+                   ->orWhereRaw('LOWER(TRIM(color)) LIKE ?', ["%{$search}%"]);
+            });
+        })
+        ->sum('stock');
+
+    return view('products.index', compact(
+        'products',
+        'totalProducts',
+        'branches',
+        'availableItems' // 🔥 IMPORTANT
+    ));
 }
     // =====================
     // ADMIN OVERVIEW STOCK

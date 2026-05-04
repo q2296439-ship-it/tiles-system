@@ -264,30 +264,29 @@ svg{
     </div>
 
     {{-- PRODUCT STATS ONLY --}}
-    <div class="stats">
+<div class="stats">
 
-        <div class="stat">
-            <h4>Total Products</h4>
-            <h2>{{ $totalProducts }}</h2>
-        </div>
-
-        <div class="stat">
-            <h4>Showing</h4>
-            <h2>{{ $products->count() }}</h2>
-        </div>
-
-        <div class="stat">
-            <h4>Low Stock Items</h4>
-            <h2>{{ $products->filter(fn($p) => $p->stock <= 10)->count() }}</h2>
-        </div>
-
-        <div class="stat">
-            <h4>Available Items</h4>
-            <h2>{{ $availableItems }}</h2>
-        </div>
-
+    <div class="stat">
+        <h4>Total Products</h4>
+        <h2>{{ $totalProducts }}</h2>
     </div>
 
+    <div class="stat">
+        <h4>Showing</h4>
+        <h2>{{ $products->count() }}</h2>
+    </div>
+
+    <div class="stat">
+        <h4>Low Stock Items</h4>
+        <h2>{{ $products->filter(fn($p) => $p->stock <= 10)->count() }}</h2>
+    </div>
+
+    <div class="stat">
+        <h4>Available Items</h4>
+        <h2>{{ $availableItems ?? 0 }}</h2>
+    </div>
+
+</div>
    {{-- PRODUCT TABLE --}}
 <div class="card">
 
