@@ -117,8 +117,8 @@ public function index(Request $request)
     }
 
      // =====================
- // STORE PRODUCT
- // =====================
+// STORE PRODUCT
+// =====================
 public function store(Request $request)
 {
     $request->validate([
@@ -137,63 +137,31 @@ public function store(Request $request)
 
     try {
 
-        $sanIsidroId = 1;
-
-        // CHECK EXISTING PRODUCT (NAME + SIZE BASIS)
-        $existing = Product::where('name', $request->name)
-            ->where('size', $request->size)
-            ->first();
-
-        if (!$existing) {
-
-            // NO EXISTING = CREATE PRODUCT
-            $product = Product::create([
-                'sku' => $request->sku,
-                'category' => $request->category,
-                'name' => $request->name,
-                'size' => $request->size,
-                'color' => $request->color,
-                'price' => $request->price,
-                'stock' => 0,
-                'low_stock_threshold' => $request->low_stock_threshold,
-                'branch_id' => $request->branch_id,
-            ]);
-
-        } else {
-
-            // IF SAN ISIDRO CREATED FIRST, BLOCK OTHER BRANCHES
-            if (
-                $existing->branch_id == $sanIsidroId &&
-                $request->branch_id != $sanIsidroId
-            ) {
-                DB::rollBack();
-                return back()->with('error', 'Duplicate! Already encoded by San Isidro.');
-            }
-
-            // USE EXISTING PRODUCT
-            $product = $existing;
-        }
-
-        // CHECK SAME BRANCH DUPLICATE
-        $branchExists = DB::table('branch_product')
-            ->where('product_id', $product->id)
+        // ✅ CHECK DUPLICATE PER BRANCH (FIXED)
+        $existing = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($request->name))])
+            ->whereRaw('LOWER(TRIM(size)) = ?', [strtolower(trim($request->size))])
             ->where('branch_id', $request->branch_id)
             ->first();
 
-        if ($branchExists) {
+        if ($existing) {
             DB::rollBack();
-            return back()->with('error', 'Duplicate! Product already exists in this branch.');
+            return back()->with('error', 'Duplicate product in this branch!');
         }
 
-        // INSERT BRANCH STOCK
-        DB::table('branch_product')->insert([
-            'product_id' => $product->id,
-            'branch_id' => $request->branch_id,
+        // ✅ CREATE PRODUCT
+        $product = Product::create([
+            'sku' => $request->sku,
+            'category' => $request->category,
+            'name' => trim($request->name),
+            'size' => trim($request->size),
+            'color' => $request->color,
+            'price' => $request->price,
             'stock' => $request->stock,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'low_stock_threshold' => $request->low_stock_threshold,
+            'branch_id' => $request->branch_id,
         ]);
 
+        // ✅ STOCK MOVEMENT
         StockMovement::create([
             'product_id' => $product->id,
             'branch_id' => $request->branch_id,
@@ -211,145 +179,84 @@ public function store(Request $request)
 
     return redirect('/admin/products')->with('success', 'Product added successfully');
 }
-    // =====================
-    // EDIT PRODUCT
-    // =====================
-    public function edit($id)
-    {
-        $product = Product::findOrFail($id);
-        $branches = Branch::all();
 
-        return view('products.edit', compact('product', 'branches'));
-    }
 
-    // =====================
-    // UPDATE PRODUCT
-    // =====================
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
-        $oldPrice = $product->price;
+// =====================
+// UPDATE PRODUCT
+// =====================
+public function update(Request $request, $id)
+{
+    $product = Product::findOrFail($id);
+    $oldPrice = $product->price;
 
-        $request->validate([
-            'sku' => 'required|string|max:100',
-            'category' => 'required|string|max:100',
-            'name' => 'required|string|max:255',
-            'size' => 'nullable|string|max:100',
-            'color' => 'nullable|string|max:100',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer|min:0',
-            'low_stock_threshold' => 'required|integer',
-            'branch_id' => 'required|exists:branches,id',
+    $request->validate([
+        'sku' => 'required|string|max:100',
+        'category' => 'required|string|max:100',
+        'name' => 'required|string|max:255',
+        'size' => 'nullable|string|max:100',
+        'color' => 'nullable|string|max:100',
+        'price' => 'required|numeric',
+        'stock' => 'required|integer|min:0',
+        'low_stock_threshold' => 'required|integer',
+        'branch_id' => 'required|exists:branches,id',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+
+        // ✅ CHECK DUPLICATE (EXCEPT SELF)
+        $duplicate = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($request->name))])
+            ->whereRaw('LOWER(TRIM(size)) = ?', [strtolower(trim($request->size))])
+            ->where('branch_id', $request->branch_id)
+            ->where('id', '!=', $product->id)
+            ->exists();
+
+        if ($duplicate) {
+            DB::rollBack();
+            return back()->with('error', 'Duplicate product in this branch!');
+        }
+
+        // ✅ UPDATE PRODUCT
+        $product->update([
+            'sku' => $request->sku,
+            'category' => $request->category,
+            'name' => trim($request->name),
+            'size' => trim($request->size),
+            'color' => $request->color,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'low_stock_threshold' => $request->low_stock_threshold,
+            'branch_id' => $request->branch_id,
         ]);
 
-        DB::beginTransaction();
+        // ✅ STOCK MOVEMENT
+        StockMovement::create([
+            'product_id' => $product->id,
+            'branch_id' => $request->branch_id,
+            'type' => 'IN',
+            'quantity' => $request->stock,
+            'reason' => 'Product updated',
+        ]);
 
-        try {
-            Product::where('name', $product->name)
-                ->where('size', $product->size)
-                ->update([
-                    'sku' => $request->sku,
-                    'category' => $request->category,
-                    'name' => $request->name,
-                    'size' => $request->size,
-                    'color' => $request->color,
-                    'price' => $request->price,
-                    'low_stock_threshold' => $request->low_stock_threshold,
-                ]);
-
-            $product->update([
-                'stock' => $request->stock,
-                'branch_id' => $request->branch_id,
+        // ✅ PRICE CHANGE LOG
+        if ($oldPrice != $request->price) {
+            Announcement::create([
+                'title' => 'Pricing Adjustment',
+                'message' => 'Product ' . $request->name . ' - ' . $request->size .
+                    ' price changed from ₱' . number_format($oldPrice, 2) .
+                    ' to ₱' . number_format($request->price, 2),
+                'created_by' => auth()->id(),
+                'is_active' => 1,
             ]);
-
-            DB::table('branch_product')->updateOrInsert(
-                [
-                    'product_id' => $product->id,
-                    'branch_id' => $request->branch_id,
-                ],
-                [
-                    'stock' => $request->stock,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
-
-            StockMovement::create([
-                'product_id' => $product->id,
-                'branch_id' => $request->branch_id,
-                'type' => 'IN',
-                'quantity' => $request->stock,
-                'reason' => 'Product updated',
-            ]);
-
-            if ($oldPrice != $request->price) {
-                Announcement::create([
-                    'title' => 'Pricing Adjustment',
-                    'message' => 'Product ' . $request->name . ' - ' . $request->size .
-                        ' price changed from ₱' . number_format($oldPrice, 2) .
-                        ' to ₱' . number_format($request->price, 2),
-                    'created_by' => auth()->id(),
-                    'is_active' => 1,
-                ]);
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', $e->getMessage());
         }
 
-        return redirect('/admin/products')->with('success', 'Product updated successfully');
+        DB::commit();
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage());
     }
 
-    // =====================
-    // DELETE PRODUCT
-    // =====================
-    public function delete($id)
-    {
-        $product = Product::findOrFail($id);
-        $product->delete();
-
-        return redirect('/admin/products')->with('success', 'Product deleted successfully');
-    }
-
-        // =====================
-    // EXPORT CSV
-    // =====================
-    public function export()
-    {
-        $query = Product::with('branch');
-
-        // FILTER BY BRANCH IF SELECTED
-        if (request()->filled('branch_id')) {
-            $query->where('branch_id', request('branch_id'));
-        }
-
-        $products = $query->get();
-
-        $filename = "products_export_" . date('Y-m-d') . ".csv";
-
-        $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-        ];
-
-        $callback = function () use ($products) {
-            $file = fopen('php://output', 'w');
-
-            fputcsv($file, ['Name', 'Branch', 'Price']);
-
-            foreach ($products as $p) {
-                fputcsv($file, [
-                    $p->name,
-                    optional($p->branch)->name ?? '-',
-                    $p->price,
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
+    return redirect('/admin/products')->with('success', 'Product updated successfully');
 }
