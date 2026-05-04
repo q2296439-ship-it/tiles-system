@@ -202,37 +202,41 @@ public function store(Request $request)
 
     $selectedBranch = $request->branch_id;
 
-    // Cashier default sariling branch
+    // 🧑‍💼 CASHIER DEFAULT sariling branch
     if (!$selectedBranch && $role === 'cashier') {
         $selectedBranch = $user->branch_id;
     }
 
+    // 🔍 SEARCH FILTER
     if ($request->search) {
         $query->where('name', 'like', '%' . $request->search . '%');
     }
 
+    // 🏢 BRANCH FILTER
     if ($selectedBranch) {
         $query->where('branch_id', $selectedBranch);
     }
 
+    // 📦 PRODUCTS LIST
     $products = $query->latest()->paginate(10)->withQueryString();
     $branches = Branch::all();
 
-    // UNIQUE TOTAL PRODUCTS (NAME + SIZE)
-    $totalProducts = Product::when($selectedBranch, function ($q) use ($selectedBranch) {
-            $q->where('branch_id', $selectedBranch);
-        })
-        ->get()
+    // 🔢 TOTAL UNIQUE PRODUCTS (NAME + SIZE)
+    $totalProducts = (clone $query)->get()
         ->unique(function ($item) {
             return strtolower(trim($item->name)) . '|' . strtolower(trim($item->size));
         })
         ->count();
 
+    // 🔥 AVAILABLE ITEMS (TOTAL STOCK - DYNAMIC)
+    $availableItems = (clone $query)->sum('stock');
+
     return view('admin.overview-stock', compact(
         'products',
         'branches',
         'totalProducts',
-        'selectedBranch'
+        'selectedBranch',
+        'availableItems' // 🔥 IMPORTANT
     ));
 }
     // =====================
