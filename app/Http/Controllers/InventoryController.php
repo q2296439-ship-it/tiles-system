@@ -84,32 +84,87 @@ public function store(Request $request)
         'unit_price' => $price,
     ]);
 
-    // AUTO CENTRALIZED IF SAN ISIDRO
-    if ((int)$request->branch_id === 1) {
+    // =====================
+// STORE STOCK 🔥
+// =====================
+public function store(Request $request)
+{
+    DB::beginTransaction();
 
-        $branches = Branch::where('id', '!=', 1)->get();
+    try {
 
-        foreach ($branches as $branch) {
+        if ($request->mode === 'new') {
 
-            $already = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower($name)])
-                ->whereRaw('LOWER(TRIM(size)) = ?', [strtolower($size)])
-                ->where('branch_id', $branch->id)
-                ->exists();
+            $request->validate([
+                'new_name'  => 'required|string',
+                'new_price' => 'nullable|numeric',
+                'quantity'  => 'required|integer|min:1',
+                'branch_id' => 'required|exists:branches,id'
+            ]);
 
-            if (!$already) {
-                Product::create([
-                    'name'      => $name,
-                    'size'      => $size,
-                    'price'     => $price,
-                    'stock'     => 0,
-                    'color'     => 'N/A',
-                    'branch_id' => $branch->id,
+            if (strtolower(auth()->user()->role) === 'cashier') {
+                $request->merge([
+                    'new_price' => 0
                 ]);
             }
-        }
-    }
 
-} else {
+            $name  = trim($request->new_name);
+            $size  = trim($request->new_size);
+            $price = $request->new_price;
+
+            $exists = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower($name)])
+                ->whereRaw('LOWER(TRIM(size)) = ?', [strtolower($size)])
+                ->where('branch_id', $request->branch_id)
+                ->exists();
+
+            if ($exists) {
+                throw new \Exception('Product already existed on the system.');
+            }
+
+            // CREATE SA CURRENT BRANCH
+            $product = Product::create([
+                'name'      => $name,
+                'size'      => $size,
+                'price'     => $price,
+                'stock'     => $request->quantity,
+                'color'     => 'N/A',
+                'branch_id' => $request->branch_id,
+            ]);
+
+            StockMovement::create([
+                'product_id' => $product->id,
+                'branch_id'  => $request->branch_id,
+                'type'       => 'IN',
+                'quantity'   => $request->quantity,
+                'reason'     => 'New Product Added',
+                'dr_number'  => $request->dr_number_new,
+                'unit_price' => $price,
+            ]);
+
+            // 🔥 AUTO SYNC SA LAHAT NG BRANCHES
+            $branches = Branch::all();
+
+            foreach ($branches as $branch) {
+
+                $already = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower($name)])
+                    ->whereRaw('LOWER(TRIM(size)) = ?', [strtolower($size)])
+                    ->where('branch_id', $branch->id)
+                    ->exists();
+
+                if (!$already) {
+                    Product::create([
+                        'name'      => $name,
+                        'size'      => $size,
+                        'price'     => $price,
+                        'stock'     => 0, // 🔥 walang stock sa ibang branch
+                        'color'     => 'N/A',
+                        'branch_id' => $branch->id,
+                    ]);
+                }
+            }
+
+        } else {
+
             $request->validate([
                 'product_id' => 'required|exists:products,id',
                 'branch_id'  => 'required|exists:branches,id',
@@ -121,7 +176,6 @@ public function store(Request $request)
 
             $existingProduct = Product::findOrFail($request->product_id);
 
-            // Cashier auto uses existing price
             if (strtolower(auth()->user()->role) === 'cashier') {
                 $request->merge([
                     'price' => $existingProduct->price
@@ -162,6 +216,28 @@ public function store(Request $request)
                     'unit_price' => $request->price,
                 ]);
             }
+
+            // 🔥 AUTO SYNC SA LAHAT NG BRANCHES (EXISTING)
+            $branches = Branch::all();
+
+            foreach ($branches as $branch) {
+
+                $exists = Product::where('name', $existingProduct->name)
+                    ->where('size', $existingProduct->size)
+                    ->where('branch_id', $branch->id)
+                    ->exists();
+
+                if (!$exists) {
+                    Product::create([
+                        'name'      => $existingProduct->name,
+                        'size'      => $existingProduct->size,
+                        'price'     => $request->price,
+                        'stock'     => 0, // 🔥 walang stock
+                        'color'     => $existingProduct->color,
+                        'branch_id' => $branch->id,
+                    ]);
+                }
+            }
         }
 
         DB::commit();
@@ -174,7 +250,7 @@ public function store(Request $request)
 
         return back()->with('error', $e->getMessage());
     }
-}         
+}      
 
    public function overviewStock(Request $request)
 {
