@@ -228,15 +228,29 @@ public function store(Request $request)
         })
         ->count();
 
-    // 🔥 AVAILABLE ITEMS (TOTAL STOCK - DYNAMIC)
-    $availableItems = (clone $query)->sum('stock');
+    // 🔥 FIX: SEPARATE QUERY PARA SA AVAILABLE ITEMS (IMPORTANTE)
+    $availableQuery = Product::query();
+
+    if ($role === 'cashier') {
+        $availableQuery->where('branch_id', $user->branch_id);
+    }
+
+    if ($request->search) {
+        $availableQuery->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    if ($selectedBranch) {
+        $availableQuery->where('branch_id', $selectedBranch);
+    }
+
+    $availableItems = $availableQuery->sum('stock');
 
     return view('admin.overview-stock', compact(
         'products',
         'branches',
         'totalProducts',
         'selectedBranch',
-        'availableItems' // 🔥 IMPORTANT
+        'availableItems'
     ));
 }
     // =====================
