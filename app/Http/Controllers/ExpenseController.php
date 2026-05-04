@@ -21,9 +21,9 @@ class ExpenseController extends Controller
             $branchId = $user->branch_id;
         }
 
-        $categories = ExpenseCategory::where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        $categories = ExpenseCategory::where('status', 1)
+    ->orderBy('name')
+    ->get();
 
         $branches = Branch::orderBy('name')->get();
 
