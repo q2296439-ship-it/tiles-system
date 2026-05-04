@@ -283,7 +283,7 @@ svg{
 
         <div class="stat">
             <h4>Available Items</h4>
-            <h2>{{ $products->filter(fn($p) => $p->stock > 10)->count() }}</h2>
+            <h2>{{ $availableItems }}</h2>
         </div>
 
     </div>
