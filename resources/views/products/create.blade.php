@@ -217,7 +217,7 @@ select:focus{
 
                 <div class="form-group">
                     <label>Stock</label>
-                    <input type="number" name="quantity" value="{{ old('quantity') }}" required>
+                    <input type="number" name="stock" value="{{ old('stock') }}" required>
                 </div>
 
                 <div class="form-group">
