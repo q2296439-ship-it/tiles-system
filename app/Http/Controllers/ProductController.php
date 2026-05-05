@@ -148,16 +148,16 @@ public function store(Request $request)
 
             // NO EXISTING = CREATE PRODUCT
             $product = Product::create([
-                'sku' => $request->sku,
-                'category' => $request->category,
-                'name' => $request->name,
-                'size' => $request->size,
-                'color' => $request->color,
-                'price' => $request->price,
-                'stock' => 0,
-                'low_stock_threshold' => $request->low_stock_threshold,
-                'branch_id' => $request->branch_id,
-            ]);
+    'sku' => $request->sku,
+    'category' => $request->category,
+    'name' => $request->name,
+    'size' => $request->size,
+    'color' => $request->color,
+    'price' => $request->price,
+    'stock' => $request->stock, // ✅ FIXED
+    'low_stock_threshold' => $request->low_stock_threshold,
+    'branch_id' => $request->branch_id,
+]);
 
         } else {
 
