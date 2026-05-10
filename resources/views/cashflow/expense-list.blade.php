@@ -162,14 +162,18 @@ $routePrefix = match(strtolower(auth()->user()->role)) {
 
 .pagination{
     display:flex;
-    gap:8px;
+    justify-content:center;
+    gap:6px;
     flex-wrap:wrap;
     list-style:none;
     padding:0;
 }
 
-.pagination li a,
-.pagination li span{
+.page-item{
+    list-style:none;
+}
+
+.page-link{
     padding:8px 14px;
     border-radius:8px;
     border:1px solid #cbd5e1;
@@ -179,13 +183,13 @@ $routePrefix = match(strtolower(auth()->user()->role)) {
     font-weight:700;
 }
 
-.pagination li.active span{
+.page-item.active .page-link{
     background:#2563eb;
     color:#fff;
     border-color:#2563eb;
 }
 
-.pagination li a:hover{
+.page-link:hover{
     background:#eff6ff;
 }
 </style>
@@ -321,7 +325,7 @@ $routePrefix = match(strtolower(auth()->user()->role)) {
 
 {{-- PAGINATION --}}
 <div class="pagination-wrapper">
-    {{ $expenses->links() }}
+    {{ $expenses->onEachSide(1)->links('pagination::bootstrap-4') }}
 </div>
 
 </div>
