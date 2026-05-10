@@ -398,7 +398,114 @@ tr:hover{
 
 @if($sales->hasPages())
 <div class="pagination-wrap">
-    {{ $sales->links() }}
+
+    <div style="
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        flex-wrap:wrap;
+    ">
+
+        {{-- PREVIOUS --}}
+        @if ($sales->onFirstPage())
+            <span style="
+                padding:8px 14px;
+                border-radius:10px;
+                background:#e5e7eb;
+                color:#94a3b8;
+                font-size:13px;
+                font-weight:700;
+            ">
+                ← Previous
+            </span>
+        @else
+            <a href="{{ $sales->previousPageUrl() }}"
+               style="
+                    padding:8px 14px;
+                    border-radius:10px;
+                    background:#2563eb;
+                    color:#fff;
+                    text-decoration:none;
+                    font-size:13px;
+                    font-weight:700;
+               ">
+                ← Previous
+            </a>
+        @endif
+
+        {{-- PAGE NUMBERS --}}
+        @for ($i = 1; $i <= $sales->lastPage(); $i++)
+
+            @if($i == $sales->currentPage())
+
+                <span style="
+                    width:36px;
+                    height:36px;
+                    border-radius:10px;
+                    background:#2563eb;
+                    color:#fff;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:13px;
+                    font-weight:700;
+                ">
+                    {{ $i }}
+                </span>
+
+            @else
+
+                <a href="{{ $sales->url($i) }}"
+                   style="
+                        width:36px;
+                        height:36px;
+                        border-radius:10px;
+                        background:#f1f5f9;
+                        color:#111827;
+                        text-decoration:none;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-size:13px;
+                        font-weight:700;
+                   ">
+                    {{ $i }}
+                </a>
+
+            @endif
+
+        @endfor
+
+        {{-- NEXT --}}
+        @if ($sales->hasMorePages())
+            <a href="{{ $sales->nextPageUrl() }}"
+               style="
+                    padding:8px 14px;
+                    border-radius:10px;
+                    background:#2563eb;
+                    color:#fff;
+                    text-decoration:none;
+                    font-size:13px;
+                    font-weight:700;
+               ">
+                Next →
+            </a>
+        @else
+            <span style="
+                padding:8px 14px;
+                border-radius:10px;
+                background:#e5e7eb;
+                color:#94a3b8;
+                font-size:13px;
+                font-weight:700;
+            ">
+                Next →
+            </span>
+        @endif
+
+    </div>
+
 </div>
 @endif
 
