@@ -20,7 +20,9 @@ $layout = match(auth()->user()->role) {
         box-shadow: 0 5px 20px rgba(0,0,0,0.08);
     }
 
-    h2 { margin-bottom: 20px; }
+    h2 {
+        margin-bottom: 20px;
+    }
 
     label {
         font-size: 13px;
@@ -29,7 +31,8 @@ $layout = match(auth()->user()->role) {
         margin-bottom: 5px;
     }
 
-    input, select {
+    input,
+    select {
         width: 100%;
         padding: 10px;
         margin-bottom: 15px;
@@ -63,6 +66,17 @@ $layout = match(auth()->user()->role) {
         border-radius: 6px;
         margin-bottom: 15px;
     }
+
+    .select2-container .select2-selection--single {
+        height: 42px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        padding-top: 5px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px !important;
+    }
 </style>
 
 <div class="card">
@@ -86,6 +100,7 @@ $layout = match(auth()->user()->role) {
             </ul>
         </div>
     @endif
+
     <form method="POST" action="{{ route('stock.store') }}">
         @csrf
 
@@ -112,6 +127,7 @@ $layout = match(auth()->user()->role) {
 
             <select name="branch_id" id="branchSelect" required>
                 <option value="">-- Select Branch --</option>
+
                 @foreach($branches as $branch)
                     <option value="{{ $branch->id }}">
                         {{ $branch->name }}
@@ -125,15 +141,21 @@ $layout = match(auth()->user()->role) {
         <div id="existingProduct">
 
             <label>Product</label>
+
             <select name="product_id" id="productSelect">
-                <option value="">-- Select Product --</option>
+                <option value="">-- Search Product --</option>
+
                 @foreach($products as $product)
+
                     <option value="{{ $product->id }}"
                         data-stock="{{ $product->stock }}"
                         data-price="{{ $product->price }}"
                         data-branch="{{ $product->branch_id }}">
+
                         {{ $product->name }} (Stock: {{ $product->stock }})
+
                     </option>
+
                 @endforeach
             </select>
 
@@ -141,10 +163,22 @@ $layout = match(auth()->user()->role) {
             <input type="text" id="currentStock" readonly>
 
             <label>Update Price</label>
+
             @if(strtolower(auth()->user()->role) === 'cashier')
-                <input type="number" step="0.01" name="price" id="priceInput" readonly>
+
+                <input type="number"
+                       step="0.01"
+                       name="price"
+                       id="priceInput"
+                       readonly>
+
             @else
-                <input type="number" step="0.01" name="price" id="priceInput">
+
+                <input type="number"
+                       step="0.01"
+                       name="price"
+                       id="priceInput">
+
             @endif
 
             <label>D.R Number</label>
@@ -162,11 +196,24 @@ $layout = match(auth()->user()->role) {
             <input type="text" name="new_size">
 
             <label>Price</label>
+
             @if(strtolower(auth()->user()->role) === 'cashier')
-                <input type="number" step="0.01" value="0" readonly>
-                <input type="hidden" name="new_price" value="0">
+
+                <input type="number"
+                       step="0.01"
+                       value="0"
+                       readonly>
+
+                <input type="hidden"
+                       name="new_price"
+                       value="0">
+
             @else
-                <input type="number" step="0.01" name="new_price">
+
+                <input type="number"
+                       step="0.01"
+                       name="new_price">
+
             @endif
 
             <label>D.R Number</label>
@@ -178,11 +225,19 @@ $layout = match(auth()->user()->role) {
         <input type="number" name="quantity" required>
 
         <button type="submit" class="btn">Save</button>
+
     </form>
 
 </div>
 
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
+
 const modeSelect    = document.getElementById('modeSelect');
 const existingDiv   = document.getElementById('existingProduct');
 const newDiv        = document.getElementById('newProduct');
@@ -221,6 +276,7 @@ modeSelect.addEventListener('change', toggleMode);
 const allProducts = [];
 
 for (let i = 1; i < productSelect.options.length; i++) {
+
     const opt = productSelect.options[i];
 
     allProducts.push({
@@ -238,10 +294,13 @@ branchSelect.addEventListener('change', function () {
     const selectedBranch = this.value;
 
     productSelect.innerHTML =
-        '<option value="">-- Select Product --</option>';
+        '<option value="">-- Search Product --</option>';
 
     currentStock.value = '';
-    if (priceInput) priceInput.value = '';
+
+    if (priceInput) {
+        priceInput.value = '';
+    }
 
     allProducts.forEach(item => {
 
@@ -251,12 +310,19 @@ branchSelect.addEventListener('change', function () {
 
             option.value = item.value;
             option.textContent = item.text;
+
             option.dataset.stock = item.stock;
             option.dataset.price = item.price;
             option.dataset.branch = item.branch;
 
             productSelect.appendChild(option);
         }
+    });
+
+    $('#productSelect').select2({
+        placeholder: 'Search Product',
+        allowClear: true,
+        width: '100%'
     });
 });
 
@@ -275,9 +341,16 @@ productSelect.addEventListener('change', function () {
 // init
 toggleMode();
 
+$('#productSelect').select2({
+    placeholder: 'Search Product',
+    allowClear: true,
+    width: '100%'
+});
+
 if (branchSelect.value) {
     branchSelect.dispatchEvent(new Event('change'));
 }
+
 </script>
 
 @endsection
