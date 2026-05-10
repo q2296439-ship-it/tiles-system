@@ -39,12 +39,13 @@ class SalesReportController extends Controller
         }
 
         $sales = Sale::with(['branch','user'])
-            ->whereBetween('created_at', [$start, $end])
-            ->when($request->branch_id, function($q) use ($request) {
-                $q->where('branch_id', $request->branch_id);
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+    ->whereBetween('created_at', [$start, $end])
+    ->when($request->branch_id, function($q) use ($request) {
+        $q->where('branch_id', $request->branch_id);
+    })
+    ->orderBy('created_at', 'desc')
+    ->limit(15)
+    ->get();
 
         $total = $sales->sum('total_amount');
         $transactionCount = $sales->count();
