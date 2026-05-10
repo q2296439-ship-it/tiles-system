@@ -106,92 +106,117 @@ public function loadReceipt($receipt_no)
     }
 
     // RETURN = stock back + sales less
-    public function returnStore(Request $request)
-    {
-        try {
+public function returnStore(Request $request)
+{
+    try {
 
-            $request->validate([
-                'return_no'   => 'required|unique:returns,return_no',
-                'return_date' => 'required|date',
-                'reason'      => 'required',
-                'items'       => 'required|array|min:1',
+        $request->validate([
+            'return_no'   => 'required|unique:returns,return_no',
+            'return_date' => 'required|date',
+            'reason'      => 'required',
+            'items'       => 'required|array|min:1',
+        ]);
+
+        DB::transaction(function () use ($request) {
+
+            $branchId = auth()->user()->branch_id;
+            $userId   = auth()->id();
+
+            // 🔥 CHECK ORIGINAL RECEIPT
+            $collection = Collection::where('receipt_no', $request->receipt_no)
+                ->where('branch_id', $branchId)
+                ->first();
+
+            if (!$collection) {
+                throw new \Exception('Original receipt not found.');
+            }
+
+            // 🔥 SAVE RETURN RECORD
+            $return = ReturnModel::create([
+                'return_no'     => $request->return_no,
+                'receipt_no'    => $request->receipt_no,
+                'return_date'   => $request->return_date,
+                'customer_name' => $request->customer_name ?? '',
+                'reason'        => $request->reason,
+                'total_amount'  => $request->total_amount ?? 0,
+                'branch_id'     => $branchId,
+                'user_id'       => $userId,
             ]);
 
-            DB::transaction(function () use ($request) {
+            // 🔥 NEGATIVE SALES ENTRY
+            $sale = Sale::create([
+                'total_amount' => -1 * ($request->total_amount ?? 0),
+                'branch_id'    => $branchId,
+                'user_id'      => $userId,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
 
-                $branchId = auth()->user()->branch_id;
-                $userId   = auth()->id();
+            foreach ($request->items as $item) {
 
-                $return = ReturnModel::create([
-                    'return_no'     => $request->return_no,
-                    'receipt_no'    => $request->receipt_no,
-                    'return_date'   => $request->return_date,
-                    'customer_name' => $request->customer_name ?? '',
-                    'reason'        => $request->reason,
-                    'total_amount'  => $request->total_amount ?? 0,
-                    'branch_id'     => $branchId,
-                    'user_id'       => $userId,
-                ]);
+                if (empty($item['description'])) {
+                    continue;
+                }
 
-                $sale = Sale::create([
-                    'total_amount' => -1 * ($request->total_amount ?? 0),
-                    'branch_id'    => $branchId,
-                    'user_id'      => $userId,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ]);
+                $qty    = (int) ($item['qty'] ?? 0);
+                $price  = (float) ($item['unit_price'] ?? 0);
+                $amount = $qty * $price;
+                $desc   = trim($item['description']);
 
-                foreach ($request->items as $item) {
-
-                    if (empty($item['description'])) {
-                        continue;
-                    }
-
-                    $qty    = (int) ($item['qty'] ?? 0);
-                    $price  = (float) ($item['unit_price'] ?? 0);
-                    $amount = $qty * $price;
-                    $desc   = trim($item['description']);
-
-                    $product = Product::whereRaw('LOWER(TRIM(name)) = ?', [strtolower(trim($desc))])
+                $product = Product::whereRaw(
+                        'LOWER(TRIM(name)) = ?',
+                        [strtolower(trim($desc))]
+                    )
                     ->where('branch_id', $branchId)
                     ->first();
 
-                    ReturnItem::create([
-                        'return_id'   => $return->id,
-                        'product_id'  => $product->id ?? null,
-                        'qty'         => $qty,
-                        'unit'        => $item['unit'] ?? '',
-                        'description' => $desc,
-                        'unit_price'  => $price,
-                        'amount'      => $amount,
+                // 🔥 SAVE RETURN ITEMS
+                ReturnItem::create([
+                    'return_id'   => $return->id,
+                    'product_id'  => $product->id ?? null,
+                    'qty'         => $qty,
+                    'unit'        => $item['unit'] ?? '',
+                    'description' => $desc,
+                    'unit_price'  => $price,
+                    'amount'      => $amount,
+                ]);
+
+                // 🔥 RESTORE INVENTORY
+                if ($product) {
+
+                    $product->stock += $qty;
+                    $product->save();
+
+                    // 🔥 NEGATIVE SALE ITEM
+                    SaleItem::create([
+                        'sale_id'    => $sale->id,
+                        'product_id' => $product->id,
+                        'quantity'   => -1 * $qty,
+                        'price'      => $price,
+                        'subtotal'   => -1 * $amount,
                     ]);
-
-                    if ($product) {
-                        $product->stock += $qty;
-                        $product->save();
-
-                        SaleItem::create([
-                            'sale_id'    => $sale->id,
-                            'product_id' => $product->id,
-                            'quantity'   => -1 * $qty,
-                            'price'      => $price,
-                            'subtotal'   => -1 * $amount,
-                        ]);
-                    }
                 }
-            });
+            }
 
-            return redirect()
-                ->route('cashier.return.create')
-                ->with('success', 'Return receipt saved, stock restored, sales adjusted!');
+            // 🔥 DELETE ORIGINAL COLLECTION ITEMS
+            CollectionItem::where('collection_id', $collection->id)->delete();
 
-        } catch (\Throwable $e) {
+            // 🔥 DELETE ORIGINAL COLLECTION
+            $collection->delete();
 
-            return back()
-                ->withInput()
-                ->with('error', $e->getMessage());
-        }
+        });
+
+        return redirect()
+            ->route('cashier.return.create')
+            ->with('success', 'Return receipt saved, stock restored, original OR removed successfully!');
+
+    } catch (\Throwable $e) {
+
+        return back()
+            ->withInput()
+            ->with('error', $e->getMessage());
     }
+}
 
    public function today(Request $request)
 {
