@@ -318,6 +318,10 @@ tr:hover{
             </table>
         </div>
 
+        <div style="margin-top:20px; display:flex; justify-content:center;">
+            {{ $data->links('pagination::bootstrap-4') }}
+        </div>
+
     </div>
 
 </div>
