@@ -22,8 +22,8 @@ class ExpenseController extends Controller
         }
 
         $categories = ExpenseCategory::where('status', 1)
-    ->orderBy('name')
-    ->get();
+            ->orderBy('name')
+            ->get();
 
         $branches = Branch::orderBy('name')->get();
 
@@ -36,7 +36,12 @@ class ExpenseController extends Controller
             $totalTodayQuery->where('branch_id', $branchId);
         }
 
-        $expenses = $expenses->latest()->get();
+        // ✅ PAGINATION ADDED
+        $expenses = $expenses->latest()->paginate(10);
+
+        // ✅ KEEP FILTER WHEN CHANGING PAGE
+        $expenses->appends($request->all());
+
         $totalToday = $totalTodayQuery->sum('amount');
 
         return view('cashflow.expenses', compact(
@@ -113,6 +118,7 @@ class ExpenseController extends Controller
         ];
 
         $callback = function () use ($expenses) {
+
             $file = fopen('php://output', 'w');
 
             fputcsv($file, [
@@ -126,6 +132,7 @@ class ExpenseController extends Controller
             ]);
 
             foreach ($expenses as $row) {
+
                 fputcsv($file, [
                     $row->expense_date,
                     $row->branch->name ?? '',
