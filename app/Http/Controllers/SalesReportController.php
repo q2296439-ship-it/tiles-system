@@ -267,12 +267,13 @@ class SalesReportController extends Controller
     }
 
     $query = DB::table('sales')
-        ->join('products', 'sales.branch_id', '=', 'products.branch_id')
-        ->select(
-            'products.name as brand',
-            DB::raw('SUM(sales.total_amount) as total')
-        )
-        ->whereBetween('sales.created_at', [$start, $end]);
+    ->join('sale_items', 'sales.id', '=', 'sale_items.sale_id')
+    ->join('products', 'sale_items.product_id', '=', 'products.id')
+    ->select(
+        'products.name as brand',
+        DB::raw('SUM(sale_items.quantity * sale_items.price) as total')
+    )
+    ->whereBetween('sales.created_at', [$start, $end]);
 
     if ($request->branch_id) {
         $query->where('sales.branch_id', $request->branch_id);
