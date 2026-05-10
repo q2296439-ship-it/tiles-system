@@ -182,48 +182,24 @@ tr:hover{
     color:#6b7280;
 }
 
-/* PAGINATION */
+/* NORMAL PAGINATION */
 .pagination{
     display:flex;
     justify-content:center;
-    gap:6px;
-    flex-wrap:wrap;
-    list-style:none;
-    padding:0;
-    margin:0;
-}
-.pagination li{
-    list-style:none;
+    margin-top:20px;
+    gap:5px;
+    padding-left:0;
 }
 
-.pagination li a,
-.pagination li span{
-    display:inline-block;
-    padding:8px 14px;
-    border-radius:8px;
-    text-decoration:none;
+.pagination svg{
+    width:18px !important;
+    height:18px !important;
+}
+
+.pagination .page-link{
+    padding:6px 12px;
     font-size:14px;
-    font-weight:700;
-    border:1px solid #d1d5db;
-    background:#fff;
-    color:#111827;
-    line-height:1.2;
-}
-.pagination li a:hover{
-    background:#2563eb;
-    color:#fff;
-    border-color:#2563eb;
-}
-
-.pagination .active span{
-    background:#2563eb;
-    color:#fff;
-    border-color:#2563eb;
-}
-
-.pagination .disabled span{
-    opacity:.5;
-    cursor:not-allowed;
+    border-radius:6px;
 }
 
 @media (max-width:1100px){
@@ -248,7 +224,11 @@ tr:hover{
     <div class="page-head">
 
         <div>
-            <h1 class="page-title">📊 Sales per Brand <span class="live">● Live</span></h1>
+            <h1 class="page-title">
+                📊 Sales per Brand
+                <span class="live">● Live</span>
+            </h1>
+
             <div class="page-sub">
                 Track brand performance, totals, and rankings across branches.
             </div>
@@ -261,6 +241,7 @@ tr:hover{
     </div>
 
     <div class="filter-card">
+
         <form method="GET" class="filters">
 
             <input type="date"
@@ -272,14 +253,20 @@ tr:hover{
                    value="{{ request('end_date') }}">
 
             <select name="branch_id">
+
                 <option value="">All Branches</option>
 
                 @foreach($branches as $b)
+
                     <option value="{{ $b->id }}"
                         {{ request('branch_id') == $b->id ? 'selected' : '' }}>
+
                         {{ $b->name }}
+
                     </option>
+
                 @endforeach
+
             </select>
 
             <button class="btn btn-green" type="submit">
@@ -298,6 +285,7 @@ tr:hover{
             </a>
 
         </form>
+
     </div>
 
     <div class="kpi-grid">
@@ -319,35 +307,46 @@ tr:hover{
 
         <div class="kpi red">
             <small>Average</small>
+
             <h2>
                 ₱{{ $data->count()
                     ? number_format($totals->sum() / $data->count(), 2)
                     : 0 }}
             </h2>
+
         </div>
 
     </div>
 
     <div class="card" style="margin-bottom:22px;">
-        <div class="card-title">📈 Sales by Brand</div>
+
+        <div class="card-title">
+            📈 Sales by Brand
+        </div>
+
         <canvas id="brandChart" height="95"></canvas>
+
     </div>
 
     <div class="card">
 
-        <div class="card-title">🏆 Brand Performance</div>
+        <div class="card-title">
+            🏆 Brand Performance
+        </div>
 
         <div class="table-wrap">
 
             <table>
 
                 <thead>
+
                     <tr>
                         <th width="8%">#</th>
                         <th>Brand</th>
                         <th class="right">Sales</th>
                         <th class="right">%</th>
                     </tr>
+
                 </thead>
 
                 <tbody>
@@ -381,9 +380,11 @@ tr:hover{
                     @empty
 
                     <tr>
+
                         <td colspan="4" class="empty">
                             No sales data found.
                         </td>
+
                     </tr>
 
                     @endforelse
@@ -394,8 +395,8 @@ tr:hover{
 
         </div>
 
-        <div style="margin-top:25px;">
-            {{ $data->onEachSide(1)->links() }}
+        <div style="margin-top:20px; display:flex; justify-content:center;">
+            {{ $data->links('pagination::bootstrap-4') }}
         </div>
 
     </div>
@@ -406,9 +407,12 @@ tr:hover{
 
 <script>
 new Chart(document.getElementById('brandChart'), {
+
     type: 'bar',
+
     data: {
         labels: @json($labels),
+
         datasets: [{
             label: 'Sales',
             data: @json($totals),
@@ -416,19 +420,23 @@ new Chart(document.getElementById('brandChart'), {
             borderRadius: 8
         }]
     },
+
     options: {
         responsive: true,
+
         plugins: {
             legend: {
                 display: false
             }
         },
+
         scales: {
             y: {
                 beginAtZero: true
             }
         }
     }
+
 });
 
 document.getElementById('lastUpdated').innerText =
@@ -437,9 +445,11 @@ document.getElementById('lastUpdated').innerText =
 let isDownloading = false;
 
 document.querySelectorAll('.export-btn').forEach(link => {
+
     link.addEventListener('click', () => {
         isDownloading = true;
     });
+
 });
 
 setInterval(() => {
@@ -451,17 +461,22 @@ setInterval(() => {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
+
         .then(res => res.text())
+
         .then(html => {
 
             const parser = new DOMParser();
+
             const doc = parser.parseFromString(html, 'text/html');
 
             const newTable = doc.querySelector('tbody');
 
             if (newTable) {
+
                 document.querySelector('tbody').innerHTML =
                     newTable.innerHTML;
+
             }
 
             document.getElementById('lastUpdated').innerText =
