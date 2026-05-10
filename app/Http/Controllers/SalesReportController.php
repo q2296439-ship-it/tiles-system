@@ -284,10 +284,11 @@ class SalesReportController extends Controller
     $data = $query
     ->groupBy('products.name')
     ->orderByDesc('total')
-    ->paginate(15);
+    ->paginate(15)
+    ->withQueryString();
 
-$labels = collect($data->items())->pluck('brand');
-$totals = collect($data->items())->pluck('total');
+$labels = $data->pluck('brand');
+$totals = $data->pluck('total');
 
     $branches = DB::table('branches')->get();
 

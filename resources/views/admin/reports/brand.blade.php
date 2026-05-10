@@ -496,6 +496,7 @@ document.querySelectorAll('.export-btn').forEach(link => {
 
 });
 
+/*
 setInterval(() => {
 
     if (!isDownloading) {
@@ -531,6 +532,6 @@ setInterval(() => {
     }
 
 }, 5000);
+*/
 </script>
-
 @endsection
