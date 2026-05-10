@@ -395,9 +395,9 @@ tr:hover{
 
         </div>
 
-        <div style="margin-top:20px; display:flex; justify-content:center;">
-            {{ $data->links('pagination::bootstrap-4') }}
-        </div>
+        <div class="pagination-wrapper">
+    {{ $data->onEachSide(1)->links('pagination::bootstrap-4') }}
+</div>
 
     </div>
 
