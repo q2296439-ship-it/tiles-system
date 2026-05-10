@@ -182,6 +182,57 @@ tr:hover{
     color:#6b7280;
 }
 
+/* PAGINATION */
+.pagination{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+.pagination li{
+    list-style:none;
+}
+
+.pagination li a,
+.pagination li span{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:38px;
+    height:38px;
+    padding:0 12px;
+    border-radius:10px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:700;
+    border:1px solid #d1d5db;
+    background:#fff;
+    color:#111827;
+    transition:.2s ease;
+}
+
+.pagination li a:hover{
+    background:#2563eb;
+    color:#fff;
+    border-color:#2563eb;
+}
+
+.pagination .active span{
+    background:#2563eb;
+    color:#fff;
+    border-color:#2563eb;
+}
+
+.pagination .disabled span{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
 @media (max-width:1100px){
     .kpi-grid{
         grid-template-columns:repeat(2,1fr);
@@ -201,12 +252,13 @@ tr:hover{
 
 <div class="page-wrap">
 
-    <!-- HEADER -->
     <div class="page-head">
 
         <div>
             <h1 class="page-title">📊 Sales per Brand <span class="live">● Live</span></h1>
-            <div class="page-sub">Track brand performance, totals, and rankings across branches.</div>
+            <div class="page-sub">
+                Track brand performance, totals, and rankings across branches.
+            </div>
         </div>
 
         <div class="last-updated" id="lastUpdated">
@@ -215,18 +267,20 @@ tr:hover{
 
     </div>
 
-    <!-- FILTERS -->
     <div class="filter-card">
         <form method="GET" class="filters">
 
-            <input type="date" name="start_date"
-                value="{{ request('start_date') }}">
+            <input type="date"
+                   name="start_date"
+                   value="{{ request('start_date') }}">
 
-            <input type="date" name="end_date"
-                value="{{ request('end_date') }}">
+            <input type="date"
+                   name="end_date"
+                   value="{{ request('end_date') }}">
 
             <select name="branch_id">
                 <option value="">All Branches</option>
+
                 @foreach($branches as $b)
                     <option value="{{ $b->id }}"
                         {{ request('branch_id') == $b->id ? 'selected' : '' }}>
@@ -235,7 +289,9 @@ tr:hover{
                 @endforeach
             </select>
 
-            <button class="btn btn-green" type="submit">Filter</button>
+            <button class="btn btn-green" type="submit">
+                Filter
+            </button>
 
             <a href="{{ route('report.brand.excel', request()->all()) }}"
                class="btn btn-green export-btn">
@@ -251,7 +307,6 @@ tr:hover{
         </form>
     </div>
 
-    <!-- KPI -->
     <div class="kpi-grid">
 
         <div class="kpi blue">
@@ -261,7 +316,7 @@ tr:hover{
 
         <div class="kpi green">
             <small>Total Brands</small>
-            <h2>{{ count($data) }}</h2>
+            <h2>{{ $data->total() }}</h2>
         </div>
 
         <div class="kpi orange">
@@ -271,23 +326,28 @@ tr:hover{
 
         <div class="kpi red">
             <small>Average</small>
-            <h2>₱{{ count($data) ? number_format($totals->sum() / count($data), 2) : 0 }}</h2>
+            <h2>
+                ₱{{ $data->count()
+                    ? number_format($totals->sum() / $data->count(), 2)
+                    : 0 }}
+            </h2>
         </div>
 
     </div>
 
-    <!-- CHART -->
     <div class="card" style="margin-bottom:22px;">
         <div class="card-title">📈 Sales by Brand</div>
         <canvas id="brandChart" height="95"></canvas>
     </div>
 
-    <!-- TABLE -->
     <div class="card">
+
         <div class="card-title">🏆 Brand Performance</div>
 
         <div class="table-wrap">
+
             <table>
+
                 <thead>
                     <tr>
                         <th width="8%">#</th>
@@ -298,28 +358,51 @@ tr:hover{
                 </thead>
 
                 <tbody>
-                    @php $total = $totals->sum(); @endphp
+
+                    @php
+                        $total = $totals->sum();
+                    @endphp
 
                     @forelse($data as $index => $row)
+
                     <tr class="{{ $index == 0 ? 'top-row' : '' }}">
-                        <td>{{ $index + 1 }}</td>
+
+                        <td>
+                            {{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
+                        </td>
+
                         <td>{{ $row->brand }}</td>
-                        <td class="right">₱{{ number_format($row->total, 2) }}</td>
+
                         <td class="right">
-                            {{ $total > 0 ? number_format(($row->total / $total) * 100, 2) : 0 }}%
+                            ₱{{ number_format($row->total, 2) }}
+                        </td>
+
+                        <td class="right">
+                            {{ $total > 0
+                                ? number_format(($row->total / $total) * 100, 2)
+                                : 0 }}%
+                        </td>
+
+                    </tr>
+
+                    @empty
+
+                    <tr>
+                        <td colspan="4" class="empty">
+                            No sales data found.
                         </td>
                     </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="empty">No sales data found.</td>
-                    </tr>
+
                     @endforelse
+
                 </tbody>
+
             </table>
+
         </div>
 
-        <div style="margin-top:20px; display:flex; justify-content:center;">
-            {{ $data->links('pagination::bootstrap-4') }}
+        <div style="margin-top:25px;">
+            {{ $data->onEachSide(1)->links() }}
         </div>
 
     </div>
@@ -343,10 +426,14 @@ new Chart(document.getElementById('brandChart'), {
     options: {
         responsive: true,
         plugins: {
-            legend: { display: false }
+            legend: {
+                display: false
+            }
         },
         scales: {
-            y: { beginAtZero: true }
+            y: {
+                beginAtZero: true
+            }
         }
     }
 });
@@ -363,24 +450,34 @@ document.querySelectorAll('.export-btn').forEach(link => {
 });
 
 setInterval(() => {
+
     if (!isDownloading) {
+
         fetch(window.location.href, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
         .then(res => res.text())
         .then(html => {
+
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
 
             const newTable = doc.querySelector('tbody');
+
             if (newTable) {
-                document.querySelector('tbody').innerHTML = newTable.innerHTML;
+                document.querySelector('tbody').innerHTML =
+                    newTable.innerHTML;
             }
 
             document.getElementById('lastUpdated').innerText =
                 "Last updated: " + new Date().toLocaleTimeString();
+
         });
+
     }
+
 }, 5000);
 </script>
 
