@@ -186,36 +186,29 @@ tr:hover{
 .pagination{
     display:flex;
     justify-content:center;
-    align-items:center;
-    gap:8px;
+    gap:6px;
     flex-wrap:wrap;
     list-style:none;
     padding:0;
     margin:0;
 }
-
 .pagination li{
     list-style:none;
 }
 
 .pagination li a,
 .pagination li span{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-width:38px;
-    height:38px;
-    padding:0 12px;
-    border-radius:10px;
+    display:inline-block;
+    padding:8px 14px;
+    border-radius:8px;
     text-decoration:none;
     font-size:14px;
     font-weight:700;
     border:1px solid #d1d5db;
     background:#fff;
     color:#111827;
-    transition:.2s ease;
+    line-height:1.2;
 }
-
 .pagination li a:hover{
     background:#2563eb;
     color:#fff;
