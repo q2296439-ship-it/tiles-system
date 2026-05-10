@@ -44,7 +44,7 @@ class SalesReportController extends Controller
                 $q->where('branch_id', $request->branch_id);
             })
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         $total = $sales->sum('total_amount');
         $transactionCount = $sales->count();

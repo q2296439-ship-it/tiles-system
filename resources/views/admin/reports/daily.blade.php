@@ -201,6 +201,59 @@ tr:hover{
     color:#6b7280;
 }
 
+/* PAGINATION */
+.pagination-wrap{
+    display:flex;
+    justify-content:center;
+    margin-top:25px;
+}
+
+.pagination{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.pagination a,
+.pagination span{
+    min-width:38px;
+    height:38px;
+    padding:0 12px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:700;
+    transition:.2s ease;
+}
+
+.pagination a{
+    background:#f1f5f9;
+    color:#0f172a;
+    border:1px solid #cbd5e1;
+}
+
+.pagination a:hover{
+    background:#2563eb;
+    color:#fff;
+    border-color:#2563eb;
+}
+
+.pagination .active span{
+    background:#2563eb;
+    color:#fff;
+    border:1px solid #2563eb;
+}
+
+.pagination .disabled span{
+    background:#e5e7eb;
+    color:#94a3b8;
+    cursor:not-allowed;
+}
+
 @media (max-width:1100px){
     .kpi-grid{
         grid-template-columns:1fr;
@@ -340,10 +393,14 @@ tr:hover{
                     </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
+    </table>
+</div>
 
-    </div>
+@if($sales->hasPages())
+<div class="pagination-wrap">
+    {{ $sales->links() }}
+</div>
+@endif
 
 </div>
 
