@@ -204,22 +204,38 @@ public function returnStore(Request $request)
         continue;
     }
 
-    $desc = trim($item['description']);
+    $desc  = trim($item['description']);
+    $qty   = (int) ($item['qty'] ?? 0);
+    $price = (float) ($item['unit_price'] ?? 0);
 
     CollectionItem::where('collection_id', $collection->id)
         ->whereRaw('LOWER(TRIM(description)) = ?', [strtolower($desc)])
+        ->where('qty', $qty)
+        ->where('unit_price', $price)
+        ->limit(1)
         ->delete();
 }
 
 // CHECK IF MAY NATIRA PANG ITEMS
 $remainingItems = CollectionItem::where('collection_id', $collection->id)->count();
 
-// PAG WALA NA TALAGA ITEMS saka lang delete OR
 if ($remainingItems <= 0) {
+
     $collection->delete();
+
+} else {
+
+    $newTotal = CollectionItem::where('collection_id', $collection->id)
+        ->sum('amount');
+
+    $collection->update([
+        'total_amount' => $newTotal,
+        'net_amount'   => $newTotal,
+        'gross_amount' => $newTotal,
+    ]);
 }
 
-
+}); // ← IMPORTANT
         return redirect()
             ->route('cashier.return.create')
             ->with('success', 'Return receipt saved, stock restored, original OR removed successfully!');
@@ -776,7 +792,7 @@ public function depositStore(Request $request)
         ->where('branch_id', $branchId)
         ->get();
 
-    $gross = $rows->sum('total_amount') - $returns->sum('total_amount');
+    $gross = $rows->sum('total_amount');
     $discount = $rows->sum('discount_amount');
 
     $ar = (float) ($request->ar_balance ?? 0);
