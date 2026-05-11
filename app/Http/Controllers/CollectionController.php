@@ -368,7 +368,11 @@ public function deposit(Request $request)
 
     $returns = $returnRows->get();
 
-    $gross = $rows->sum('total_amount') - $returns->sum('total_amount');
+    // ✅ FIXED
+    // Return already deducted in sales flow
+    // Do not subtract again
+    $gross = $rows->sum('total_amount');
+
     $discount = $rows->sum('discount_amount');
     $net = $gross - $discount;
 
@@ -432,7 +436,6 @@ public function deposit(Request $request)
         'other_income'
     ));
 }
-
 public function exportPdf(Request $request)
 {
     $selectedDate = $request->date ?? date('Y-m-d');
