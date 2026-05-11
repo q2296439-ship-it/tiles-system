@@ -198,13 +198,26 @@ public function returnStore(Request $request)
                 }
             }
 
-            // 🔥 DELETE ORIGINAL COLLECTION ITEMS
-            CollectionItem::where('collection_id', $collection->id)->delete();
+            foreach ($request->items as $item) {
 
-            // 🔥 DELETE ORIGINAL COLLECTION
-            $collection->delete();
+    if (empty($item['description'])) {
+        continue;
+    }
 
-        });
+    $desc = trim($item['description']);
+
+    CollectionItem::where('collection_id', $collection->id)
+        ->whereRaw('LOWER(TRIM(description)) = ?', [strtolower($desc)])
+        ->delete();
+}
+
+// CHECK IF MAY NATIRA PANG ITEMS
+$remainingItems = CollectionItem::where('collection_id', $collection->id)->count();
+
+// PAG WALA NA TALAGA ITEMS saka lang delete OR
+if ($remainingItems <= 0) {
+    $collection->delete();
+}
 
         return redirect()
             ->route('cashier.return.create')
