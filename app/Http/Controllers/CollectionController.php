@@ -219,6 +219,7 @@ if ($remainingItems <= 0) {
     $collection->delete();
 }
 
+
         return redirect()
             ->route('cashier.return.create')
             ->with('success', 'Return receipt saved, stock restored, original OR removed successfully!');
