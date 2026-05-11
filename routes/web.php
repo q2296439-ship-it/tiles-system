@@ -324,6 +324,10 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
     Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 
+    Route::get('/delete-transactions', function () {
+    return view('admin.delete-transactions.index');
+});
+
     Route::get('/total-cash', [CashierController::class, 'totalCash'])
     ->name('admin.total.cash');
 
@@ -340,7 +344,7 @@ Route::get('/store-expenses', [ExpenseController::class, 'index'])->name('admin.
 Route::post('/store-expenses/store', [ExpenseController::class, 'store'])->name('admin.expenses.store');
 Route::get('/store-expenses/list', [ExpenseController::class, 'list'])->name('admin.expenses.list');
 Route::get('/store-expenses/excel', [ExpenseController::class, 'excel'])->name('admin.expenses.excel');
-    
+
 });// end admin group
 
     Route::post('/stock/store', [InventoryController::class, 'store'])
@@ -449,6 +453,8 @@ Route::prefix('cashier')->middleware('auth')->group(function () {
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
     Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 
+
+    
     Route::get('/add-stock', [InventoryController::class, 'create'])
         ->name('cashier.add.stock');
 

@@ -414,6 +414,8 @@ $unreadCount = $notes->whereNotIn('id', $readIds)->count();
     <a href="/admin/sales/daily" class="{{ request()->is('admin/sales/daily') ? 'active' : '' }}">📅 Daily Sales</a>
     <a href="/admin/delivery-fee" class="{{ request()->is('admin/delivery-fee') ? 'active' : '' }}">🚚 Delivery Fee</a>
     <a href="/admin/ar-accounts" class="{{ request()->is('admin/ar-accounts') ? 'active' : '' }}">📒 A/R Accounts</a>
+    <a href="/admin/delete-transactions"class="{{ request()->is('admin/delete-transactions') ? 'active' : '' }}">⚠ Delete Transactions
+</a>
 
     <div class="menu-title">Cash Flow</div>
     <a href="/admin/total-cash" class="{{ request()->is('admin/total-cash') ? 'active' : '' }}">💰 Total Cash</a>
