@@ -366,7 +366,6 @@ if ($remainingItems <= 0) {
         'status'
     ));
 }
-
 public function deposit(Request $request)
 {
     $selectedDate = $request->date ?? date('Y-m-d');
@@ -399,11 +398,12 @@ public function deposit(Request $request)
     $returns = $returnRows->get();
 
     // ✅ FIXED
-    // Return already deducted in sales flow
-    // Do not subtract again
-    $gross = $rows->sum('total_amount');
+    // Gross Sales should match dashboard / collection report
+    // Deduct returned amount once only
+    $gross = $rows->sum('total_amount') - $returns->sum('total_amount');
 
     $discount = $rows->sum('discount_amount');
+
     $net = $gross - $discount;
 
     $depositQuery = \App\Models\Deposit::where('deposit_date', $selectedDate);
