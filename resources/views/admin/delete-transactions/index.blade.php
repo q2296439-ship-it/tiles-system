@@ -55,127 +55,125 @@
     </div>
 
     {{-- SEARCH FILTER --}}
-<form method="GET" action="" style="margin-bottom:30px;">
+    <form method="GET" action="" style="margin-bottom:30px;">
 
-    <div style="
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-        gap:15px;
-    ">
+        <div style="
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:15px;
+        ">
 
-        {{-- BRANCH --}}
-        <div>
-            <label style="
-                display:block;
-                margin-bottom:6px;
-                font-size:13px;
-                font-weight:700;
-                color:#374151;
-            ">
-                Select Branch
-            </label>
+            {{-- BRANCH --}}
+            <div>
+                <label style="
+                    display:block;
+                    margin-bottom:6px;
+                    font-size:13px;
+                    font-weight:700;
+                    color:#374151;
+                ">
+                    Select Branch
+                </label>
 
-            <select name="branch_id" style="
-                width:100%;
-                padding:12px;
-                border:1px solid #d1d5db;
+                <select name="branch_id" style="
+                    width:100%;
+                    padding:12px;
+                    border:1px solid #d1d5db;
+                    border-radius:12px;
+                    font-size:14px;
+                    outline:none;
+                ">
+
+                    <option value="">-- Select Branch --</option>
+
+                    @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}"
+                            {{ $selectedBranch == $branch->id ? 'selected' : '' }}>
+                            {{ $branch->name }}
+                        </option>
+                    @endforeach
+
+                </select>
+            </div>
+
+            {{-- DATE --}}
+            <div>
+                <label style="
+                    display:block;
+                    margin-bottom:6px;
+                    font-size:13px;
+                    font-weight:700;
+                    color:#374151;
+                ">
+                    Transaction Date
+                </label>
+
+                <input
+                    type="date"
+                    name="date"
+                    value="{{ $selectedDate }}"
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:12px;
+                        font-size:14px;
+                        outline:none;
+                    "
+                >
+            </div>
+
+            {{-- OR NUMBER --}}
+            <div>
+                <label style="
+                    display:block;
+                    margin-bottom:6px;
+                    font-size:13px;
+                    font-weight:700;
+                    color:#374151;
+                ">
+                    OR Number
+                </label>
+
+                <input
+                    type="text"
+                    name="receipt_no"
+                    value="{{ $receiptNo }}"
+                    placeholder="Enter OR Number"
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:12px;
+                        font-size:14px;
+                        outline:none;
+                    "
+                >
+            </div>
+
+        </div>
+
+        {{-- BUTTON --}}
+        <div style="
+            margin-top:20px;
+            display:flex;
+            justify-content:flex-end;
+        ">
+
+            <button type="submit" style="
+                background:#2563eb;
+                color:#fff;
+                border:none;
+                padding:12px 24px;
                 border-radius:12px;
                 font-size:14px;
-                outline:none;
-            ">
-
-                <option value="">-- Select Branch --</option>
-
-                @foreach($branches as $branch)
-                    <option value="{{ $branch->id }}"
-                        {{ $selectedBranch == $branch->id ? 'selected' : '' }}>
-                        {{ $branch->name }}
-                    </option>
-                @endforeach
-
-            </select>
-        </div>
-
-        {{-- DATE --}}
-        <div>
-            <label style="
-                display:block;
-                margin-bottom:6px;
-                font-size:13px;
                 font-weight:700;
-                color:#374151;
+                cursor:pointer;
             ">
-                Transaction Date
-            </label>
+                🔍 Search Transaction
+            </button>
 
-            <input
-                type="date"
-                name="date"
-                value="{{ $selectedDate }}"
-                style="
-                    width:100%;
-                    padding:12px;
-                    border:1px solid #d1d5db;
-                    border-radius:12px;
-                    font-size:14px;
-                    outline:none;
-                "
-            >
         </div>
-
-        {{-- OR NUMBER --}}
-        <div>
-            <label style="
-                display:block;
-                margin-bottom:6px;
-                font-size:13px;
-                font-weight:700;
-                color:#374151;
-            ">
-                OR Number
-            </label>
-
-            <input
-                type="text"
-                name="receipt_no"
-                value="{{ $receiptNo }}"
-                placeholder="Enter OR Number"
-                style="
-                    width:100%;
-                    padding:12px;
-                    border:1px solid #d1d5db;
-                    border-radius:12px;
-                    font-size:14px;
-                    outline:none;
-                "
-            >
-        </div>
-
-    </div>
-
-    {{-- BUTTON --}}
-    <div style="
-        margin-top:20px;
-        display:flex;
-        justify-content:flex-end;
-    ">
-
-        <button type="submit" style="
-            background:#2563eb;
-            color:#fff;
-            border:none;
-            padding:12px 24px;
-            border-radius:12px;
-            font-size:14px;
-            font-weight:700;
-            cursor:pointer;
-        ">
-            🔍 Search Transaction
-        </button>
-
-    </div>
-
-</form>
 
     </form>
 
@@ -210,216 +208,273 @@
             </p>
 
         </div>
-{{-- PREVIEW CONTENT --}}
-<div style="padding:20px;">
 
-    @if($collection)
+        {{-- PREVIEW CONTENT --}}
+        <div style="padding:20px;">
 
-        {{-- INFO GRID --}}
-        <div style="
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-            gap:15px;
-            margin-bottom:25px;
-        ">
+            @if($collection)
 
-            <div style="
-                background:#f9fafb;
-                padding:15px;
-                border-radius:12px;
-            ">
-                <small style="color:#6b7280;">OR Number</small>
-
+                {{-- INFO GRID --}}
                 <div style="
-                    font-weight:700;
-                    margin-top:4px;
+                    display:grid;
+                    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                    gap:15px;
+                    margin-bottom:25px;
                 ">
-                    {{ $collection->receipt_no }}
+
+                    <div style="background:#f9fafb;padding:15px;border-radius:12px;">
+                        <small style="color:#6b7280;">OR Number</small>
+                        <div style="font-weight:700;margin-top:4px;">
+                            {{ $collection->receipt_no }}
+                        </div>
+                    </div>
+
+                    <div style="background:#f9fafb;padding:15px;border-radius:12px;">
+                        <small style="color:#6b7280;">Branch</small>
+                        <div style="font-weight:700;margin-top:4px;">
+                            {{ $collection->branch->name ?? 'N/A' }}
+                        </div>
+                    </div>
+
+                    <div style="background:#f9fafb;padding:15px;border-radius:12px;">
+                        <small style="color:#6b7280;">Cashier</small>
+                        <div style="font-weight:700;margin-top:4px;">
+                            {{ $collection->user->name ?? 'N/A' }}
+                        </div>
+                    </div>
+
+                    <div style="background:#f9fafb;padding:15px;border-radius:12px;">
+                        <small style="color:#6b7280;">Gross Sales</small>
+                        <div style="
+                            font-weight:800;
+                            margin-top:4px;
+                            color:#16a34a;
+                        ">
+                            ₱{{ number_format($collection->total_amount, 2) }}
+                        </div>
+                    </div>
+
                 </div>
-            </div>
 
-            <div style="
-                background:#f9fafb;
-                padding:15px;
-                border-radius:12px;
-            ">
-                <small style="color:#6b7280;">Branch</small>
-
-                <div style="
-                    font-weight:700;
-                    margin-top:4px;
-                ">
-                    {{ $collection->branch->name ?? 'N/A' }}
-                </div>
-            </div>
-
-            <div style="
-                background:#f9fafb;
-                padding:15px;
-                border-radius:12px;
-            ">
-                <small style="color:#6b7280;">Cashier</small>
-
-                <div style="
-                    font-weight:700;
-                    margin-top:4px;
-                ">
-                    {{ $collection->user->name ?? 'N/A' }}
-                </div>
-            </div>
-
-            <div style="
-                background:#f9fafb;
-                padding:15px;
-                border-radius:12px;
-            ">
-                <small style="color:#6b7280;">Gross Sales</small>
-
-                <div style="
+                {{-- COLLECTION ITEMS --}}
+                <h4 style="
+                    font-size:16px;
                     font-weight:800;
-                    margin-top:4px;
-                    color:#16a34a;
+                    margin-bottom:12px;
+                    color:#111827;
                 ">
-                    ₱{{ number_format($collection->total_amount, 2) }}
-                </div>
-            </div>
+                    Collection Items
+                </h4>
 
-        </div>
+                <div style="overflow-x:auto;margin-bottom:30px;">
 
-        {{-- ITEM TABLE --}}
-        <div style="
-            overflow-x:auto;
-            margin-bottom:25px;
-        ">
-
-            <table style="
-                width:100%;
-                border-collapse:collapse;
-                min-width:700px;
-            ">
-
-                <thead>
-
-                    <tr style="
-                        background:#f3f4f6;
-                        text-align:left;
+                    <table style="
+                        width:100%;
+                        border-collapse:collapse;
+                        min-width:700px;
                     ">
 
-                        <th style="padding:12px;">Product</th>
-                        <th style="padding:12px;">Qty</th>
-                        <th style="padding:12px;">Price</th>
-                        <th style="padding:12px;">Subtotal</th>
+                        <thead>
+                            <tr style="background:#f3f4f6;text-align:left;">
+                                <th style="padding:12px;">Product</th>
+                                <th style="padding:12px;">Qty</th>
+                                <th style="padding:12px;">Price</th>
+                                <th style="padding:12px;">Subtotal</th>
+                            </tr>
+                        </thead>
 
-                    </tr>
+                        <tbody>
 
-                </thead>
+                            @foreach($collection->items as $item)
 
-                <tbody>
+                                <tr style="border-bottom:1px solid #e5e7eb;">
 
-                    @foreach($collection->items as $item)
+                                    <td style="padding:12px;">
+                                        {{ $item->description }}
+                                    </td>
 
-                        <tr style="
-                            border-bottom:1px solid #e5e7eb;
-                        ">
+                                    <td style="padding:12px;">
+                                        {{ $item->qty }}
+                                    </td>
 
-                            <td style="padding:12px;">
-                                {{ $item->description }}
-                            </td>
+                                    <td style="padding:12px;">
+                                        ₱{{ number_format($item->unit_price, 2) }}
+                                    </td>
 
-                            <td style="padding:12px;">
-                                {{ $item->qty }}
-                            </td>
+                                    <td style="padding:12px;">
+                                        ₱{{ number_format($item->amount, 2) }}
+                                    </td>
 
-                            <td style="padding:12px;">
-                                ₱{{ number_format($item->unit_price, 2) }}
-                            </td>
+                                </tr>
 
-                            <td style="padding:12px;">
-                                ₱{{ number_format($item->amount, 2) }}
-                            </td>
+                            @endforeach
 
-                        </tr>
+                        </tbody>
 
-                    @endforeach
+                    </table>
 
-                </tbody>
+                </div>
 
-            </table>
+                {{-- SALES --}}
+                @if(isset($sales) && $sales->count())
 
-        </div>
+                    <h4 style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:12px;
+                        color:#111827;
+                    ">
+                        Sales Records
+                    </h4>
 
-    @else
+                    <div style="margin-bottom:30px;">
 
-        <div style="
-            padding:40px;
-            text-align:center;
-            color:#9ca3af;
-            font-size:15px;
-        ">
-            No transaction found.
-        </div>
+                        @foreach($sales as $sale)
 
-    @endif
+                            <div style="
+                                background:#f9fafb;
+                                padding:15px;
+                                border-radius:12px;
+                                margin-bottom:15px;
+                            ">
 
-    {{-- DELETE WARNING --}}
-    <div style="
-        background:#fff7ed;
-        border:1px solid #fdba74;
-        color:#9a3412;
-        padding:15px;
-        border-radius:12px;
-        margin-bottom:20px;
-        font-size:14px;
-        line-height:1.6;
-    ">
-        ⚠ This action permanently deletes:
-        collections, sales, returns, related items,
-        and restores inventory stock automatically.
-    </div>
+                                Sale ID: {{ $sale->id }}
 
-    {{-- DELETE BUTTON --}}
-    <div style="
-        display:flex;
-        justify-content:flex-end;
-    ">
+                            </div>
 
-        <button type="button" style="
-            background:#dc2626;
-            color:#fff;
-            border:none;
-            padding:14px 28px;
-            border-radius:12px;
-            font-size:15px;
-            font-weight:800;
-            cursor:pointer;
-        ">
-        
-        </button>
+                        @endforeach
 
-    </div>
+                    </div>
 
-</div>
+                @endif
 
-            {{-- DELETE BUTTON --}}
-            <div style="
-                display:flex;
-                justify-content:flex-end;
-            ">
+                {{-- RETURNS --}}
+                @if(isset($returns) && $returns->count())
 
-                <button type="button" style="
-                    background:#dc2626;
-                    color:#fff;
-                    border:none;
-                    padding:14px 28px;
+                    <h4 style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:12px;
+                        color:#111827;
+                    ">
+                        Return Records
+                    </h4>
+
+                    <div style="margin-bottom:30px;">
+
+                        @foreach($returns as $return)
+
+                            <div style="
+                                background:#fff7ed;
+                                padding:15px;
+                                border-radius:12px;
+                                margin-bottom:15px;
+                            ">
+
+                                Return ID: {{ $return->id }}
+
+                            </div>
+
+                        @endforeach
+
+                    </div>
+
+                @endif
+
+                {{-- SUMMARY --}}
+                <div style="
+                    background:#eff6ff;
+                    border:1px solid #bfdbfe;
+                    padding:18px;
                     border-radius:12px;
-                    font-size:15px;
-                    font-weight:800;
-                    cursor:pointer;
+                    margin-bottom:25px;
                 ">
-                    🗑 Delete OR Transaction
-                </button>
 
-            </div>
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                        color:#1e3a8a;
+                    ">
+                        Records To Delete
+                    </div>
+
+                    <ul style="
+                        margin:0;
+                        padding-left:18px;
+                        color:#1e40af;
+                        line-height:1.8;
+                    ">
+                        <li>1 Collection Record</li>
+                        <li>{{ $collection->items->count() }} Collection Items</li>
+                        <li>{{ isset($sales) ? $sales->count() : 0 }} Sales Records</li>
+                        <li>{{ isset($returns) ? $returns->count() : 0 }} Return Records</li>
+                    </ul>
+
+                </div>
+
+                {{-- DELETE WARNING --}}
+                <div style="
+                    background:#fff7ed;
+                    border:1px solid #fdba74;
+                    color:#9a3412;
+                    padding:15px;
+                    border-radius:12px;
+                    margin-bottom:20px;
+                    font-size:14px;
+                    line-height:1.6;
+                ">
+                    ⚠ This action permanently deletes:
+                    collections, sales, returns, related items,
+                    and restores inventory stock automatically.
+                </div>
+
+                {{-- DELETE FORM --}}
+                <form method="POST"
+                      action="{{ route('admin.delete-transactions.destroy') }}"
+                      onsubmit="return confirm('DELETE THIS TRANSACTION? THIS CANNOT BE UNDONE.')">
+
+                    @csrf
+                    @method('DELETE')
+
+                    <input type="hidden"
+                           name="receipt_no"
+                           value="{{ $collection->receipt_no }}">
+
+                    <div style="
+                        display:flex;
+                        justify-content:flex-end;
+                    ">
+
+                        <button type="submit" style="
+                            background:#dc2626;
+                            color:#fff;
+                            border:none;
+                            padding:14px 28px;
+                            border-radius:12px;
+                            font-size:15px;
+                            font-weight:800;
+                            cursor:pointer;
+                        ">
+                            🗑 Delete OR Transaction
+                        </button>
+
+                    </div>
+
+                </form>
+
+            @else
+
+                <div style="
+                    padding:40px;
+                    text-align:center;
+                    color:#9ca3af;
+                    font-size:15px;
+                ">
+                    No transaction found.
+                </div>
+
+            @endif
 
         </div>
 
