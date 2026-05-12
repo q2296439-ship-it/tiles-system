@@ -1269,14 +1269,12 @@ public function deleteTransactions(Request $request)
             ->first();
 
         // SALES
-        $sales = Sale::with('items')
-            ->where('branch_id', $selectedBranch)
-            ->whereDate('created_at', $selectedDate)
-            ->where('receipt_no', $receiptNo)
-            ->get();
+        // not directly connected to OR receipt_no
+        $sales = collect();
 
         // RETURNS
-        $returns = ReturnItem::where('receipt_no', $receiptNo)
+        $returns = ReturnModel::with('items')
+            ->where('receipt_no', $receiptNo)
             ->get();
     }
 
