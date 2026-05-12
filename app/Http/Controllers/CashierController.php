@@ -63,20 +63,35 @@ class CashierController extends Controller
         $branchId = $user->branch_id;
     }
 
-    $today = now()->toDateString();
+    // SELECTED DATE
+    $selectedDate = $request->date ?? now()->toDateString();
 
     $branches = \App\Models\Branch::orderBy('name')->get();
 
+    /*
+    |--------------------------------------------------------------------------
+    | TOTAL CASH UP TO SELECTED DATE
+    |--------------------------------------------------------------------------
+    */
+
     // CASH IN
-    $depositQuery = Deposit::where('status', 'closed');
-    $arQuery = ArPayment::query();
-    $incomingQuery = CashTransfer::where('status', 'completed');
+    $depositQuery = Deposit::where('status', 'closed')
+        ->whereDate('deposit_date', '<=', $selectedDate);
+
+    $arQuery = ArPayment::whereDate('payment_date', '<=', $selectedDate);
+
+    $incomingQuery = CashTransfer::where('status', 'completed')
+        ->whereDate('transfer_date', '<=', $selectedDate);
 
     // CASH OUT
-    $expenseQuery = Expense::where('status', 'approved');
-    $outgoingQuery = CashTransfer::where('status', 'completed');
+    $expenseQuery = Expense::where('status', 'approved')
+        ->whereDate('expense_date', '<=', $selectedDate);
+
+    $outgoingQuery = CashTransfer::where('status', 'completed')
+        ->whereDate('transfer_date', '<=', $selectedDate);
 
     if (!empty($branchId)) {
+
         $depositQuery->where('branch_id', $branchId);
         $arQuery->where('branch_id', $branchId);
         $incomingQuery->where('to_branch_id', $branchId);
@@ -93,36 +108,42 @@ class CashierController extends Controller
     $outgoingTransfers = $outgoingQuery->sum('amount');
 
     $cashIn = round(
-    $actualDeposit + $arPayments + $incomingTransfers,
-    2
-);
+        $actualDeposit + $arPayments + $incomingTransfers,
+        2
+    );
 
-$cashOut = round(
-    $expenses + $outgoingTransfers,
-    2
-);
+    $cashOut = round(
+        $expenses + $outgoingTransfers,
+        2
+    );
 
-$totalCash = round(
-    $cashIn - $cashOut,
-    2
-);
+    $totalCash = round(
+        $cashIn - $cashOut,
+        2
+    );
 
-    // TODAY
+    /*
+    |--------------------------------------------------------------------------
+    | DAILY CASH FLOW (SELECTED DATE ONLY)
+    |--------------------------------------------------------------------------
+    */
+
     $todayDepositQuery = Deposit::where('status', 'closed')
-        ->whereDate('deposit_date', $today);
+        ->whereDate('deposit_date', $selectedDate);
 
-    $todayArQuery = ArPayment::whereDate('payment_date', $today);
+    $todayArQuery = ArPayment::whereDate('payment_date', $selectedDate);
 
     $todayIncomingQuery = CashTransfer::where('status', 'completed')
-        ->whereDate('transfer_date', $today);
+        ->whereDate('transfer_date', $selectedDate);
 
     $todayExpenseQuery = Expense::where('status', 'approved')
-        ->whereDate('expense_date', $today);
+        ->whereDate('expense_date', $selectedDate);
 
     $todayOutgoingQuery = CashTransfer::where('status', 'completed')
-        ->whereDate('transfer_date', $today);
+        ->whereDate('transfer_date', $selectedDate);
 
     if (!empty($branchId)) {
+
         $todayDepositQuery->where('branch_id', $branchId);
         $todayArQuery->where('branch_id', $branchId);
         $todayIncomingQuery->where('to_branch_id', $branchId);
@@ -139,24 +160,25 @@ $totalCash = round(
     $todayOutgoingTransfers = $todayOutgoingQuery->sum('amount');
 
     $todayCashIn = round(
-    $todayDeposit + $todayArPayments + $todayIncomingTransfers,
-    2
-);
+        $todayDeposit + $todayArPayments + $todayIncomingTransfers,
+        2
+    );
 
-$todayCashOut = round(
-    $todayExpenses + $todayOutgoingTransfers,
-    2
-);
+    $todayCashOut = round(
+        $todayExpenses + $todayOutgoingTransfers,
+        2
+    );
 
-$previousBalance = round(
-    $totalCash - ($todayCashIn - $todayCashOut),
-    2
-);
+    $previousBalance = round(
+        $totalCash - ($todayCashIn - $todayCashOut),
+        2
+    );
 
     return view('cashflow.total-cash', compact(
         'branches',
         'branchId',
         'role',
+        'selectedDate',
 
         'actualDeposit',
         'arPayments',
@@ -255,4 +277,90 @@ $previousBalance = round(
             ], 500);
         }
     }
+    public function cashFlowExcel(Request $request)
+{
+    $user = Auth::user();
+    $role = strtolower($user->role);
+
+    $branchId = $request->branch_id;
+
+    if ($role === 'cashier') {
+        $branchId = $user->branch_id;
+    }
+
+    $selectedDate = $request->date ?? now()->toDateString();
+
+    // CASH IN
+    $todayDeposit = Deposit::where('status', 'closed')
+        ->whereDate('deposit_date', $selectedDate)
+        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+        ->sum('actual_amount');
+
+    $todayArPayments = ArPayment::whereDate('payment_date', $selectedDate)
+        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+        ->sum('amount');
+
+    $todayIncomingTransfers = CashTransfer::where('status', 'completed')
+        ->whereDate('transfer_date', $selectedDate)
+        ->when($branchId, fn($q) => $q->where('to_branch_id', $branchId))
+        ->sum('amount');
+
+    // CASH OUT
+    $todayExpenses = Expense::where('status', 'approved')
+        ->whereDate('expense_date', $selectedDate)
+        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+        ->sum('amount');
+
+    $todayOutgoingTransfers = CashTransfer::where('status', 'completed')
+        ->whereDate('transfer_date', $selectedDate)
+        ->when($branchId, fn($q) => $q->where('from_branch_id', $branchId))
+        ->sum('amount');
+
+    $todayCashIn = round(
+        $todayDeposit + $todayArPayments + $todayIncomingTransfers,
+        2
+    );
+
+    $todayCashOut = round(
+        $todayExpenses + $todayOutgoingTransfers,
+        2
+    );
+
+    $netCash = round(
+        $todayCashIn - $todayCashOut,
+        2
+    );
+
+    $rows = collect([
+        [
+            'Description' => 'Actual Deposit',
+            'Amount' => $todayDeposit
+        ],
+        [
+            'Description' => 'A/R Payments',
+            'Amount' => $todayArPayments
+        ],
+        [
+            'Description' => 'Incoming Transfers',
+            'Amount' => $todayIncomingTransfers
+        ],
+        [
+            'Description' => 'Expenses',
+            'Amount' => -1 * $todayExpenses
+        ],
+        [
+            'Description' => 'Outgoing Transfers',
+            'Amount' => -1 * $todayOutgoingTransfers
+        ],
+        [
+            'Description' => 'NET CASH',
+            'Amount' => $netCash
+        ],
+    ]);
+
+    return \Maatwebsite\Excel\Facades\Excel::download(
+        new \App\Exports\CashFlowExport($rows),
+        'cash-flow-' . $selectedDate . '.xlsx'
+    );
+}
 }

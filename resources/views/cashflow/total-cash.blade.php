@@ -207,7 +207,20 @@ text-align:center;
 </select>
 @endif
 
-<button class="btn">Filter</button>
+<input type="date"
+       name="date"
+       class="filter"
+       value="{{ request('date', date('Y-m-d')) }}">
+
+<button class="btn">
+📅 Generate
+</button>
+
+<a href="/{{ $routePrefix }}/cash-flow-excel?branch_id={{ request('branch_id') }}&date={{ request('date', date('Y-m-d')) }}"
+   class="btn"
+   style="background:#16a34a;text-decoration:none;">
+📗 Excel
+</a>
 
 </div>
 </form>

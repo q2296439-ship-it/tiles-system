@@ -230,6 +230,9 @@ Route::get('/manager/delivery-today/excel', [CollectionController::class, 'deliv
 Route::get('/manager/total-cash', [CashierController::class, 'totalCash'])
     ->middleware('auth')
     ->name('manager.total.cash');
+Route::get('/manager/cash-flow-excel', [CashierController::class, 'cashFlowExcel'])
+    ->middleware('auth')
+    ->name('manager.cashflow.excel');
 
 Route::get('/manager/cash-transfer', [CashTransferController::class, 'index'])->middleware('auth');
 Route::post('/manager/cash-transfer/store', [CashTransferController::class, 'store'])->middleware('auth');
@@ -324,17 +327,12 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
     Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 
-    Route::get(
-    '/delete-transactions',
-    [CollectionController::class, 'deleteTransactions']
-)->name('admin.delete-transactions');
-
-Route::delete(
-    '/delete-transactions',
-    [CollectionController::class, 'destroyTransaction']
-)->name('admin.delete-transactions.destroy');
+    
     Route::get('/total-cash', [CashierController::class, 'totalCash'])
     ->name('admin.total.cash');
+
+    Route::get('/cash-flow-excel', [CashierController::class, 'cashFlowExcel'])
+    ->name('admin.cashflow.excel');
 
     Route::get('/cash-transfer', [CashTransferController::class, 'index']);
 Route::post('/cash-transfer/store', [CashTransferController::class, 'store']);
@@ -444,6 +442,9 @@ Route::prefix('cashier')->middleware('auth')->group(function () {
 
     Route::get('/total-cash', [CashierController::class, 'totalCash'])
     ->name('cashier.total.cash');
+
+    Route::get('/cash-flow-excel', [CashierController::class, 'cashFlowExcel'])
+    ->name('cashier.cashflow.excel');
 
     Route::get('/salary', function () {
         return 'Employee Salary Page';
