@@ -469,7 +469,21 @@
 
     @endforeach
 
-@endif
+                @endif
+
+            @else
+
+                <div style="
+                    padding:40px;
+                    text-align:center;
+                    color:#9ca3af;
+                    font-size:15px;
+                ">
+                    No transaction found.
+                </div>
+
+            @endif
+
         </div>
 
     </div>
