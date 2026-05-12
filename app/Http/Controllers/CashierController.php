@@ -435,11 +435,15 @@ public function cashFlowPdf(Request $request)
     |--------------------------------------------------------------------------
     */
 
-    $allDeposit = Deposit::where('branch_id', $branchId)
-        ->sum('actual_amount');
+    $allDeposit = Deposit::where(
+        'branch_id',
+        $branchId
+    )->sum('actual_amount');
 
-    $allExpenses = Expense::where('branch_id', $branchId)
-        ->sum('amount');
+    $allExpenses = Expense::where(
+        'branch_id',
+        $branchId
+    )->sum('amount');
 
     $runningBalance = $allDeposit - $allExpenses;
 
@@ -449,13 +453,21 @@ public function cashFlowPdf(Request $request)
     |--------------------------------------------------------------------------
     */
 
-    $todayDeposit = Deposit::where('branch_id', $branchId)
-        ->whereDate('deposit_date', $date)
-        ->sum('actual_amount');
+    $todayDeposit = Deposit::where(
+        'branch_id',
+        $branchId
+    )->whereDate(
+        'deposit_date',
+        $date
+    )->sum('actual_amount');
 
-    $todayExpenses = Expense::where('branch_id', $branchId)
-        ->whereDate('expense_date', $date)
-        ->sum('amount');
+    $todayExpenses = Expense::where(
+        'branch_id',
+        $branchId
+    )->whereDate(
+        'expense_date',
+        $date
+    )->sum('amount');
 
     $todayCashIn = $todayDeposit;
 
@@ -467,7 +479,9 @@ public function cashFlowPdf(Request $request)
     |--------------------------------------------------------------------------
     */
 
-    $previousBalance = $runningBalance - ($todayCashIn - $todayCashOut);
+    $previousBalance = $runningBalance - (
+        $todayCashIn - $todayCashOut
+    );
 
     /*
     |--------------------------------------------------------------------------
@@ -475,7 +489,9 @@ public function cashFlowPdf(Request $request)
     |--------------------------------------------------------------------------
     */
 
-    $totalCash = $previousBalance + $todayCashIn - $todayCashOut;
+    $totalCash = $previousBalance
+        + $todayCashIn
+        - $todayCashOut;
 
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
         'cashflow.pdf',
