@@ -446,6 +446,11 @@ Route::prefix('cashier')->middleware('auth')->group(function () {
     Route::get('/cash-flow-excel', [CashierController::class, 'cashFlowExcel'])
     ->name('cashier.cashflow.excel');
 
+    Route::get(
+    '/cash-flow-pdf',
+    [CashierController::class, 'cashFlowPdf']
+)->name('cashflow.pdf');
+
     Route::get('/salary', function () {
         return 'Employee Salary Page';
     })->name('cashier.salary');

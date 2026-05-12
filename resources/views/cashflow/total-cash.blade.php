@@ -216,10 +216,14 @@ text-align:center;
 📅 Generate
 </button>
 
-<a href="/{{ $routePrefix }}/cash-flow-excel?branch_id={{ request('branch_id') }}&date={{ request('date', date('Y-m-d')) }}"
-   class="btn"
-   style="background:#16a34a;text-decoration:none;">
-📗 Excel
+<a href="{{ route('cashier.cashflow.pdf', [
+    'branch_id' => $branchId,
+    'date' => request('date')
+]) }}"
+class="btn btn-danger">
+
+    📄 PDF
+
 </a>
 
 </div>

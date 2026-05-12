@@ -421,4 +421,42 @@ class CashierController extends Controller
         'cash-flow-' . $selectedDate . '.xlsx'
     );
 }
+public function cashFlowPdf(Request $request)
+{
+    $user = Auth::user();
+
+    $branchId = $user->branch_id;
+
+    $date = $request->date ?? now()->toDateString();
+
+    $actualDeposit = Deposit::whereDate('deposit_date', $date)
+        ->where('branch_id', $branchId)
+        ->sum('actual_amount');
+
+    $expenses = Expense::whereDate('expense_date', $date)
+        ->where('branch_id', $branchId)
+        ->sum('amount');
+
+    $cashIn = $actualDeposit;
+
+    $cashOut = $expenses;
+
+    $totalCash = $cashIn - $cashOut;
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        'cashflow.pdf',
+        compact(
+            'date',
+            'cashIn',
+            'cashOut',
+            'totalCash',
+            'actualDeposit',
+            'expenses'
+        )
+    );
+
+    return $pdf->download(
+        'cash-flow-report.pdf'
+    );
+}
 }
