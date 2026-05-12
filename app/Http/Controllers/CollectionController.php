@@ -18,6 +18,8 @@ use App\Exports\CollectionExport;
 use App\Exports\DepositExport;
 use App\Exports\RequestAccessExport;
 use App\Models\Branch;
+use App\Models\Sale;
+use App\Models\ReturnItem;
 
 class CollectionController extends Controller
 {
@@ -1248,6 +1250,8 @@ public function deleteTransactions(Request $request)
     $receiptNo = $request->receipt_no;
 
     $collection = null;
+    $sales = collect();
+    $returns = collect();
 
     if (
         !empty($selectedBranch) &&
@@ -1255,6 +1259,7 @@ public function deleteTransactions(Request $request)
         !empty($receiptNo)
     ) {
 
+        // COLLECTION
         $collection = Collection::with([
                 'items',
                 'user',
@@ -1264,6 +1269,17 @@ public function deleteTransactions(Request $request)
             ->whereDate('receipt_date', $selectedDate)
             ->where('receipt_no', $receiptNo)
             ->first();
+
+        // SALES
+        $sales = Sale::with('items')
+            ->where('branch_id', $selectedBranch)
+            ->whereDate('created_at', $selectedDate)
+            ->where('receipt_no', $receiptNo)
+            ->get();
+
+        // RETURNS
+        $returns = ReturnItem::where('receipt_no', $receiptNo)
+            ->get();
     }
 
     return view('admin.delete-transactions.index', compact(
@@ -1271,10 +1287,11 @@ public function deleteTransactions(Request $request)
         'selectedBranch',
         'selectedDate',
         'receiptNo',
-        'collection'
+        'collection',
+        'sales',
+        'returns'
     ));
 }
-
 public function payAr(Request $request, $id)
 {
     $request->validate([
