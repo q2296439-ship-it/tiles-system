@@ -457,7 +457,7 @@
 
                             </tr>
 
-                        @endforeach
+                                               @endforeach
 
                     </tbody>
 
@@ -469,7 +469,89 @@
 
     @endforeach
 
-                @endif
+@endif
+
+                {{-- SUMMARY --}}
+                <div style="
+                    background:#eff6ff;
+                    border:1px solid #bfdbfe;
+                    padding:18px;
+                    border-radius:12px;
+                    margin-bottom:25px;
+                    margin-top:20px;
+                ">
+
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                        color:#1e3a8a;
+                    ">
+                        Records To Delete
+                    </div>
+
+                    <ul style="
+                        margin:0;
+                        padding-left:18px;
+                        color:#1e40af;
+                        line-height:1.8;
+                    ">
+                        <li>1 Collection Record</li>
+                        <li>{{ $collection->items->count() }} Collection Items</li>
+                        <li>{{ $returns->count() }} Return Records</li>
+                    </ul>
+
+                </div>
+
+                {{-- DELETE WARNING --}}
+                <div style="
+                    background:#fff7ed;
+                    border:1px solid #fdba74;
+                    color:#9a3412;
+                    padding:15px;
+                    border-radius:12px;
+                    margin-bottom:20px;
+                    font-size:14px;
+                    line-height:1.6;
+                ">
+                    ⚠ This action permanently deletes:
+                    collections, returns, related items,
+                    and restores inventory stock automatically.
+                </div>
+
+                {{-- DELETE FORM --}}
+                <form method="POST"
+                      action="{{ route('admin.delete-transactions.destroy') }}"
+                      onsubmit="return confirm('DELETE THIS TRANSACTION? THIS CANNOT BE UNDONE.')">
+
+                    @csrf
+                    @method('DELETE')
+
+                    <input type="hidden"
+                           name="receipt_no"
+                           value="{{ $collection->receipt_no }}">
+
+                    <div style="
+                        display:flex;
+                        justify-content:flex-end;
+                    ">
+
+                        <button type="submit" style="
+                            background:#dc2626;
+                            color:#fff;
+                            border:none;
+                            padding:14px 28px;
+                            border-radius:12px;
+                            font-size:15px;
+                            font-weight:800;
+                            cursor:pointer;
+                        ">
+                            🗑 Delete OR Transaction
+                        </button>
+
+                    </div>
+
+                </form>
 
             @else
 
