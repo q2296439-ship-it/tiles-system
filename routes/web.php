@@ -324,9 +324,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
     Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 
-    Route::get('/delete-transactions', function () {
-    return view('admin.delete-transactions.index');
-});
+    Route::get('/delete-transactions',
+    [CollectionController::class, 'deleteTransactions']);
 
     Route::get('/total-cash', [CashierController::class, 'totalCash'])
     ->name('admin.total.cash');

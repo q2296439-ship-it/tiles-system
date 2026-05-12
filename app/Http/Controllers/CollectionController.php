@@ -1239,6 +1239,42 @@ public function arAccounts(Request $request)
         'role'
     ));
 }
+public function deleteTransactions(Request $request)
+{
+    $branches = Branch::orderBy('name')->get();
+
+    $selectedBranch = $request->branch_id;
+    $selectedDate = $request->date;
+    $receiptNo = $request->receipt_no;
+
+    $collection = null;
+
+    if (
+        !empty($selectedBranch) &&
+        !empty($selectedDate) &&
+        !empty($receiptNo)
+    ) {
+
+        $collection = Collection::with([
+                'items',
+                'user',
+                'branch'
+            ])
+            ->where('branch_id', $selectedBranch)
+            ->whereDate('receipt_date', $selectedDate)
+            ->where('receipt_no', $receiptNo)
+            ->first();
+    }
+
+    return view('admin.delete-transactions.index', compact(
+        'branches',
+        'selectedBranch',
+        'selectedDate',
+        'receiptNo',
+        'collection'
+    ));
+}
+
 public function payAr(Request $request, $id)
 {
     $request->validate([
