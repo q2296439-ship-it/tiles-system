@@ -6,9 +6,7 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class CashFlowExport implements WithEvents, ShouldAutoSize
 {
@@ -33,30 +31,31 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
 
                 /*
                 |--------------------------------------------------------------------------
+                | PAGE SETUP
+                |--------------------------------------------------------------------------
+                */
+
+                $sheet->getPageSetup()
+                    ->setOrientation(
+                        \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT
+                    );
+
+                $sheet->getPageSetup()
+                    ->setPaperSize(
+                        \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4
+                    );
+
+                /*
+                |--------------------------------------------------------------------------
                 | WIDTHS
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->getColumnDimension('A')->setWidth(28);
-                $sheet->getColumnDimension('B')->setWidth(22);
+                $sheet->getColumnDimension('A')->setWidth(40);
+                $sheet->getColumnDimension('B')->setWidth(25);
                 $sheet->getColumnDimension('C')->setWidth(10);
-                $sheet->getColumnDimension('D')->setWidth(28);
-                $sheet->getColumnDimension('E')->setWidth(22);
-
-                /*
-                |--------------------------------------------------------------------------
-                | BACKGROUND
-                |--------------------------------------------------------------------------
-                */
-
-                $sheet->getStyle('A1:E40')->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'DCEBFF'
-                        ]
-                    ]
-                ]);
+                $sheet->getColumnDimension('D')->setWidth(40);
+                $sheet->getColumnDimension('E')->setWidth(25);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -74,12 +73,12 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                 $sheet->getStyle('A1')->applyFromArray([
                     'font' => [
                         'bold' => true,
-                        'size' => 22,
-                        'color' => ['rgb' => '0F172A']
+                        'size' => 20,
+                        'color' => ['rgb' => '0F172A'],
                     ],
                     'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER
-                    ]
+                        'horizontal' => 'center',
+                    ],
                 ]);
 
                 /*
@@ -99,61 +98,70 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                     'font' => [
                         'italic' => true,
                         'size' => 10,
-                        'color' => ['rgb' => '64748B']
+                        'color' => ['rgb' => '64748B'],
                     ],
                     'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER
-                    ]
+                        'horizontal' => 'center',
+                    ],
                 ]);
 
                 /*
                 |--------------------------------------------------------------------------
-                | DATE / BRANCH
+                | DETAILS
                 |--------------------------------------------------------------------------
                 */
 
                 $sheet->setCellValue('A4', 'Branch');
-                $sheet->setCellValue('B4', $this->branch ?? 'All Branches');
+                $sheet->setCellValue(
+                    'B4',
+                    $this->branch ?? 'All Branches'
+                );
 
                 $sheet->setCellValue('D4', 'Date');
-                $sheet->setCellValue('E4', $this->date);
+                $sheet->setCellValue(
+                    'E4',
+                    $this->date
+                );
 
                 $sheet->getStyle('A4:E4')->applyFromArray([
                     'font' => [
-                        'bold' => true
-                    ]
+                        'bold' => true,
+                    ],
                 ]);
 
                 /*
                 |--------------------------------------------------------------------------
-                | FIND VALUES
+                | COMPUTE VALUES
                 |--------------------------------------------------------------------------
                 */
 
-                $cashIn = 0;
-                $cashOut = 0;
+                $actualDeposit = 0;
+                $arPayments = 0;
+                $incomingTransfers = 0;
+                $expenses = 0;
+                $outgoingTransfers = 0;
                 $netCash = 0;
 
                 foreach ($this->rows as $row) {
 
                     if ($row['Description'] === 'Actual Deposit') {
-                        $cashIn += $row['Amount'];
+                        $actualDeposit = $row['Amount'];
                     }
 
                     if ($row['Description'] === 'A/R Payments') {
-                        $cashIn += $row['Amount'];
+                        $arPayments = $row['Amount'];
                     }
 
                     if ($row['Description'] === 'Incoming Transfers') {
-                        $cashIn += $row['Amount'];
+                        $incomingTransfers = $row['Amount'];
                     }
 
                     if ($row['Description'] === 'Expenses') {
-                        $cashOut += abs($row['Amount']);
+                        $expenses = $row['Amount'];
                     }
 
                     if ($row['Description'] === 'Outgoing Transfers') {
-                        $cashOut += abs($row['Amount']);
+                        $outgoingTransfers = $row['Amount'];
                     }
 
                     if ($row['Description'] === 'NET CASH') {
@@ -161,13 +169,26 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                     }
                 }
 
+                $todayCashIn =
+                    $actualDeposit +
+                    $arPayments +
+                    $incomingTransfers;
+
+                $todayCashOut =
+                    $expenses +
+                    $outgoingTransfers;
+
+                $previousBalance =
+                    $netCash -
+                    ($todayCashIn - $todayCashOut);
+
                 /*
                 |--------------------------------------------------------------------------
-                | AVAILABLE CASH BOX
+                | AVAILABLE CASH
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->mergeCells('A6:E10');
+                $sheet->mergeCells('A7:E9');
 
                 $sheet->setCellValue(
                     'A7',
@@ -184,51 +205,79 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                     'Current usable cash balance of selected branch'
                 );
 
-                $sheet->getStyle('A6:E10')->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'FFFFFF'
-                        ]
+                $sheet->getStyle('A7:E9')->applyFromArray([
+                    'alignment' => [
+                        'horizontal' => 'center',
                     ],
-                    'borders' => [
-                        'outline' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '1E3A8A']
-                        ]
-                    ]
                 ]);
 
                 $sheet->getStyle('A7')->applyFromArray([
                     'font' => [
                         'bold' => true,
-                        'size' => 12,
-                        'color' => ['rgb' => '64748B']
+                        'size' => 11,
+                        'color' => ['rgb' => '64748B'],
                     ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER
-                    ]
                 ]);
 
                 $sheet->getStyle('A8')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 28,
-                        'color' => ['rgb' => '16A34A']
+                        'color' => ['rgb' => '16A34A'],
                     ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER
-                    ]
                 ]);
 
-                $sheet->getStyle('A9')->applyFromArray([
+                /*
+                |--------------------------------------------------------------------------
+                | MAIN SUMMARY
+                |--------------------------------------------------------------------------
+                */
+
+                $sheet->setCellValue('A12', 'Beginning Balance');
+                $sheet->setCellValue('E12', $previousBalance);
+
+                $sheet->setCellValue('A13', 'Today Cash In');
+                $sheet->setCellValue('E13', $todayCashIn);
+
+                $sheet->setCellValue('A14', 'Today Cash Out');
+                $sheet->setCellValue('E14', $todayCashOut);
+
+                $sheet->setCellValue('A16', 'Running Balance');
+                $sheet->setCellValue('E16', $netCash);
+
+                $sheet->getStyle('A12:E16')->applyFromArray([
                     'font' => [
-                        'size' => 10,
-                        'color' => ['rgb' => '64748B']
+                        'bold' => true,
                     ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER
-                    ]
+                ]);
+
+                $sheet->getStyle('E12')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => '2563EB'],
+                    ],
+                ]);
+
+                $sheet->getStyle('E13')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => '16A34A'],
+                    ],
+                ]);
+
+                $sheet->getStyle('E14')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'DC2626'],
+                    ],
+                ]);
+
+                $sheet->getStyle('E16')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'size' => 14,
+                        'color' => ['rgb' => '2563EB'],
+                    ],
                 ]);
 
                 /*
@@ -237,29 +286,46 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->mergeCells('A12:B12');
+                $sheet->mergeCells('A19:B19');
 
-                $sheet->setCellValue('A12', '💰 CASH IN');
+                $sheet->setCellValue(
+                    'A19',
+                    '💰 CASH IN'
+                );
 
-                $sheet->setCellValue('A14', 'Actual Deposit');
-                $sheet->setCellValue('B14', $cashIn);
+                $sheet->setCellValue('A21', 'Actual Deposit Amount');
+                $sheet->setCellValue('B21', $actualDeposit);
 
-                $sheet->setCellValue('A15', 'Total Cash In');
-                $sheet->setCellValue('B15', $cashIn);
+                $sheet->setCellValue('A22', 'A/R Payment');
+                $sheet->setCellValue('B22', $arPayments);
 
-                $sheet->getStyle('A12:B16')->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'FFFFFF'
-                        ]
-                    ],
+                $sheet->setCellValue('A23', 'Incoming Transfers');
+                $sheet->setCellValue('B23', $incomingTransfers);
+
+                $sheet->setCellValue('A25', 'Total Cash In');
+                $sheet->setCellValue('B25', $todayCashIn);
+
+                $sheet->getStyle('A19:B25')->applyFromArray([
                     'borders' => [
                         'outline' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '1E3A8A']
-                        ]
-                    ]
+                            'borderStyle' => 'thin',
+                            'color' => ['rgb' => '1E3A8A'],
+                        ],
+                    ],
+                ]);
+
+                $sheet->getStyle('A19')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'size' => 14,
+                    ],
+                ]);
+
+                $sheet->getStyle('B21:B25')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => '16A34A'],
+                    ],
                 ]);
 
                 /*
@@ -268,29 +334,43 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->mergeCells('D12:E12');
+                $sheet->mergeCells('D19:E19');
 
-                $sheet->setCellValue('D12', '💸 CASH OUT');
+                $sheet->setCellValue(
+                    'D19',
+                    '💸 CASH OUT'
+                );
 
-                $sheet->setCellValue('D14', 'Expenses');
-                $sheet->setCellValue('E14', $cashOut);
+                $sheet->setCellValue('D21', 'Expenses');
+                $sheet->setCellValue('E21', $expenses);
 
-                $sheet->setCellValue('D15', 'Total Cash Out');
-                $sheet->setCellValue('E15', $cashOut);
+                $sheet->setCellValue('D22', 'Transfer to Other Branch');
+                $sheet->setCellValue('E22', $outgoingTransfers);
 
-                $sheet->getStyle('D12:E16')->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'FFFFFF'
-                        ]
-                    ],
+                $sheet->setCellValue('D24', 'Total Cash Out');
+                $sheet->setCellValue('E24', $todayCashOut);
+
+                $sheet->getStyle('D19:E24')->applyFromArray([
                     'borders' => [
                         'outline' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '1E3A8A']
-                        ]
-                    ]
+                            'borderStyle' => 'thin',
+                            'color' => ['rgb' => '1E3A8A'],
+                        ],
+                    ],
+                ]);
+
+                $sheet->getStyle('D19')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'size' => 14,
+                    ],
+                ]);
+
+                $sheet->getStyle('E21:E24')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'DC2626'],
+                    ],
                 ]);
 
                 /*
@@ -299,76 +379,45 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->mergeCells('A19:E22');
+                $sheet->mergeCells('A28:E30');
 
                 $sheet->setCellValue(
-                    'A20',
+                    'A29',
                     '📊 NET CASH POSITION'
                 );
 
                 $sheet->setCellValue(
-                    'A21',
+                    'A30',
                     'Beginning + Today In - Today Out'
                 );
 
                 $sheet->setCellValue(
-                    'E21',
+                    'E30',
                     '₱' . number_format($netCash, 2)
                 );
 
-                $sheet->getStyle('A19:E22')->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'rgb' => 'FFFFFF'
-                        ]
-                    ],
+                $sheet->getStyle('A28:E30')->applyFromArray([
                     'borders' => [
                         'outline' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '1E3A8A']
-                        ]
-                    ]
+                            'borderStyle' => 'thin',
+                            'color' => ['rgb' => '1E3A8A'],
+                        ],
+                    ],
                 ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | COLORS
-                |--------------------------------------------------------------------------
-                */
-
-                $sheet->getStyle('B14:B15')->applyFromArray([
+                $sheet->getStyle('A29')->applyFromArray([
                     'font' => [
                         'bold' => true,
-                        'color' => ['rgb' => '16A34A']
-                    ]
+                        'size' => 14,
+                    ],
                 ]);
 
-                $sheet->getStyle('E14:E15')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'color' => ['rgb' => 'DC2626']
-                    ]
-                ]);
-
-                $sheet->getStyle('E21')->applyFromArray([
+                $sheet->getStyle('E30')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 18,
-                        'color' => ['rgb' => '2563EB']
-                    ]
-                ]);
-
-                /*
-                |--------------------------------------------------------------------------
-                | ALIGNMENT
-                |--------------------------------------------------------------------------
-                */
-
-                $sheet->getStyle('A1:E30')->applyFromArray([
-                    'alignment' => [
-                        'vertical' => Alignment::VERTICAL_CENTER
-                    ]
+                        'color' => ['rgb' => '2563EB'],
+                    ],
                 ]);
 
                 /*
@@ -377,11 +426,15 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->getStyle('B14:B15')
+                $sheet->getStyle('E12:E16')
                     ->getNumberFormat()
                     ->setFormatCode('#,##0.00');
 
-                $sheet->getStyle('E14:E15')
+                $sheet->getStyle('B21:B25')
+                    ->getNumberFormat()
+                    ->setFormatCode('#,##0.00');
+
+                $sheet->getStyle('E21:E24')
                     ->getNumberFormat()
                     ->setFormatCode('#,##0.00');
             },
