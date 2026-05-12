@@ -210,123 +210,195 @@
             </p>
 
         </div>
+{{-- PREVIEW CONTENT --}}
+<div style="padding:20px;">
 
-        {{-- PREVIEW CONTENT --}}
-        <div style="padding:20px;">
+    @if($collection)
 
-            {{-- INFO GRID --}}
+        {{-- INFO GRID --}}
+        <div style="
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:15px;
+            margin-bottom:25px;
+        ">
+
             <div style="
-                display:grid;
-                grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-                gap:15px;
-                margin-bottom:25px;
-            ">
-
-                <div style="
-                    background:#f9fafb;
-                    padding:15px;
-                    border-radius:12px;
-                ">
-                    <small style="color:#6b7280;">OR Number</small>
-                    <div style="font-weight:700;margin-top:4px;">---</div>
-                </div>
-
-                <div style="
-                    background:#f9fafb;
-                    padding:15px;
-                    border-radius:12px;
-                ">
-                    <small style="color:#6b7280;">Branch</small>
-                    <div style="font-weight:700;margin-top:4px;">---</div>
-                </div>
-
-                <div style="
-                    background:#f9fafb;
-                    padding:15px;
-                    border-radius:12px;
-                ">
-                    <small style="color:#6b7280;">Cashier</small>
-                    <div style="font-weight:700;margin-top:4px;">---</div>
-                </div>
-
-                <div style="
-                    background:#f9fafb;
-                    padding:15px;
-                    border-radius:12px;
-                ">
-                    <small style="color:#6b7280;">Gross Sales</small>
-                    <div style="
-                        font-weight:800;
-                        margin-top:4px;
-                        color:#16a34a;
-                    ">
-                        ₱0.00
-                    </div>
-                </div>
-
-            </div>
-
-            {{-- ITEM TABLE --}}
-            <div style="
-                overflow-x:auto;
-                margin-bottom:25px;
-            ">
-
-                <table style="
-                    width:100%;
-                    border-collapse:collapse;
-                    min-width:700px;
-                ">
-
-                    <thead>
-
-                        <tr style="
-                            background:#f3f4f6;
-                            text-align:left;
-                        ">
-
-                            <th style="padding:12px;">Product</th>
-                            <th style="padding:12px;">Qty</th>
-                            <th style="padding:12px;">Price</th>
-                            <th style="padding:12px;">Subtotal</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-                            <td colspan="4" style="
-                                padding:30px;
-                                text-align:center;
-                                color:#9ca3af;
-                            ">
-                                No transaction loaded.
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            {{-- DELETE WARNING --}}
-            <div style="
-                background:#fff7ed;
-                border:1px solid #fdba74;
-                color:#9a3412;
+                background:#f9fafb;
                 padding:15px;
                 border-radius:12px;
-                margin-bottom:20px;
-                font-size:14px;
-                line-height:1.6;
             ">
-                ⚠ This action permanently deletes:
-                collections, sales, returns, related items,
-                and restores inventory stock automatically.
+                <small style="color:#6b7280;">OR Number</small>
+
+                <div style="
+                    font-weight:700;
+                    margin-top:4px;
+                ">
+                    {{ $collection->receipt_no }}
+                </div>
             </div>
+
+            <div style="
+                background:#f9fafb;
+                padding:15px;
+                border-radius:12px;
+            ">
+                <small style="color:#6b7280;">Branch</small>
+
+                <div style="
+                    font-weight:700;
+                    margin-top:4px;
+                ">
+                    {{ $collection->branch->name ?? 'N/A' }}
+                </div>
+            </div>
+
+            <div style="
+                background:#f9fafb;
+                padding:15px;
+                border-radius:12px;
+            ">
+                <small style="color:#6b7280;">Cashier</small>
+
+                <div style="
+                    font-weight:700;
+                    margin-top:4px;
+                ">
+                    {{ $collection->user->name ?? 'N/A' }}
+                </div>
+            </div>
+
+            <div style="
+                background:#f9fafb;
+                padding:15px;
+                border-radius:12px;
+            ">
+                <small style="color:#6b7280;">Gross Sales</small>
+
+                <div style="
+                    font-weight:800;
+                    margin-top:4px;
+                    color:#16a34a;
+                ">
+                    ₱{{ number_format($collection->total_amount, 2) }}
+                </div>
+            </div>
+
+        </div>
+
+        {{-- ITEM TABLE --}}
+        <div style="
+            overflow-x:auto;
+            margin-bottom:25px;
+        ">
+
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                min-width:700px;
+            ">
+
+                <thead>
+
+                    <tr style="
+                        background:#f3f4f6;
+                        text-align:left;
+                    ">
+
+                        <th style="padding:12px;">Product</th>
+                        <th style="padding:12px;">Qty</th>
+                        <th style="padding:12px;">Price</th>
+                        <th style="padding:12px;">Subtotal</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach($collection->items as $item)
+
+                        <tr style="
+                            border-bottom:1px solid #e5e7eb;
+                        ">
+
+                            <td style="padding:12px;">
+                                {{ $item->description }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                {{ $item->qty }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                ₱{{ number_format($item->unit_price, 2) }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                ₱{{ number_format($item->amount, 2) }}
+                            </td>
+
+                        </tr>
+
+                    @endforeach
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    @else
+
+        <div style="
+            padding:40px;
+            text-align:center;
+            color:#9ca3af;
+            font-size:15px;
+        ">
+            No transaction found.
+        </div>
+
+    @endif
+
+    {{-- DELETE WARNING --}}
+    <div style="
+        background:#fff7ed;
+        border:1px solid #fdba74;
+        color:#9a3412;
+        padding:15px;
+        border-radius:12px;
+        margin-bottom:20px;
+        font-size:14px;
+        line-height:1.6;
+    ">
+        ⚠ This action permanently deletes:
+        collections, sales, returns, related items,
+        and restores inventory stock automatically.
+    </div>
+
+    {{-- DELETE BUTTON --}}
+    <div style="
+        display:flex;
+        justify-content:flex-end;
+    ">
+
+        <button type="button" style="
+            background:#dc2626;
+            color:#fff;
+            border:none;
+            padding:14px 28px;
+            border-radius:12px;
+            font-size:15px;
+            font-weight:800;
+            cursor:pointer;
+        ">
+            🗑 Delete OR Transaction
+        </button>
+
+    </div>
+
+</div>
 
             {{-- DELETE BUTTON --}}
             <div style="
