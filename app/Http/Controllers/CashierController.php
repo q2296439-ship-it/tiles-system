@@ -13,6 +13,7 @@ use App\Models\CashTransfer;
 use App\Models\ArPayment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CashierController extends Controller
 {
@@ -290,77 +291,133 @@ class CashierController extends Controller
 
     $selectedDate = $request->date ?? now()->toDateString();
 
-    // CASH IN
+    /*
+    |--------------------------------------------------------------------------
+    | CASH IN
+    |--------------------------------------------------------------------------
+    */
+
     $todayDeposit = Deposit::where('status', 'closed')
         ->whereDate('deposit_date', $selectedDate)
-        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+        ->when($branchId, function ($q) use ($branchId) {
+            $q->where('branch_id', $branchId);
+        })
         ->sum('actual_amount');
 
     $todayArPayments = ArPayment::whereDate('payment_date', $selectedDate)
-        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+        ->when($branchId, function ($q) use ($branchId) {
+            $q->where('branch_id', $branchId);
+        })
         ->sum('amount');
 
     $todayIncomingTransfers = CashTransfer::where('status', 'completed')
         ->whereDate('transfer_date', $selectedDate)
-        ->when($branchId, fn($q) => $q->where('to_branch_id', $branchId))
+        ->when($branchId, function ($q) use ($branchId) {
+            $q->where('to_branch_id', $branchId);
+        })
         ->sum('amount');
 
-    // CASH OUT
+    /*
+    |--------------------------------------------------------------------------
+    | CASH OUT
+    |--------------------------------------------------------------------------
+    */
+
     $todayExpenses = Expense::where('status', 'approved')
         ->whereDate('expense_date', $selectedDate)
-        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+        ->when($branchId, function ($q) use ($branchId) {
+            $q->where('branch_id', $branchId);
+        })
         ->sum('amount');
 
     $todayOutgoingTransfers = CashTransfer::where('status', 'completed')
         ->whereDate('transfer_date', $selectedDate)
-        ->when($branchId, fn($q) => $q->where('from_branch_id', $branchId))
+        ->when($branchId, function ($q) use ($branchId) {
+            $q->where('from_branch_id', $branchId);
+        })
         ->sum('amount');
 
-    $todayCashIn = round(
-        $todayDeposit + $todayArPayments + $todayIncomingTransfers,
-        2
-    );
+    /*
+    |--------------------------------------------------------------------------
+    | TOTALS
+    |--------------------------------------------------------------------------
+    */
 
-    $todayCashOut = round(
-        $todayExpenses + $todayOutgoingTransfers,
-        2
-    );
+    $todayCashIn =
+        $todayDeposit +
+        $todayArPayments +
+        $todayIncomingTransfers;
 
-    $netCash = round(
-        $todayCashIn - $todayCashOut,
-        2
-    );
+    $todayCashOut =
+        $todayExpenses +
+        $todayOutgoingTransfers;
+
+    $netCash =
+        $todayCashIn -
+        $todayCashOut;
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXPORT ROWS
+    |--------------------------------------------------------------------------
+    */
 
     $rows = collect([
         [
             'Description' => 'Actual Deposit',
-            'Amount' => $todayDeposit
+            'Amount' => $todayDeposit,
         ],
         [
-            'Description' => 'A/R Payments',
-            'Amount' => $todayArPayments
+            'Description' => 'A/R Payment',
+            'Amount' => $todayArPayments,
         ],
         [
             'Description' => 'Incoming Transfers',
-            'Amount' => $todayIncomingTransfers
+            'Amount' => $todayIncomingTransfers,
         ],
         [
             'Description' => 'Expenses',
-            'Amount' => -1 * $todayExpenses
+            'Amount' => $todayExpenses,
         ],
         [
-            'Description' => 'Outgoing Transfers',
-            'Amount' => -1 * $todayOutgoingTransfers
+            'Description' => 'Transfer to Other Branch',
+            'Amount' => $todayOutgoingTransfers,
         ],
         [
             'Description' => 'NET CASH',
-            'Amount' => $netCash
+            'Amount' => $netCash,
         ],
     ]);
 
-    return \Maatwebsite\Excel\Facades\Excel::download(
-        new \App\Exports\CashFlowExport($rows),
+    /*
+    |--------------------------------------------------------------------------
+    | BRANCH NAME
+    |--------------------------------------------------------------------------
+    */
+
+    $branchName = 'All Branches';
+
+    if (!empty($branchId)) {
+
+        $branch = \App\Models\Branch::find($branchId);
+
+        if ($branch) {
+            $branchName = $branch->name;
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXPORT
+    |--------------------------------------------------------------------------
+    */
+
+    return Excel::download(
+        new \App\Exports\CashFlowExport(
+            $rows,
+            $selectedDate,
+            $branchName
+        ),
         'cash-flow-' . $selectedDate . '.xlsx'
     );
-}
 }

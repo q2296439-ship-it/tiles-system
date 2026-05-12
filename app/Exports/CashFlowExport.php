@@ -147,7 +147,7 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                 |--------------------------------------------------------------------------
                 */
 
-                foreach ($this->rows as $row) {
+                foreach ($this->rows->toArray() as $row) {
 
                     $description = strtolower(trim($row['Description']));
                     $amount = (float) $row['Amount'];
