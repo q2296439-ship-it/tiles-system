@@ -421,3 +421,4 @@ class CashierController extends Controller
         'cash-flow-' . $selectedDate . '.xlsx'
     );
 }
+}
