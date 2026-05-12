@@ -216,14 +216,5 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
         ];
     }
 }
-```
 
-Simple na format lang ito:
 
-* Total Cash
-* Total Cash In
-* Total Cash Out
-* Net Cash
-* Branch
-* Date
-* Malinis na printable Excel format
