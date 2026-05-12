@@ -1389,6 +1389,35 @@ public function destroyTransaction(Request $request)
             CollectionItem::where('collection_id', $collection->id)
                 ->delete();
 
+                        /*
+            |--------------------------------------------------------------------------
+            | DELETE SALE ITEMS + SALES
+            |--------------------------------------------------------------------------
+            */
+
+            $sales = Sale::where('branch_id', $collection->branch_id)
+                ->where('user_id', $collection->user_id)
+                ->where('total_amount', $collection->total_amount)
+                ->whereDate('created_at', $collection->created_at)
+                ->get();
+
+            foreach ($sales as $sale) {
+
+                SaleItem::where('sale_id', $sale->id)
+                    ->delete();
+
+                $sale->delete();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE COLLECTION ITEMS
+            |--------------------------------------------------------------------------
+            */
+
+            CollectionItem::where('collection_id', $collection->id)
+                ->delete();
+
             /*
             |--------------------------------------------------------------------------
             | DELETE COLLECTION
