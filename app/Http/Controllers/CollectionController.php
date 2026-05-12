@@ -18,8 +18,6 @@ use App\Exports\CollectionExport;
 use App\Exports\DepositExport;
 use App\Exports\RequestAccessExport;
 use App\Models\Branch;
-use App\Models\Sale;
-use App\Models\ReturnItem;
 
 class CollectionController extends Controller
 {
