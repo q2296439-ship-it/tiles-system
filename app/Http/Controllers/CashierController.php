@@ -76,7 +76,10 @@ class CashierController extends Controller
     */
 
     // CASH IN
-    $depositQuery = Deposit::where('status', 'closed')
+    $depositQuery = Deposit::whereIn(
+    'status',
+    ['closed', 'reopened']
+)
         ->whereDate('deposit_date', '<=', $selectedDate);
 
     $arQuery = ArPayment::whereDate('payment_date', '<=', $selectedDate);
@@ -129,7 +132,10 @@ class CashierController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    $todayDepositQuery = Deposit::where('status', 'closed')
+    $todayDepositQuery = Deposit::whereIn(
+    'status',
+    ['closed', 'reopened']
+)
         ->whereDate('deposit_date', $selectedDate);
 
     $todayArQuery = ArPayment::whereDate('payment_date', $selectedDate);
@@ -297,7 +303,10 @@ class CashierController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    $todayDeposit = Deposit::where('status', 'closed')
+    $todayDeposit = Deposit::whereIn(
+    'status',
+    ['closed', 'reopened']
+)
         ->whereDate('deposit_date', $selectedDate)
         ->when($branchId, function ($q) use ($branchId) {
             $q->where('branch_id', $branchId);
