@@ -303,7 +303,18 @@ textarea{
         <tr><td>20</td><td><input type="number" name="denom_20" class="input denom" data-val="20" value="0"></td><td class="right lineTotal">0.00</td></tr>
         <tr><td>10 Coin</td><td><input type="number" name="coin_10" class="input denom" data-val="10" value="0"></td><td class="right lineTotal">0.00</td></tr>
         <tr><td>5 Coin</td><td><input type="number" name="coin_5" class="input denom" data-val="5" value="0"></td><td class="right lineTotal">0.00</td></tr>
-        <tr><td>1 Coin</td><td><input type="number" name="coin_1" class="input denom" data-val="1" value="0"></td><td class="right lineTotal">0.00</td></tr>
+        <tr>
+    <td>Coins / Cents</td>
+    <td>
+        <input type="number"
+               step="0.01"
+               name="coin_1"
+               class="input denom"
+               data-val="1"
+               value="0">
+    </td>
+    <td class="right lineTotal">0.00</td>
+</tr>
     </table>
 
     <div class="adjust-grid">
