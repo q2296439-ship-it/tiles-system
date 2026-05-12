@@ -92,9 +92,20 @@ class CashierController extends Controller
     $expenses = $expenseQuery->sum('amount');
     $outgoingTransfers = $outgoingQuery->sum('amount');
 
-    $cashIn = $actualDeposit + $arPayments + $incomingTransfers;
-    $cashOut = $expenses + $outgoingTransfers;
-    $totalCash = $cashIn - $cashOut;
+    $cashIn = round(
+    $actualDeposit + $arPayments + $incomingTransfers,
+    2
+);
+
+$cashOut = round(
+    $expenses + $outgoingTransfers,
+    2
+);
+
+$totalCash = round(
+    $cashIn - $cashOut,
+    2
+);
 
     // TODAY
     $todayDepositQuery = Deposit::where('status', 'closed')
@@ -127,10 +138,20 @@ class CashierController extends Controller
     $todayExpenses = $todayExpenseQuery->sum('amount');
     $todayOutgoingTransfers = $todayOutgoingQuery->sum('amount');
 
-    $todayCashIn = $todayDeposit + $todayArPayments + $todayIncomingTransfers;
-    $todayCashOut = $todayExpenses + $todayOutgoingTransfers;
+    $todayCashIn = round(
+    $todayDeposit + $todayArPayments + $todayIncomingTransfers,
+    2
+);
 
-    $previousBalance = $totalCash - ($todayCashIn - $todayCashOut);
+$todayCashOut = round(
+    $todayExpenses + $todayOutgoingTransfers,
+    2
+);
+
+$previousBalance = round(
+    $totalCash - ($todayCashIn - $todayCashOut),
+    2
+);
 
     return view('cashflow.total-cash', compact(
         'branches',
