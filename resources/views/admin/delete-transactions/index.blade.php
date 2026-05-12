@@ -393,7 +393,7 @@
             font-weight:800;
             cursor:pointer;
         ">
-            🗑 Delete OR Transaction
+        
         </button>
 
     </div>
