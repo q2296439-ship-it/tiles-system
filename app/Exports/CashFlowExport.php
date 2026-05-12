@@ -6,7 +6,6 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class CashFlowExport implements WithEvents, ShouldAutoSize
 {
@@ -131,7 +130,7 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
 
                 /*
                 |--------------------------------------------------------------------------
-                | COMPUTE VALUES
+                | DEFAULT VALUES
                 |--------------------------------------------------------------------------
                 */
 
@@ -142,37 +141,53 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                 $outgoingTransfers = 0;
                 $netCash = 0;
 
+                /*
+                |--------------------------------------------------------------------------
+                | GET VALUES FROM ROWS
+                |--------------------------------------------------------------------------
+                */
+
                 foreach ($this->rows as $row) {
 
-    $description = strtolower(trim($row['Description']));
+                    $description = strtolower(trim($row['Description']));
+                    $amount = (float) $row['Amount'];
 
-    if (str_contains($description, 'actual deposit')) {
-        $actualDeposit = (float) $row['Amount'];
-    }
+                    if (str_contains($description, 'actual deposit')) {
+                        $actualDeposit = $amount;
+                    }
 
-    if (
-        str_contains($description, 'a/r payment')
-        || str_contains($description, 'a/r payments')
-    ) {
-        $arPayments = (float) $row['Amount'];
-    }
+                    if (
+                        str_contains($description, 'a/r payment')
+                        || str_contains($description, 'a/r payments')
+                    ) {
+                        $arPayments = $amount;
+                    }
 
-    if (str_contains($description, 'incoming')) {
-        $incomingTransfers = (float) $row['Amount'];
-    }
+                    if (str_contains($description, 'incoming')) {
+                        $incomingTransfers = $amount;
+                    }
 
-    if (str_contains($description, 'expense')) {
-        $expenses = (float) $row['Amount'];
-    }
+                    if (str_contains($description, 'expense')) {
+                        $expenses = $amount;
+                    }
 
-    if (str_contains($description, 'outgoing')) {
-        $outgoingTransfers = (float) $row['Amount'];
-    }
+                    if (
+                        str_contains($description, 'outgoing')
+                        || str_contains($description, 'transfer to other branch')
+                    ) {
+                        $outgoingTransfers = $amount;
+                    }
 
-    if (str_contains($description, 'net cash')) {
-        $netCash = (float) $row['Amount'];
-    }
-}
+                    if (str_contains($description, 'net cash')) {
+                        $netCash = $amount;
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | COMPUTE TOTALS
+                |--------------------------------------------------------------------------
+                */
 
                 $todayCashIn =
                     $actualDeposit +
@@ -319,20 +334,6 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                     ],
                 ]);
 
-                $sheet->getStyle('A19')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 14,
-                    ],
-                ]);
-
-                $sheet->getStyle('B21:B25')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'color' => ['rgb' => '16A34A'],
-                    ],
-                ]);
-
                 /*
                 |--------------------------------------------------------------------------
                 | CASH OUT BOX
@@ -361,20 +362,6 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                             'borderStyle' => 'thin',
                             'color' => ['rgb' => '1E3A8A'],
                         ],
-                    ],
-                ]);
-
-                $sheet->getStyle('D19')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 14,
-                    ],
-                ]);
-
-                $sheet->getStyle('E21:E24')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'color' => ['rgb' => 'DC2626'],
                     ],
                 ]);
 
@@ -407,21 +394,6 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
                             'borderStyle' => 'thin',
                             'color' => ['rgb' => '1E3A8A'],
                         ],
-                    ],
-                ]);
-
-                $sheet->getStyle('A29')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 14,
-                    ],
-                ]);
-
-                $sheet->getStyle('E30')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 18,
-                        'color' => ['rgb' => '2563EB'],
                     ],
                 ]);
 
