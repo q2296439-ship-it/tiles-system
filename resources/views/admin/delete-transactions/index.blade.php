@@ -55,116 +55,127 @@
     </div>
 
     {{-- SEARCH FILTER --}}
-    <form method="GET" action="" style="margin-bottom:30px;">
+<form method="GET" action="" style="margin-bottom:30px;">
 
-        <div style="
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-            gap:15px;
-        ">
+    <div style="
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:15px;
+    ">
 
-            {{-- BRANCH --}}
-            <div>
-                <label style="
-                    display:block;
-                    margin-bottom:6px;
-                    font-size:13px;
-                    font-weight:700;
-                    color:#374151;
-                ">
-                    Select Branch
-                </label>
+        {{-- BRANCH --}}
+        <div>
+            <label style="
+                display:block;
+                margin-bottom:6px;
+                font-size:13px;
+                font-weight:700;
+                color:#374151;
+            ">
+                Select Branch
+            </label>
 
-                <select name="branch_id" style="
-                    width:100%;
-                    padding:12px;
-                    border:1px solid #d1d5db;
-                    border-radius:12px;
-                    font-size:14px;
-                    outline:none;
-                ">
-                    <option value="">-- Select Branch --</option>
-
-                    <option>San Isidro</option>
-                    <option>Arayat</option>
-                    <option>Mexico</option>
-                    <option>Capas</option>
-                    <option>Magalang</option>
-                    <option>Mabalacat</option>
-                    <option>Angeles</option>
-                </select>
-            </div>
-
-            {{-- DATE --}}
-            <div>
-                <label style="
-                    display:block;
-                    margin-bottom:6px;
-                    font-size:13px;
-                    font-weight:700;
-                    color:#374151;
-                ">
-                    Transaction Date
-                </label>
-
-                <input type="date" name="date" style="
-                    width:100%;
-                    padding:12px;
-                    border:1px solid #d1d5db;
-                    border-radius:12px;
-                    font-size:14px;
-                    outline:none;
-                ">
-            </div>
-
-            {{-- OR NUMBER --}}
-            <div>
-                <label style="
-                    display:block;
-                    margin-bottom:6px;
-                    font-size:13px;
-                    font-weight:700;
-                    color:#374151;
-                ">
-                    OR Number
-                </label>
-
-                <input type="text"
-                       name="receipt_no"
-                       placeholder="Enter OR Number"
-                       style="
-                            width:100%;
-                            padding:12px;
-                            border:1px solid #d1d5db;
-                            border-radius:12px;
-                            font-size:14px;
-                            outline:none;
-                       ">
-            </div>
-
-        </div>
-
-        {{-- BUTTON --}}
-        <div style="
-            margin-top:20px;
-            display:flex;
-            justify-content:flex-end;
-        ">
-
-            <button type="submit" style="
-                background:#2563eb;
-                color:#fff;
-                border:none;
-                padding:12px 24px;
+            <select name="branch_id" style="
+                width:100%;
+                padding:12px;
+                border:1px solid #d1d5db;
                 border-radius:12px;
                 font-size:14px;
-                font-weight:700;
-                cursor:pointer;
+                outline:none;
             ">
-                🔍 Search Transaction
-            </button>
 
+                <option value="">-- Select Branch --</option>
+
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}"
+                        {{ $selectedBranch == $branch->id ? 'selected' : '' }}>
+                        {{ $branch->name }}
+                    </option>
+                @endforeach
+
+            </select>
         </div>
+
+        {{-- DATE --}}
+        <div>
+            <label style="
+                display:block;
+                margin-bottom:6px;
+                font-size:13px;
+                font-weight:700;
+                color:#374151;
+            ">
+                Transaction Date
+            </label>
+
+            <input
+                type="date"
+                name="date"
+                value="{{ $selectedDate }}"
+                style="
+                    width:100%;
+                    padding:12px;
+                    border:1px solid #d1d5db;
+                    border-radius:12px;
+                    font-size:14px;
+                    outline:none;
+                "
+            >
+        </div>
+
+        {{-- OR NUMBER --}}
+        <div>
+            <label style="
+                display:block;
+                margin-bottom:6px;
+                font-size:13px;
+                font-weight:700;
+                color:#374151;
+            ">
+                OR Number
+            </label>
+
+            <input
+                type="text"
+                name="receipt_no"
+                value="{{ $receiptNo }}"
+                placeholder="Enter OR Number"
+                style="
+                    width:100%;
+                    padding:12px;
+                    border:1px solid #d1d5db;
+                    border-radius:12px;
+                    font-size:14px;
+                    outline:none;
+                "
+            >
+        </div>
+
+    </div>
+
+    {{-- BUTTON --}}
+    <div style="
+        margin-top:20px;
+        display:flex;
+        justify-content:flex-end;
+    ">
+
+        <button type="submit" style="
+            background:#2563eb;
+            color:#fff;
+            border:none;
+            padding:12px 24px;
+            border-radius:12px;
+            font-size:14px;
+            font-weight:700;
+            cursor:pointer;
+        ">
+            🔍 Search Transaction
+        </button>
+
+    </div>
+
+</form>
 
     </form>
 
