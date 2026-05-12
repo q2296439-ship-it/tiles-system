@@ -1340,31 +1340,30 @@ public function destroyTransaction(Request $request)
 
             foreach ($collection->items as $item) {
 
-                $desc = strtolower(trim($item->description));
+    $soldQty = $item->qty;
 
-                $soldQty = $item->qty;
+    $returnedQtyTotal = ReturnItem::whereHas('return', function ($q) use ($receiptNo) {
+            $q->where('receipt_no', $receiptNo);
+        })
+        ->where('description', $item->description)
+        ->sum('qty');
 
-                $alreadyReturned = $returnedQty[$desc] ?? 0;
+    $remainingToRestore = $soldQty - $returnedQtyTotal;
 
-                $remainingToRestore = $soldQty - $alreadyReturned;
+    if ($remainingToRestore <= 0) {
+        continue;
+    }
 
-                if ($remainingToRestore <= 0) {
-                    continue;
-                }
+    $product = Product::where('name', $item->description)
+        ->where('branch_id', $collection->branch_id)
+        ->first();
 
-                $product = Product::whereRaw(
-                        'LOWER(TRIM(name)) = ?',
-                        [$desc]
-                    )
-                    ->where('branch_id', $collection->branch_id)
-                    ->first();
+    if ($product) {
 
-                if ($product) {
-
-                    $product->stock += $remainingToRestore;
-                    $product->save();
-                }
-            }
+        $product->stock += $remainingToRestore;
+        $product->save();
+    }
+}
 
             /*
             |--------------------------------------------------------------------------
