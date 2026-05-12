@@ -163,13 +163,17 @@ public function returnStore(Request $request)
                 $amount = $qty * $price;
                 $desc   = trim($item['description']);
 
-                $product = Product::whereRaw(
-                        'LOWER(TRIM(name)) = ?',
-                        [strtolower(trim($desc))]
-                    )
-                    ->where('branch_id', $branchId)
-                    ->first();
+                $description = strtoupper(trim($desc));
 
+$parts = explode('-', $description);
+
+$productName = trim($parts[0] ?? '');
+$productSize = trim($parts[1] ?? '');
+
+$product = Product::where('branch_id', $branchId)
+    ->whereRaw('UPPER(name) = ?', [$productName])
+    ->whereRaw('UPPER(size) = ?', [$productSize])
+    ->first();
                 // 🔥 SAVE RETURN ITEMS
                 ReturnItem::create([
                     'return_id'   => $return->id,
