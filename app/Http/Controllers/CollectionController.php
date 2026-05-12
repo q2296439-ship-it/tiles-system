@@ -1288,6 +1288,137 @@ public function deleteTransactions(Request $request)
         'returns'
     ));
 }
+public function destroyTransaction(Request $request)
+{
+    try {
+
+        DB::transaction(function () use ($request) {
+
+            $receiptNo = $request->receipt_no;
+
+            // LOAD COLLECTION
+            $collection = Collection::with('items')
+                ->where('receipt_no', $receiptNo)
+                ->first();
+
+            if (!$collection) {
+                throw new \Exception('Collection not found.');
+            }
+
+            // LOAD RETURNS
+            $returns = ReturnModel::with('items')
+                ->where('receipt_no', $receiptNo)
+                ->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMPUTE RETURNED QTY
+            |--------------------------------------------------------------------------
+            */
+
+            $returnedQty = [];
+
+            foreach ($returns as $return) {
+
+                foreach ($return->items as $item) {
+
+                    $desc = strtolower(trim($item->description));
+
+                    if (!isset($returnedQty[$desc])) {
+                        $returnedQty[$desc] = 0;
+                    }
+
+                    $returnedQty[$desc] += $item->qty;
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | RESTORE REMAINING STOCK ONLY
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($collection->items as $item) {
+
+                $desc = strtolower(trim($item->description));
+
+                $soldQty = $item->qty;
+
+                $alreadyReturned = $returnedQty[$desc] ?? 0;
+
+                $remainingToRestore = $soldQty - $alreadyReturned;
+
+                if ($remainingToRestore <= 0) {
+                    continue;
+                }
+
+                $product = Product::whereRaw(
+                        'LOWER(TRIM(name)) = ?',
+                        [$desc]
+                    )
+                    ->where('branch_id', $collection->branch_id)
+                    ->first();
+
+                if ($product) {
+
+                    $product->stock += $remainingToRestore;
+                    $product->save();
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE RETURN ITEMS
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($returns as $return) {
+
+                ReturnItem::where('return_id', $return->id)
+                    ->delete();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE RETURNS
+            |--------------------------------------------------------------------------
+            */
+
+            ReturnModel::where('receipt_no', $receiptNo)
+                ->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE COLLECTION ITEMS
+            |--------------------------------------------------------------------------
+            */
+
+            CollectionItem::where('collection_id', $collection->id)
+                ->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE COLLECTION
+            |--------------------------------------------------------------------------
+            */
+
+            $collection->delete();
+        });
+
+        return back()->with(
+            'success',
+            'Transaction deleted and stocks restored successfully.'
+        );
+
+    } catch (\Throwable $e) {
+
+        return back()->with(
+            'error',
+            $e->getMessage()
+        );
+    }
+}
+
 public function payAr(Request $request, $id)
 {
     $request->validate([
