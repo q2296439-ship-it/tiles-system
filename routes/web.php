@@ -324,9 +324,15 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/ar-accounts', [CollectionController::class, 'arAccounts']);
     Route::post('/ar-payment/{id}', [CollectionController::class, 'payAr']);
 
-    Route::get('/delete-transactions',
-    [CollectionController::class, 'deleteTransactions']);
+    Route::get(
+    '/delete-transactions',
+    [CollectionController::class, 'deleteTransactions']
+)->name('admin.delete-transactions');
 
+Route::delete(
+    '/delete-transactions',
+    [CollectionController::class, 'destroyTransaction']
+)->name('admin.delete-transactions.destroy');
     Route::get('/total-cash', [CashierController::class, 'totalCash'])
     ->name('admin.total.cash');
 
