@@ -349,133 +349,127 @@
                 @endif
 
                 {{-- RETURNS --}}
-                @if(isset($returns) && $returns->count())
+@if(isset($returns) && $returns->count())
 
-                    <h4 style="
-                        font-size:16px;
-                        font-weight:800;
-                        margin-bottom:12px;
-                        color:#111827;
-                    ">
-                        Return Records
-                    </h4>
+    <h4 style="
+        font-size:16px;
+        font-weight:800;
+        margin-bottom:12px;
+        color:#111827;
+    ">
+        Return Records
+    </h4>
 
-                    <div style="margin-bottom:30px;">
+    @foreach($returns as $return)
 
-                        @foreach($returns as $return)
+        {{-- RETURN INFO --}}
+        <div style="
+            background:#fff7ed;
+            padding:15px;
+            border-radius:12px;
+            margin-bottom:15px;
+            border:1px solid #fed7aa;
+        ">
 
-                            <div style="
-                                background:#fff7ed;
-                                padding:15px;
-                                border-radius:12px;
-                                margin-bottom:15px;
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                flex-wrap:wrap;
+                gap:10px;
+                margin-bottom:10px;
+            ">
+
+                <div>
+                    <strong>Return No:</strong>
+                    {{ $return->return_no }}
+                </div>
+
+                <div>
+                    <strong>Receipt No:</strong>
+                    {{ $return->receipt_no }}
+                </div>
+
+                <div>
+                    <strong>Total:</strong>
+                    ₱{{ number_format($return->total_amount, 2) }}
+                </div>
+
+            </div>
+
+            <div style="
+                margin-bottom:15px;
+                color:#92400e;
+                font-size:14px;
+            ">
+                <strong>Reason:</strong>
+                {{ $return->reason }}
+            </div>
+
+            {{-- RETURN ITEMS --}}
+            <div style="overflow-x:auto;">
+
+                <table style="
+                    width:100%;
+                    border-collapse:collapse;
+                    min-width:700px;
+                    background:#fff;
+                ">
+
+                    <thead>
+
+                        <tr style="
+                            background:#fef3c7;
+                            text-align:left;
+                        ">
+
+                            <th style="padding:12px;">Product</th>
+                            <th style="padding:12px;">Qty</th>
+                            <th style="padding:12px;">Price</th>
+                            <th style="padding:12px;">Subtotal</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach($return->items as $item)
+
+                            <tr style="
+                                border-bottom:1px solid #e5e7eb;
                             ">
 
-                                Return ID: {{ $return->id }}
+                                <td style="padding:12px;">
+                                    {{ $item->description }}
+                                </td>
 
-                            </div>
+                                <td style="padding:12px;">
+                                    {{ $item->qty }}
+                                </td>
+
+                                <td style="padding:12px;">
+                                    ₱{{ number_format($item->unit_price, 2) }}
+                                </td>
+
+                                <td style="padding:12px;">
+                                    ₱{{ number_format($item->amount, 2) }}
+                                </td>
+
+                            </tr>
 
                         @endforeach
 
-                    </div>
+                    </tbody>
 
-                @endif
+                </table>
 
-                {{-- SUMMARY --}}
-                <div style="
-                    background:#eff6ff;
-                    border:1px solid #bfdbfe;
-                    padding:18px;
-                    border-radius:12px;
-                    margin-bottom:25px;
-                ">
+            </div>
 
-                    <div style="
-                        font-size:16px;
-                        font-weight:800;
-                        margin-bottom:10px;
-                        color:#1e3a8a;
-                    ">
-                        Records To Delete
-                    </div>
+        </div>
 
-                    <ul style="
-                        margin:0;
-                        padding-left:18px;
-                        color:#1e40af;
-                        line-height:1.8;
-                    ">
-                        <li>1 Collection Record</li>
-                        <li>{{ $collection->items->count() }} Collection Items</li>
-                        <li>{{ isset($sales) ? $sales->count() : 0 }} Sales Records</li>
-                        <li>{{ isset($returns) ? $returns->count() : 0 }} Return Records</li>
-                    </ul>
+    @endforeach
 
-                </div>
-
-                {{-- DELETE WARNING --}}
-                <div style="
-                    background:#fff7ed;
-                    border:1px solid #fdba74;
-                    color:#9a3412;
-                    padding:15px;
-                    border-radius:12px;
-                    margin-bottom:20px;
-                    font-size:14px;
-                    line-height:1.6;
-                ">
-                    ⚠ This action permanently deletes:
-                    collections, sales, returns, related items,
-                    and restores inventory stock automatically.
-                </div>
-
-                {{-- DELETE FORM --}}
-                <form method="POST"
-                      action="{{ route('admin.delete-transactions.destroy') }}"
-                      onsubmit="return confirm('DELETE THIS TRANSACTION? THIS CANNOT BE UNDONE.')">
-
-                    @csrf
-                    @method('DELETE')
-
-                    <input type="hidden"
-                           name="receipt_no"
-                           value="{{ $collection->receipt_no }}">
-
-                    <div style="
-                        display:flex;
-                        justify-content:flex-end;
-                    ">
-
-                        <button type="submit" style="
-                            background:#dc2626;
-                            color:#fff;
-                            border:none;
-                            padding:14px 28px;
-                            border-radius:12px;
-                            font-size:15px;
-                            font-weight:800;
-                            cursor:pointer;
-                        ">
-                            🗑 Delete OR Transaction
-                        </button>
-
-                    </div>
-
-                </form>
-
-            @else
-
-                <div style="
-                    padding:40px;
-                    text-align:center;
-                    color:#9ca3af;
-                    font-size:15px;
-                ">
-                    No transaction found.
-                </div>
-
-            @endif
-
+@endif
         </div>
 
     </div>
