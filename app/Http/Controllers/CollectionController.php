@@ -1400,11 +1400,23 @@ public function destroyTransaction(Request $request)
             */
 
             $sales = Sale::where('branch_id', $collection->branch_id)
-                ->where('user_id', $collection->user_id)
-                ->where('total_amount', $collection->total_amount)
-                ->whereDate('created_at', $collection->created_at)
-                ->get();
+    ->where('user_id', $collection->user_id)
+    ->whereDate('created_at', $collection->created_at)
+    ->where(function ($q) use ($collection, $returns) {
 
+        // POSITIVE SALE
+        $q->where('total_amount', $collection->total_amount);
+
+        // NEGATIVE RETURN SALES
+        foreach ($returns as $return) {
+
+            $q->orWhere(
+                'total_amount',
+                -1 * abs($return->total_amount)
+            );
+        }
+    })
+    ->get();
             foreach ($sales as $sale) {
 
                 SaleItem::where('sale_id', $sale->id)
