@@ -1312,58 +1312,52 @@ public function destroyTransaction(Request $request)
 
             /*
             |--------------------------------------------------------------------------
-            | COMPUTE RETURNED QTY
-            |--------------------------------------------------------------------------
-            */
-
-            $returnedQty = [];
-
-            foreach ($returns as $return) {
-
-                foreach ($return->items as $item) {
-
-                    $desc = strtolower(trim($item->description));
-
-                    if (!isset($returnedQty[$desc])) {
-                        $returnedQty[$desc] = 0;
-                    }
-
-                    $returnedQty[$desc] += $item->qty;
-                }
-            }
-
-            /*
-            |--------------------------------------------------------------------------
             | RESTORE REMAINING STOCK ONLY
             |--------------------------------------------------------------------------
             */
 
             foreach ($collection->items as $item) {
 
-    $soldQty = $item->qty;
+                $soldQty = $item->qty;
 
-    $returnedQtyTotal = ReturnItem::whereHas('return', function ($q) use ($receiptNo) {
-            $q->where('receipt_no', $receiptNo);
-        })
-        ->where('description', $item->description)
-        ->sum('qty');
+                // COMPUTE RETURNED QTY
+                $returnedQtyTotal = ReturnItem::whereHas('return', function ($q) use ($receiptNo) {
+                        $q->where('receipt_no', $receiptNo);
+                    })
+                    ->where('description', $item->description)
+                    ->sum('qty');
 
-    $remainingToRestore = $soldQty - $returnedQtyTotal;
+                // REMAINING TO RESTORE
+                $remainingToRestore = $soldQty - $returnedQtyTotal;
 
-    if ($remainingToRestore <= 0) {
-        continue;
-    }
+                if ($remainingToRestore <= 0) {
+                    continue;
+                }
 
-    $product = Product::where('name', $item->description)
-        ->where('branch_id', $collection->branch_id)
-        ->first();
+                /*
+                |--------------------------------------------------------------------------
+                | MATCH PRODUCT USING NAME + SIZE
+                |--------------------------------------------------------------------------
+                */
 
-    if ($product) {
+                $description = strtoupper(trim($item->description));
 
-        $product->stock += $remainingToRestore;
-        $product->save();
-    }
-}
+                $parts = explode('-', $description);
+
+                $productName = trim($parts[0] ?? '');
+                $productSize = trim($parts[1] ?? '');
+
+                $product = Product::where('branch_id', $collection->branch_id)
+                    ->whereRaw('UPPER(name) = ?', [$productName])
+                    ->whereRaw('UPPER(size) = ?', [$productSize])
+                    ->first();
+
+                if ($product) {
+
+                    $product->stock += $remainingToRestore;
+                    $product->save();
+                }
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -1417,7 +1411,6 @@ public function destroyTransaction(Request $request)
         );
     }
 }
-
 public function payAr(Request $request, $id)
 {
     $request->validate([
