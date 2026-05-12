@@ -144,30 +144,35 @@ class CashFlowExport implements WithEvents, ShouldAutoSize
 
                 foreach ($this->rows as $row) {
 
-                    if ($row['Description'] === 'Actual Deposit') {
-                        $actualDeposit = $row['Amount'];
-                    }
+    $description = strtolower(trim($row['Description']));
 
-                    if ($row['Description'] === 'A/R Payments') {
-                        $arPayments = $row['Amount'];
-                    }
+    if (str_contains($description, 'actual deposit')) {
+        $actualDeposit = (float) $row['Amount'];
+    }
 
-                    if ($row['Description'] === 'Incoming Transfers') {
-                        $incomingTransfers = $row['Amount'];
-                    }
+    if (
+        str_contains($description, 'a/r payment')
+        || str_contains($description, 'a/r payments')
+    ) {
+        $arPayments = (float) $row['Amount'];
+    }
 
-                    if ($row['Description'] === 'Expenses') {
-                        $expenses = $row['Amount'];
-                    }
+    if (str_contains($description, 'incoming')) {
+        $incomingTransfers = (float) $row['Amount'];
+    }
 
-                    if ($row['Description'] === 'Outgoing Transfers') {
-                        $outgoingTransfers = $row['Amount'];
-                    }
+    if (str_contains($description, 'expense')) {
+        $expenses = (float) $row['Amount'];
+    }
 
-                    if ($row['Description'] === 'NET CASH') {
-                        $netCash = $row['Amount'];
-                    }
-                }
+    if (str_contains($description, 'outgoing')) {
+        $outgoingTransfers = (float) $row['Amount'];
+    }
+
+    if (str_contains($description, 'net cash')) {
+        $netCash = (float) $row['Amount'];
+    }
+}
 
                 $todayCashIn =
                     $actualDeposit +
