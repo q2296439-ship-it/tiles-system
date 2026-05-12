@@ -429,29 +429,64 @@ public function cashFlowPdf(Request $request)
 
     $date = $request->date ?? now()->toDateString();
 
-    $actualDeposit = Deposit::whereDate('deposit_date', $date)
-        ->where('branch_id', $branchId)
+    /*
+    |--------------------------------------------------------------------------
+    | TOTAL RUNNING CASH
+    |--------------------------------------------------------------------------
+    */
+
+    $allDeposit = Deposit::where('branch_id', $branchId)
         ->sum('actual_amount');
 
-    $expenses = Expense::whereDate('expense_date', $date)
-        ->where('branch_id', $branchId)
+    $allExpenses = Expense::where('branch_id', $branchId)
         ->sum('amount');
 
-    $cashIn = $actualDeposit;
+    $runningBalance = $allDeposit - $allExpenses;
 
-    $cashOut = $expenses;
+    /*
+    |--------------------------------------------------------------------------
+    | TODAY CASH FLOW
+    |--------------------------------------------------------------------------
+    */
 
-    $totalCash = $cashIn - $cashOut;
+    $todayDeposit = Deposit::where('branch_id', $branchId)
+        ->whereDate('deposit_date', $date)
+        ->sum('actual_amount');
+
+    $todayExpenses = Expense::where('branch_id', $branchId)
+        ->whereDate('expense_date', $date)
+        ->sum('amount');
+
+    $todayCashIn = $todayDeposit;
+
+    $todayCashOut = $todayExpenses;
+
+    /*
+    |--------------------------------------------------------------------------
+    | PREVIOUS BALANCE
+    |--------------------------------------------------------------------------
+    */
+
+    $previousBalance = $runningBalance - ($todayCashIn - $todayCashOut);
+
+    /*
+    |--------------------------------------------------------------------------
+    | FINAL TOTAL CASH
+    |--------------------------------------------------------------------------
+    */
+
+    $totalCash = $previousBalance + $todayCashIn - $todayCashOut;
 
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
         'cashflow.pdf',
         compact(
             'date',
-            'cashIn',
-            'cashOut',
+            'previousBalance',
+            'todayCashIn',
+            'todayCashOut',
             'totalCash',
-            'actualDeposit',
-            'expenses'
+            'todayDeposit',
+            'todayExpenses'
         )
     );
 

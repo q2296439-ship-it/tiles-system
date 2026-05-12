@@ -88,6 +88,13 @@
             font-weight:bold;
         }
 
+        .section-title{
+            margin-top:25px;
+            margin-bottom:10px;
+            font-size:16px;
+            font-weight:bold;
+        }
+
     </style>
 </head>
 <body>
@@ -102,7 +109,7 @@
 
     <div class="card cash">
 
-        <h2>TOTAL CASH</h2>
+        <h2>AVAILABLE CASH</h2>
 
         <h1>
             ₱{{ number_format($totalCash,2) }}
@@ -126,36 +133,107 @@
         <tbody>
 
             <tr>
-                <td>Actual Deposit</td>
+                <td>Beginning Balance</td>
+                <td class="right blue">
+                    ₱{{ number_format($previousBalance,2) }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Today Cash In</td>
                 <td class="right green">
-                    ₱{{ number_format($actualDeposit,2) }}
+                    ₱{{ number_format($todayCashIn,2) }}
                 </td>
             </tr>
 
             <tr>
-                <td>Expenses</td>
+                <td>Today Cash Out</td>
                 <td class="right red">
-                    ₱{{ number_format($expenses,2) }}
-                </td>
-            </tr>
-
-            <tr>
-                <td>Total Cash In</td>
-                <td class="right green">
-                    ₱{{ number_format($cashIn,2) }}
-                </td>
-            </tr>
-
-            <tr>
-                <td>Total Cash Out</td>
-                <td class="right red">
-                    ₱{{ number_format($cashOut,2) }}
+                    ₱{{ number_format($todayCashOut,2) }}
                 </td>
             </tr>
 
             <tr>
                 <td class="blue">
-                    NET CASH
+                    Running Balance
+                </td>
+
+                <td class="right blue">
+                    ₱{{ number_format($totalCash,2) }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="section-title">
+        CASH IN
+    </div>
+
+    <table>
+
+        <tbody>
+
+            <tr>
+                <td>Actual Deposit Amount</td>
+
+                <td class="right green">
+                    ₱{{ number_format($todayDeposit,2) }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Cash In</td>
+
+                <td class="right green">
+                    ₱{{ number_format($todayCashIn,2) }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="section-title">
+        CASH OUT
+    </div>
+
+    <table>
+
+        <tbody>
+
+            <tr>
+                <td>Expenses</td>
+
+                <td class="right red">
+                    ₱{{ number_format($todayExpenses,2) }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Cash Out</td>
+
+                <td class="right red">
+                    ₱{{ number_format($todayCashOut,2) }}
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="section-title">
+        NET CASH POSITION
+    </div>
+
+    <table>
+
+        <tbody>
+
+            <tr>
+                <td>
+                    Beginning + Today In - Today Out
                 </td>
 
                 <td class="right blue">
