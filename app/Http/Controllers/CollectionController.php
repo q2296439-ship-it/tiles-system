@@ -1448,6 +1448,23 @@ CollectionItem::where('collection_id', $collection->id)
     ->delete();
 
 $collection->delete();
+
+        });
+
+        return back()->with(
+            'success',
+            'Transaction deleted and stocks restored successfully.'
+        );
+
+    } catch (\Throwable $e) {
+
+        return back()->with(
+            'error',
+            $e->getMessage()
+        );
+    }
+}
+
 public function payAr(Request $request, $id)
 {
     $request->validate([
