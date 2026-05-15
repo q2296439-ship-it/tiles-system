@@ -1261,16 +1261,45 @@ public function deleteTransactions(Request $request)
         !empty($receiptNo)
     ) {
 
-        // COLLECTION
-        $collection = Collection::with([
-                'items',
-                'user',
-                'branch'
-            ])
-            ->where('branch_id', $selectedBranch)
-            ->whereDate('receipt_date', $selectedDate)
-            ->where('receipt_no', $receiptNo)
-            ->first();
+      // COLLECTION
+$collection = Collection::with([
+        'items',
+        'user',
+        'branch'
+    ])
+    ->where('branch_id', $selectedBranch)
+    ->where(function ($q) use ($selectedDate) {
+
+        $q->whereDate('receipt_date', $selectedDate)
+          ->orWhereDate('created_at', $selectedDate);
+
+    })
+    ->where('receipt_no', $receiptNo)
+    ->first();
+
+/*
+|--------------------------------------------------------------------------
+| IF NOT FOUND CHECK RETURNS
+|--------------------------------------------------------------------------
+*/
+
+if (!$collection) {
+
+    $collection = ReturnModel::with([
+            'items',
+            'user',
+            'branch'
+        ])
+        ->where('branch_id', $selectedBranch)
+        ->where(function ($q) use ($selectedDate) {
+
+            $q->whereDate('return_date', $selectedDate)
+              ->orWhereDate('created_at', $selectedDate);
+
+        })
+        ->where('receipt_no', $receiptNo)
+        ->first();
+}
 
         // SALES
         // not directly connected to OR receipt_no
