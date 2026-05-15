@@ -1394,20 +1394,31 @@ public function destroyTransaction(Request $request)
                 ->delete();
 
                         /*
-            |--------------------------------------------------------------------------
-            | DELETE SALE ITEMS + SALES
-            |--------------------------------------------------------------------------
-            */
+            /*
+|--------------------------------------------------------------------------
+| DELETE SALE ITEMS + SALES
+|--------------------------------------------------------------------------
+*/
 
-            $sales = Sale::where('branch_id', $collection->branch_id)
+$sales = Sale::where('branch_id', $collection->branch_id)
     ->where('user_id', $collection->user_id)
     ->whereDate('created_at', $collection->created_at)
     ->where(function ($q) use ($collection, $returns) {
 
-        // POSITIVE SALE
+        /*
+        |--------------------------------------------------------------------------
+        | ORIGINAL SALE
+        |--------------------------------------------------------------------------
+        */
+
         $q->where('total_amount', $collection->total_amount);
 
-        // NEGATIVE RETURN SALES
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN NEGATIVE SALES
+        |--------------------------------------------------------------------------
+        */
+
         foreach ($returns as $return) {
 
             $q->orWhere(
@@ -1416,46 +1427,27 @@ public function destroyTransaction(Request $request)
             );
         }
     })
+    ->orderBy('id')
     ->get();
-            foreach ($sales as $sale) {
 
-                SaleItem::where('sale_id', $sale->id)
-                    ->delete();
+foreach ($sales as $sale) {
 
-                $sale->delete();
-            }
+    SaleItem::where('sale_id', $sale->id)
+        ->delete();
 
-            /*
-            |--------------------------------------------------------------------------
-            | DELETE COLLECTION ITEMS
-            |--------------------------------------------------------------------------
-            */
-
-            CollectionItem::where('collection_id', $collection->id)
-                ->delete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | DELETE COLLECTION
-            |--------------------------------------------------------------------------
-            */
-
-            $collection->delete();
-        });
-
-        return back()->with(
-            'success',
-            'Transaction deleted and stocks restored successfully.'
-        );
-
-    } catch (\Throwable $e) {
-
-        return back()->with(
-            'error',
-            $e->getMessage()
-        );
-    }
+    $sale->delete();
 }
+
+/*
+|--------------------------------------------------------------------------
+| DELETE COLLECTION
+|--------------------------------------------------------------------------
+*/
+
+CollectionItem::where('collection_id', $collection->id)
+    ->delete();
+
+$collection->delete();
 public function payAr(Request $request, $id)
 {
     $request->validate([
