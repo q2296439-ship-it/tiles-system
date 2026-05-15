@@ -525,8 +525,7 @@
                       onsubmit="return confirm('DELETE THIS TRANSACTION? THIS CANNOT BE UNDONE.')">
 
                     @csrf
-                    @method('DELETE')
-
+                  
                     <input type="hidden"
                            name="receipt_no"
                            value="{{ $collection->receipt_no }}">
