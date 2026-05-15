@@ -25,9 +25,23 @@ class CashierController extends Controller
 
         $products = Product::where('branch_id', $branchId)->get();
 
-        $todaySales = Sale::whereDate('created_at', $today)
-            ->where('branch_id', $branchId)
-            ->sum('total_amount');
+        /*
+|--------------------------------------------------------------------------
+| TODAY SALES LESS RETURNS
+|--------------------------------------------------------------------------
+*/
+
+$positiveSales = Sale::whereDate('created_at', $today)
+    ->where('branch_id', $branchId)
+    ->where('total_amount', '>', 0)
+    ->sum('total_amount');
+
+$returnSales = Sale::whereDate('created_at', $today)
+    ->where('branch_id', $branchId)
+    ->where('total_amount', '<', 0)
+    ->sum('total_amount');
+
+$todaySales = $positiveSales + $returnSales;
 
         $receiptCount = Collection::whereDate('receipt_date', $today)
             ->where('branch_id', $branchId)
