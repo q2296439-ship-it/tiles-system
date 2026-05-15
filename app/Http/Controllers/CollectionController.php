@@ -1327,7 +1327,7 @@ public function destroyTransaction(Request $request)
 
         DB::transaction(function () use ($request) {
 
-            $receiptNo = $request->receipt_no;
+            $receiptNo = trim($request->receipt_no);
 
             /*
             |--------------------------------------------------------------------------
@@ -1364,19 +1364,24 @@ public function destroyTransaction(Request $request)
 
             /*
             |--------------------------------------------------------------------------
-            | RESTORE STOCKS FROM COLLECTION
+            | RESTORE STOCKS FROM ORIGINAL SALE ONLY
             |--------------------------------------------------------------------------
+            |
+            | IMPORTANT:
+            | Return delete should NOT restore stock again.
+            | Only restore remaining sold qty.
+            |
             */
 
             if ($collection) {
 
                 foreach ($collection->items as $item) {
 
-                    $soldQty = $item->qty;
+                    $soldQty = (int) $item->qty;
 
                     /*
                     |--------------------------------------------------------------------------
-                    | COMPUTE RETURNED QTY
+                    | TOTAL RETURNED QTY
                     |--------------------------------------------------------------------------
                     */
 
@@ -1398,12 +1403,18 @@ public function destroyTransaction(Request $request)
 
                     /*
                     |--------------------------------------------------------------------------
-                    | REMAINING TO RESTORE
+                    | REMAINING SOLD QTY
                     |--------------------------------------------------------------------------
                     */
 
                     $remainingToRestore =
                         $soldQty - $returnedQtyTotal;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FULLY RETURNED
+                    |--------------------------------------------------------------------------
+                    */
 
                     if ($remainingToRestore <= 0) {
                         continue;
@@ -1411,7 +1422,7 @@ public function destroyTransaction(Request $request)
 
                     /*
                     |--------------------------------------------------------------------------
-                    | MATCH PRODUCT USING NAME + SIZE
+                    | FIND PRODUCT
                     |--------------------------------------------------------------------------
                     */
 
@@ -1419,10 +1430,7 @@ public function destroyTransaction(Request $request)
                         trim($item->description)
                     );
 
-                    $parts = explode(
-                        '-',
-                        $description
-                    );
+                    $parts = explode('-', $description);
 
                     $productName = trim($parts[0] ?? '');
                     $productSize = trim($parts[1] ?? '');
@@ -1441,6 +1449,12 @@ public function destroyTransaction(Request $request)
                         )
                         ->first();
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | RESTORE STOCK
+                    |--------------------------------------------------------------------------
+                    */
+
                     if ($product) {
 
                         $product->stock +=
@@ -1451,17 +1465,6 @@ public function destroyTransaction(Request $request)
                 }
             }
 
-            /*
-|--------------------------------------------------------------------------
-| RETURN ONLY DELETE
-|--------------------------------------------------------------------------
-| NO STOCK MOVEMENT
-|--------------------------------------------------------------------------
-|
-| Stock was already restored during actual return process.
-| Deleting return transaction should NOT add or deduct stock.
-|
-*/
             /*
             |--------------------------------------------------------------------------
             | DELETE RETURN ITEMS
@@ -1493,82 +1496,74 @@ public function destroyTransaction(Request $request)
             |--------------------------------------------------------------------------
             | DELETE SALES
             |--------------------------------------------------------------------------
+            |
+            | Deletes:
+            | - positive sales
+            | - negative return sales
+            |
             */
 
-            $sales = Sale::where(function ($q) use (
-                    $collection,
-                    $returns
-                ) {
+            $sales = collect();
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | NORMAL SALE
-                    |--------------------------------------------------------------------------
-                    */
+            /*
+            |--------------------------------------------------------------------------
+            | POSITIVE SALES
+            |--------------------------------------------------------------------------
+            */
 
-                    if ($collection) {
+            if ($collection) {
 
-                        $q->orWhere(function ($saleQuery) use (
-                            $collection
-                        ) {
+                $positiveSales = Sale::where(
+                        'branch_id',
+                        $collection->branch_id
+                    )
+                    ->where(
+                        'user_id',
+                        $collection->user_id
+                    )
+                    ->where(
+                        'total_amount',
+                        $collection->total_amount
+                    )
+                    ->orderBy('id')
+                    ->get();
 
-                            $saleQuery
-                                ->where(
-                                    'branch_id',
-                                    $collection->branch_id
-                                )
-                                ->where(
-                                    'user_id',
-                                    $collection->user_id
-                                )
-                                ->whereDate(
-                                    'created_at',
-                                    $collection->created_at
-                                )
-                                ->where(
-                                    'total_amount',
-                                    $collection->total_amount
-                                );
-                        });
-                    }
+                $sales = $sales->merge($positiveSales);
+            }
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | RETURN NEGATIVE SALES
-                    |--------------------------------------------------------------------------
-                    */
+            /*
+            |--------------------------------------------------------------------------
+            | NEGATIVE RETURN SALES
+            |--------------------------------------------------------------------------
+            */
 
-                    foreach ($returns as $return) {
+            foreach ($returns as $return) {
 
-                        $q->orWhere(function ($saleQuery) use (
-                            $return
-                        ) {
+                $negativeSales = Sale::where(
+                        'branch_id',
+                        $return->branch_id
+                    )
+                    ->where(
+                        'user_id',
+                        $return->user_id
+                    )
+                    ->where(
+                        'total_amount',
+                        -1 * abs($return->total_amount)
+                    )
+                    ->orderBy('id')
+                    ->get();
 
-                            $saleQuery
-                                ->where(
-                                    'branch_id',
-                                    $return->branch_id
-                                )
-                                ->where(
-                                    'user_id',
-                                    $return->user_id
-                                )
-                                ->whereDate(
-                                    'created_at',
-                                    $return->created_at
-                                )
-                                ->where(
-                                    'total_amount',
-                                    -1 * abs(
-                                        $return->total_amount
-                                    )
-                                );
-                        });
-                    }
-                })
-                ->get();
+                $sales = $sales->merge($negativeSales);
+            }
 
-            foreach ($sales as $sale) {
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE SALE ITEMS + SALES
+            |--------------------------------------------------------------------------
+            */
+
+            foreach ($sales->unique('id') as $sale) {
 
                 SaleItem::where(
                         'sale_id',
