@@ -1329,66 +1329,148 @@ public function destroyTransaction(Request $request)
 
             $receiptNo = $request->receipt_no;
 
-            // LOAD COLLECTION
+            /*
+            |--------------------------------------------------------------------------
+            | LOAD COLLECTION
+            |--------------------------------------------------------------------------
+            */
+
             $collection = Collection::with('items')
                 ->where('receipt_no', $receiptNo)
                 ->first();
 
-            if (!$collection) {
-                throw new \Exception('Collection not found.');
-            }
+            /*
+            |--------------------------------------------------------------------------
+            | LOAD RETURNS
+            |--------------------------------------------------------------------------
+            */
 
-            // LOAD RETURNS
             $returns = ReturnModel::with('items')
                 ->where('receipt_no', $receiptNo)
                 ->get();
 
             /*
             |--------------------------------------------------------------------------
-            | RESTORE REMAINING STOCK ONLY
+            | NOTHING FOUND
             |--------------------------------------------------------------------------
             */
 
-            foreach ($collection->items as $item) {
+            if (!$collection && $returns->count() <= 0) {
 
-                $soldQty = $item->qty;
+                throw new \Exception(
+                    'Transaction not found.'
+                );
+            }
 
-                // COMPUTE RETURNED QTY
-                $returnedQtyTotal = ReturnItem::whereHas('return', function ($q) use ($receiptNo) {
-                        $q->where('receipt_no', $receiptNo);
-                    })
-                    ->where('description', $item->description)
-                    ->sum('qty');
+            /*
+            |--------------------------------------------------------------------------
+            | RESTORE STOCKS FROM COLLECTION
+            |--------------------------------------------------------------------------
+            */
 
-                // REMAINING TO RESTORE
-                $remainingToRestore = $soldQty - $returnedQtyTotal;
+            if ($collection) {
 
-                if ($remainingToRestore <= 0) {
-                    continue;
+                foreach ($collection->items as $item) {
+
+                    $soldQty = $item->qty;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | COMPUTE RETURNED QTY
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $returnedQtyTotal = ReturnItem::whereHas(
+                            'return',
+                            function ($q) use ($receiptNo) {
+
+                                $q->where(
+                                    'receipt_no',
+                                    $receiptNo
+                                );
+                            }
+                        )
+                        ->where(
+                            'description',
+                            $item->description
+                        )
+                        ->sum('qty');
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | REMAINING TO RESTORE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $remainingToRestore =
+                        $soldQty - $returnedQtyTotal;
+
+                    if ($remainingToRestore <= 0) {
+                        continue;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | MATCH PRODUCT USING NAME + SIZE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $description = strtoupper(
+                        trim($item->description)
+                    );
+
+                    $parts = explode(
+                        '-',
+                        $description
+                    );
+
+                    $productName = trim($parts[0] ?? '');
+                    $productSize = trim($parts[1] ?? '');
+
+                    $product = Product::where(
+                            'branch_id',
+                            $collection->branch_id
+                        )
+                        ->whereRaw(
+                            'UPPER(name) = ?',
+                            [$productName]
+                        )
+                        ->whereRaw(
+                            'UPPER(size) = ?',
+                            [$productSize]
+                        )
+                        ->first();
+
+                    if ($product) {
+
+                        $product->stock +=
+                            $remainingToRestore;
+
+                        $product->save();
+                    }
                 }
+            }
 
-                /*
-                |--------------------------------------------------------------------------
-                | MATCH PRODUCT USING NAME + SIZE
-                |--------------------------------------------------------------------------
-                */
+            /*
+            |--------------------------------------------------------------------------
+            | RESTORE STOCKS FROM RETURN ONLY
+            |--------------------------------------------------------------------------
+            */
 
-                $description = strtoupper(trim($item->description));
+            foreach ($returns as $return) {
 
-                $parts = explode('-', $description);
+                foreach ($return->items as $item) {
 
-                $productName = trim($parts[0] ?? '');
-                $productSize = trim($parts[1] ?? '');
+                    $product = Product::find(
+                        $item->product_id
+                    );
 
-                $product = Product::where('branch_id', $collection->branch_id)
-                    ->whereRaw('UPPER(name) = ?', [$productName])
-                    ->whereRaw('UPPER(size) = ?', [$productSize])
-                    ->first();
+                    if ($product) {
 
-                if ($product) {
+                        $product->stock += $item->qty;
 
-                    $product->stock += $remainingToRestore;
-                    $product->save();
+                        $product->save();
+                    }
                 }
             }
 
@@ -1400,7 +1482,10 @@ public function destroyTransaction(Request $request)
 
             foreach ($returns as $return) {
 
-                ReturnItem::where('return_id', $return->id)
+                ReturnItem::where(
+                        'return_id',
+                        $return->id
+                    )
                     ->delete();
             }
 
@@ -1410,8 +1495,101 @@ public function destroyTransaction(Request $request)
             |--------------------------------------------------------------------------
             */
 
-            ReturnModel::where('receipt_no', $receiptNo)
+            ReturnModel::where(
+                    'receipt_no',
+                    $receiptNo
+                )
                 ->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE SALES
+            |--------------------------------------------------------------------------
+            */
+
+            $sales = Sale::where(function ($q) use (
+                    $collection,
+                    $returns
+                ) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | NORMAL SALE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($collection) {
+
+                        $q->orWhere(function ($saleQuery) use (
+                            $collection
+                        ) {
+
+                            $saleQuery
+                                ->where(
+                                    'branch_id',
+                                    $collection->branch_id
+                                )
+                                ->where(
+                                    'user_id',
+                                    $collection->user_id
+                                )
+                                ->whereDate(
+                                    'created_at',
+                                    $collection->created_at
+                                )
+                                ->where(
+                                    'total_amount',
+                                    $collection->total_amount
+                                );
+                        });
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | RETURN NEGATIVE SALES
+                    |--------------------------------------------------------------------------
+                    */
+
+                    foreach ($returns as $return) {
+
+                        $q->orWhere(function ($saleQuery) use (
+                            $return
+                        ) {
+
+                            $saleQuery
+                                ->where(
+                                    'branch_id',
+                                    $return->branch_id
+                                )
+                                ->where(
+                                    'user_id',
+                                    $return->user_id
+                                )
+                                ->whereDate(
+                                    'created_at',
+                                    $return->created_at
+                                )
+                                ->where(
+                                    'total_amount',
+                                    -1 * abs(
+                                        $return->total_amount
+                                    )
+                                );
+                        });
+                    }
+                })
+                ->get();
+
+            foreach ($sales as $sale) {
+
+                SaleItem::where(
+                        'sale_id',
+                        $sale->id
+                    )
+                    ->delete();
+
+                $sale->delete();
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -1419,70 +1597,30 @@ public function destroyTransaction(Request $request)
             |--------------------------------------------------------------------------
             */
 
-            CollectionItem::where('collection_id', $collection->id)
-                ->delete();
+            if ($collection) {
 
-                        /*
+                CollectionItem::where(
+                        'collection_id',
+                        $collection->id
+                    )
+                    ->delete();
+            }
+
             /*
-|--------------------------------------------------------------------------
-| DELETE SALE ITEMS + SALES
-|--------------------------------------------------------------------------
-*/
+            |--------------------------------------------------------------------------
+            | DELETE COLLECTION
+            |--------------------------------------------------------------------------
+            */
 
-$sales = Sale::where('branch_id', $collection->branch_id)
-    ->where('user_id', $collection->user_id)
-    ->whereDate('created_at', $collection->created_at)
-    ->where(function ($q) use ($collection, $returns) {
+            if ($collection) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | ORIGINAL SALE
-        |--------------------------------------------------------------------------
-        */
-
-        $q->where('total_amount', $collection->total_amount);
-
-        /*
-        |--------------------------------------------------------------------------
-        | RETURN NEGATIVE SALES
-        |--------------------------------------------------------------------------
-        */
-
-        foreach ($returns as $return) {
-
-            $q->orWhere(
-                'total_amount',
-                -1 * abs($return->total_amount)
-            );
-        }
-    })
-    ->orderBy('id')
-    ->get();
-
-foreach ($sales as $sale) {
-
-    SaleItem::where('sale_id', $sale->id)
-        ->delete();
-
-    $sale->delete();
-}
-
-/*
-|--------------------------------------------------------------------------
-| DELETE COLLECTION
-|--------------------------------------------------------------------------
-*/
-
-CollectionItem::where('collection_id', $collection->id)
-    ->delete();
-
-$collection->delete();
-
+                $collection->delete();
+            }
         });
 
         return back()->with(
             'success',
-            'Transaction deleted and stocks restored successfully.'
+            'Transaction deleted successfully.'
         );
 
     } catch (\Throwable $e) {
@@ -1493,7 +1631,6 @@ $collection->delete();
         );
     }
 }
-
 public function payAr(Request $request, $id)
 {
     $request->validate([
