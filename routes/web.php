@@ -352,6 +352,16 @@ Route::post('/store-expenses/store', [ExpenseController::class, 'store'])->name(
 Route::get('/store-expenses/list', [ExpenseController::class, 'list'])->name('admin.expenses.list');
 Route::get('/store-expenses/excel', [ExpenseController::class, 'excel'])->name('admin.expenses.excel');
 
+Route::get(
+    '/delete-transactions',
+    [CollectionController::class, 'deleteTransactions']
+)->name('admin.delete-transactions');
+
+Route::post(
+    '/delete-transactions/destroy',
+    [CollectionController::class, 'destroyTransaction']
+)->name('admin.delete-transactions.destroy');
+
 });// end admin group
 
     Route::post('/stock/store', [InventoryController::class, 'store'])
