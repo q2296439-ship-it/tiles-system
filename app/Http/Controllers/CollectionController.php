@@ -1452,28 +1452,16 @@ public function destroyTransaction(Request $request)
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | RESTORE STOCKS FROM RETURN ONLY
-            |--------------------------------------------------------------------------
-            */
-
-            foreach ($returns as $return) {
-
-                foreach ($return->items as $item) {
-
-                    $product = Product::find(
-                        $item->product_id
-                    );
-
-                    if ($product) {
-
-                        $product->stock += $item->qty;
-
-                        $product->save();
-                    }
-                }
-            }
-
+|--------------------------------------------------------------------------
+| RETURN ONLY DELETE
+|--------------------------------------------------------------------------
+| NO STOCK MOVEMENT
+|--------------------------------------------------------------------------
+|
+| Stock was already restored during actual return process.
+| Deleting return transaction should NOT add or deduct stock.
+|
+*/
             /*
             |--------------------------------------------------------------------------
             | DELETE RETURN ITEMS
