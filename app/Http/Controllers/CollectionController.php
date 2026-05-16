@@ -1035,16 +1035,18 @@ public function deliveryFeeForm()
 {
     $user = auth()->user();
     $role = strtolower($user->role);
-    $branchId = $user->branch_id;
 
-    $today = date('Ymd');
+    /*
+    |--------------------------------------------------------------------------
+    | GENERATE UNIQUE DELIVERY NUMBER
+    |--------------------------------------------------------------------------
+    */
 
-    $count = DB::table('delivery_fees')
-        ->whereDate('delivery_date', date('Y-m-d'))
-        ->where('branch_id', $branchId)
-        ->count() + 1;
-
-    $deliveryNo = 'DF-' . $today . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
+    $deliveryNo =
+        'DF-' .
+        now()->format('YmdHis') .
+        '-' .
+        rand(100, 999);
 
     $branches = Branch::orderBy('name')->get();
 
@@ -1054,7 +1056,6 @@ public function deliveryFeeForm()
         'role'
     ));
 }
-
 public function deliveryStore(Request $request)
 {
     $request->validate([
