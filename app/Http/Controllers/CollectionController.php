@@ -1066,14 +1066,18 @@ public function deliveryStore(Request $request)
     ]);
 
     $branchId = auth()->user()->branch_id;
-    $today = date('Ymd');
 
-    $count = DB::table('delivery_fees')
-        ->whereDate('delivery_date', $request->delivery_date)
-        ->where('branch_id', $branchId)
-        ->count() + 1;
+    /*
+    |--------------------------------------------------------------------------
+    | GENERATE UNIQUE DELIVERY NUMBER
+    |--------------------------------------------------------------------------
+    */
 
-    $deliveryNo = 'DF-' . $today . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
+    $deliveryNo =
+        'DF-' .
+        now()->format('YmdHis') .
+        '-' .
+        rand(100, 999);
 
     DB::table('delivery_fees')->insert([
         'delivery_no'   => $deliveryNo,
@@ -1095,7 +1099,6 @@ public function deliveryStore(Request $request)
         ->route('cashier.delivery.fee')
         ->with('success', 'Delivery fee saved successfully.');
 }
-
 public function deliveryToday(Request $request)
 {
     $user = auth()->user();
